@@ -6,7 +6,19 @@ This directory contains instructions and configuration for spinning up all local
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/)
 
-## Usage: Docker Compose
+
+## Available Development Tools
+
+The following development tools and infrastructure services are available when running `docker compose up`:
+
+| Name         | Description                                    | Development tool URL  | Used in production |
+|--------------|------------------------------------------------|-----------------------|--------------------|
+| localstack   | Local AWS cloud service emulator (used for S3) |                       | No                 |
+| s3manager    | Local S3-compatible storage manager (minio)    | http://localhost:9000 | No                 |
+| mongo        | MongoDB database for backends                  |                       | Yes                |
+| mongo-express| Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
+| redis        | Redis cache/message broker for frontends       |                       | Yes                |
+| cdp-uploader | File upload infrastructure                     |                       | Yes                |
 
 To start all dependencies using Docker Compose, run:
 
@@ -21,5 +33,3 @@ To stop and remove the containers, run:
 ```sh
 docker compose down
 ```
-
-> For more information about the services and port mappings, refer to the main README and the `docker-compose.yml` file.

@@ -15,25 +15,8 @@ It includes the CDP uploader infrastructure relevant for `forms-runner` and `for
 
 ## Getting Started
 
-### Prerequisites
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/)
-
-### Usage: Docker Compose
-
-To start all dependencies using Docker Compose, run:
-
-```sh
-docker compose up
-```
-
-This will spin up all the necessary containers for local development of the Defra Forms.
-
-To stop and remove the containers, run:
-
-```sh
-docker compose down
-```
+### Local Development Dependencies
+Instructions for running all local dependencies with Docker Compose can be found in [`local-development-dependencies/README.md`](./local-development-dependencies/README.md).
 
 ## Notes
 - This repository is intended for development and local testing only.

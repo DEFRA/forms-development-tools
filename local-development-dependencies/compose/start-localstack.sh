@@ -18,7 +18,7 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-uploa
 
 # test harness
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name mock-clamav
-aws --endpoint-url=http://localhost:4566 s3api put-bucket-notification-configuration  \
+aws --endpoint-url=http://localhost:4566 s3api put-bucket-notification-configuration \
   --bucket cdp-uploader-quarantine \
   --notification-configuration '
     {

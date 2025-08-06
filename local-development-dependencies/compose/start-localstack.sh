@@ -12,6 +12,11 @@ export AWS_SECRET_ACCESS_KEY=test
 aws --endpoint-url=http://localhost:4566 s3 mb s3://cdp-uploader-quarantine
 aws --endpoint-url=http://localhost:4566 s3 mb s3://my-bucket
 
+aws --endpoint-url=http://localhost:4566 s3 mb s3://form-definition-storage
+aws --endpoint-url=http://localhost:4566 s3api put-bucket-versioning \
+  --bucket form-definition-storage \
+  --versioning-configuration Status=Enabled
+
 # queues
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-clamav-results
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-uploader-scan-results-callback.fifo --attributes "{\"FifoQueue\":\"true\",\"ContentBasedDeduplication\": \"true\"}"

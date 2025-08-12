@@ -53,7 +53,7 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_aud
 aws --endpoint-url=http://localhost:4566 sqs set-queue-attributes \
     --queue-url http://sqs.eu-west-2.127.0.0.1:4566/000000000000/forms_audit_events \
     --attributes '{
-      "RedrivePolicy": "{\"deadLetterTargetArn\":\"http://sqs.eu-west-2.127.0.0.1:4566/000000000000/forms_audit_events-deadletter\",\"maxReceiveCount\":\"3\"}",
+      "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:forms_audit_events-deadletter\",\"maxReceiveCount\":\"3\"}",
       "ReceiveMessageWaitTimeSeconds": "20",
       "VisibilityTimeout": "60"
     }'

@@ -3,7 +3,7 @@
     - "local-mock-secret"
   AllowedGrantTypes: ["authorization_code"]
   RequirePkce : false
-  RedirectUris: ["http://localhost:3000", "http://localhost:3000/auth/callback"]
+  RedirectUris: ["http://localhost:3000", "http://localhost:3000/auth/callback", "http://localhost:3000/auth/sign-out", "http://localhost:3000/account/signed-out"]
   AllowedScopes:
     - "openid"
     - "profile"
@@ -11,11 +11,12 @@
     - "local-test-client"
     - "api://local-test-client/forms.user"
   AllowOfflineAccess: true
+  AllowAccessTokensViaBrowser: true
   AccessTokenType: "Jwt"
   AlwaysSendClientClaims: true
   ClientClaimsPrefix: ""
   Claims:
     - Type: "login_hint"
-      Value: "dummy"
+      Value: ""
     - Type: "aud"
       Value: "local-test-client"

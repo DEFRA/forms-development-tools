@@ -1,0 +1,21 @@
+- ClientId: "local-test-client"
+  ClientSecrets:
+    - "local-mock-secret"
+  AllowedGrantTypes: ["authorization_code"]
+  RequirePkce : false
+  RedirectUris: ["http://localhost:3000", "http://localhost:3000/auth/callback"]
+  AllowedScopes:
+    - "openid"
+    - "profile"
+    - "email"
+    - "local-test-client"
+    - "api://local-test-client/forms.user"
+  AllowOfflineAccess: true
+  AccessTokenType: "Jwt"
+  AlwaysSendClientClaims: true
+  ClientClaimsPrefix: ""
+  Claims:
+    - Type: "login_hint"
+      Value: "dummy"
+    - Type: "aud"
+      Value: "local-test-client"

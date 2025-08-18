@@ -68,3 +68,17 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:
 
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_designer_events" \
   --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_audit_events"
+
+#
+# Forms Notify Listener
+#
+# topics
+aws --endpoint-url=http://localhost:4566 sns create-topic --name forms_runner_submission_events
+
+# queues
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_notify_listener_events
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_notify_listener_events-deadletter
+
+# subscriptions
+aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \
+  --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_notify_listener_events"

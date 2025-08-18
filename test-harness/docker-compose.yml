@@ -40,8 +40,7 @@ services:
     depends_on:
       - forms-manager
       - redis
-    networks:
-      - cdpuploader
+    network_mode: host
 
   forms-manager:
     image: defradigital/forms-manager:${FORMS_MANAGER_TAG:-latest}
@@ -49,7 +48,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       # Mongo
-      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-manager
       # OIDC (override for your IdP)
       OIDC_JWKS_URI: ${MANAGER_OIDC_JWKS_URI:-https://example.invalid/jwks.json}
@@ -72,6 +71,8 @@ services:
       LOG_LEVEL: info
     ports:
       - '3001:3001'
+    networks:
+      - cdpuploader
     depends_on:
       mongo:
         condition: service_healthy
@@ -107,6 +108,8 @@ services:
       LOG_LEVEL: info
     ports:
       - '3009:3009'
+    networks:
+      - cdpuploader
     depends_on:
       - forms-submission-api
       - forms-entitlement-api
@@ -119,7 +122,7 @@ services:
       NODE_ENV: production
       PORT: 3002
       # Mongo
-      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-submission
       # S3 via Localstack
       S3_BUCKET: form-definition-storage
@@ -132,6 +135,8 @@ services:
       OIDC_VERIFY_ISS: ${SUBMISSION_OIDC_VERIFY_ISS}
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
+    networks:
+      - cdpuploader
     ports:
       - '3002:3002'
     depends_on:
@@ -144,7 +149,7 @@ services:
       NODE_ENV: production
       PORT: 3004
       # Mongo
-      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-entitlement
       # OIDC
       OIDC_JWKS_URI: ${ENTITLEMENT_OIDC_JWKS_URI}
@@ -160,6 +165,8 @@ services:
       AWS_REGION: eu-west-2
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+    networks:
+      - cdpuploader
     ports:
       - '3004:3004'
     depends_on:
@@ -172,7 +179,7 @@ services:
       NODE_ENV: production
       PORT: 3003
       # Mongo
-      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-audit
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2
@@ -182,6 +189,8 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
+    networks:
+      - cdpuploader
     ports:
       - '3003:3003'
     depends_on:

@@ -210,14 +210,11 @@ services:
       - cdpuploader
     healthcheck:
       test:
-        [
-          'CMD-SHELL',
-          'wget -q --spider http://localhost:80/.well-known/openid-configuration || exit 1'
-        ]
+        ['CMD', 'curl', 'localhost:80/.well-known/openid-configuration']
       interval: 10s
       timeout: 10s
       retries: 18
-      start_period: 90s
+      start_period: 10s
 
 networks:
   cdpuploader:

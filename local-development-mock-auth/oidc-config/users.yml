@@ -5,7 +5,7 @@
     - Type: "oid"
       Value: "86758ba9-92e7-4287-9751-7705e449688e"
     - Type: "groups"
-      Value: '["7049296f-2156-4d61-8ac3-349276438ef9"]'
+      Value: '["5b8a0214-74d3-4bf0-b665-102511c967b2"]'
     - Type: "email"
       Value: "local-service-account@internal.test"
     - Type: "name"
@@ -21,7 +21,7 @@
     - Type: "oid"
       Value: "7049296f-2156-4d61-8ac3-349276438ef9"
     - Type: "groups"
-      Value: '["7049296f-2156-4d61-8ac3-349276438ef9"]'
+      Value: '["5b8a0214-74d3-4bf0-b665-102511c967b2"]'
     - Type: "email"
       Value: "local-service-account2@internal.test"
     - Type: "name"

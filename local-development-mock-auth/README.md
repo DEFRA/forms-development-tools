@@ -1,4 +1,4 @@
-# Local Development Dependencies
+# Local Development Dependencies with mock OIDC authentication
 
 This directory contains instructions and configuration for spinning up all local development dependencies required by the Defra Forms application suite using Docker Compose.
 
@@ -19,6 +19,7 @@ The following development tools and infrastructure services are available when r
 | mongo-express| Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis        | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader | File upload infrastructure                     |                       | Yes                |
+| oidc         | Mock OIDC authentication server                |                       | No                 |
 
 To start all dependencies using Docker Compose, run:
 

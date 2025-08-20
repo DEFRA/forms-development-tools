@@ -1,4 +1,4 @@
-# Local Development Dependencies
+# Local Development Dependencies with AAD/Entra authentication
 
 This directory contains instructions and configuration for spinning up all local development dependencies required by the Defra Forms application suite using Docker Compose.
 

@@ -9,7 +9,7 @@ This directory contains instructions and configuration for spinning up all local
 
 ## Available Development Tools
 
-The following development tools and infrastructure services are available when running `docker compose up`:
+The following development tools and infrastructure services are available when running `./run-harness.sh`:
 
 | Name         | Description                                    | Development tool URL  | Used in production |
 |--------------|------------------------------------------------|-----------------------|--------------------|
@@ -19,15 +19,16 @@ The following development tools and infrastructure services are available when r
 | mongo-express| Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis        | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader | File upload infrastructure                     |                       | Yes                |
+| oidc         | Mock OIDC authentication server                |                       | No                 |
 | forms-designer | Forms UI editor                              | http://localhost:3000 | Yes                |
 | forms-manager | Forms file management                         |                       | Yes                |
+| forms-runner | Forms runner                                   |                       | Yes                |
 | forms-submission-api | Forms submission service               |                       | Yes                |
 | forms-entitlement-api | Entitlement (authorization) service   |                       | Yes                |
 | forms-audit-api | Audit service                               |                       | Yes                |
 
-Create a .env file with the following typical contents:
+Create a `.env` file with the following typical contents (or copy from `example.env`):
 ```
-
 # forms-designer
 # forms-designer
 AZURE_CLIENT_ID="local-test-client"

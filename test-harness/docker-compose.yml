@@ -40,6 +40,8 @@ services:
     depends_on:
       - forms-manager
       - redis
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     network_mode: host
 
   forms-manager:
@@ -73,6 +75,8 @@ services:
       - '3001:3001'
     networks:
       - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       mongo:
         condition: service_healthy
@@ -110,6 +114,8 @@ services:
       - '3009:3009'
     networks:
       - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       - forms-submission-api
       - forms-entitlement-api
@@ -137,6 +143,8 @@ services:
       LOG_LEVEL: info
     networks:
       - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     ports:
       - '3002:3002'
     depends_on:
@@ -167,6 +175,8 @@ services:
       AWS_SECRET_ACCESS_KEY: test
     networks:
       - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     ports:
       - '3004:3004'
     depends_on:
@@ -191,6 +201,8 @@ services:
       LOG_LEVEL: info
     networks:
       - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     ports:
       - '3003:3003'
     depends_on:

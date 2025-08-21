@@ -1,3 +1,5 @@
+JQ_INSTALLED=`command -v jq`
+echo "installed ${JQ_INSTALLED}"
 CONTAINER_IDS=`docker ps | awk '{print $1}' | grep -v "CONTAINER"`
 for CONTAINER_ID in $CONTAINER_IDS;
 do
@@ -9,6 +11,6 @@ do
   TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
   TAG_1=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq "$TAG_FILTER"`
   TAG=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq "$TAG_FILTER" | jq .name`
-  echo $SERVICE_NAME $TAG 1: $TAG_1
+  echo $SERVICE_NAME $TAG 1: $TAG_1 $TAG_FILTER
   fi
 done

@@ -7,6 +7,7 @@ do
   FULL_SERVICE_NAME=`echo $IMAGE_DETAILS | jq '.name' | tr -d '"'`
   SERVICE_NAME=`echo $FULL_SERVICE_NAME | sed "s/DEFRA\///"`
   echo ServiceName $SERVICE_NAME
+  echo INSPECT `docker inspect $CONTAINER_ID`
   CURL_URL="https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags"
   TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
   TAG_FILTER2=".results[]"

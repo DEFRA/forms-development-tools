@@ -64,5 +64,9 @@ To start all dependencies, run:
 ```sh
 ./run-harness.sh
 ```
+To start all dependencies **except forms-designer**, run:
+```sh
+./run-harness.sh omit-designer
+```
 
 This will spin up all the necessary containers for local development of the Defra Forms.

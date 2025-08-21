@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DESIGNER_PROFILE=download_designer
+if [ $# -ge 1 ] && [ "$1" == "omit-designer" ]
+then
+  DESIGNER_PROFILE="omit_designer"
+fi
+
 # Resolve script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -35,6 +41,7 @@ COMPOSE_PROJECT_NAME="forms-harness" IMAGE_NAMESPACE="$IMAGE_NAMESPACE" IMAGE_TA
   ${ENV_FILE:+--env-file "$ENV_FILE"} \
   -f "$ROOT_DIR/local-development-mock-auth/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
+  --profile $DESIGNER_PROFILE \
   up -d
 
 ./utils/list-versions.sh

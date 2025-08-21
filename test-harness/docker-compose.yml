@@ -1,6 +1,8 @@
 services:
   forms-designer:
     image: defradigital/forms-designer:${FORMS_DESIGNER_TAG:-latest}
+    profiles:
+      - download_designer
     environment:
       NODE_ENV: production
       PORT: 3000

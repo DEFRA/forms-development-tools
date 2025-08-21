@@ -8,6 +8,7 @@ do
   SERVICE_NAME=`echo $FULL_SERVICE_NAME | sed "s/DEFRA\///"`
   TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
   TAG=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq "$TAG_FILTER" | jq .name`
+  curl https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags
   echo $SERVICE_NAME $TAG
   fi
 done

@@ -11,6 +11,8 @@ do
   TAG_1=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags`
   TAG_2=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq '.results[]'`
   echo Temp1 $TAG_1
+  echo Temp2 $TAG_2
+  echo Temp3 Filter $TAG_FILTER
   TAG=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq "$TAG_FILTER" | jq .name`
   echo $SERVICE_NAME $TAG
   fi

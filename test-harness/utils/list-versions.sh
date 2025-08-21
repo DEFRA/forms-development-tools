@@ -1,28 +1,19 @@
 CONTAINER_IDS=`docker ps | awk '{print $1}' | grep -v "CONTAINER"`
 for CONTAINER_ID in $CONTAINER_IDS;
 do
-  IMAGE_DETAILS=`docker inspect $CONTAINER_ID | jq '.[] | { name: .Config.Labels."defra.cdp.git.repo.name", digest: .Image } | select(.name != null)'`
+  IMAGE_DETAILS=`docker inspect $CONTAINER_ID | jq '.[] | { name: .Config.Labels."defra.cdp.service.name", digest: .Image } | select(.name != null)'`
   if [ "$IMAGE_DETAILS" != '' ]; then
   DIGEST=`echo $IMAGE_DETAILS | jq '.digest' | tr -d '"'`
-  FULL_SERVICE_NAME=`echo $IMAGE_DETAILS | jq '.name' | tr -d '"'`
-  SERVICE_NAME=`echo $FULL_SERVICE_NAME | sed "s/DEFRA\///"`
+  SERVICE_NAME=`echo $IMAGE_DETAILS | jq '.name' | tr -d '"'`
   echo ServiceName $SERVICE_NAME
-  echo INSPECT `docker inspect $CONTAINER_ID`
+  echo INSPECT `docker inspect $CONTAINER_ID | jq '.[] | { image: .Image, name: .Name, composeImage: .Config.Labels."defra.docker.compose.image", serviceName: .Config.Labels."defra.cdp.service.name" }'`
   CURL_URL="https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags"
   TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
-  TAG_FILTER2=".results[]"
-  TAG_FILTER3=".results[] | { name: .name, digest: .digest }"
-  TAG_FILTER4=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\")"
-  TAG_FILTER5=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\")"
 
-  TAG_2=`curl -s $CURL_URL | jq "$TAG_FILTER2"`
+  TAG_FILTER3=".results[] | { name: .name, digest: .digest }"
+
   TAG_3=`curl -s $CURL_URL | jq "$TAG_FILTER3"`
-  TAG_4=`curl -s $CURL_URL | jq "$TAG_FILTER4"`
-  TAG_5=`curl -s $CURL_URL | jq "$TAG_FILTER5"`
-  echo Temp2 $TAG_2
   echo Temp3 $TAG_3
-  echo Temp4 $TAG_4
-  echo Temp5 $TAG_5
   echo Temp3 Filter $TAG_FILTER
   TAG=`curl -s $CURL_URL | jq "$TAG_FILTER" | jq .name`
   echo $SERVICE_NAME $TAG

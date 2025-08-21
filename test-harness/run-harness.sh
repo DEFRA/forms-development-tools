@@ -42,8 +42,7 @@ COMPOSE_PROJECT_NAME="forms-harness" IMAGE_NAMESPACE="$IMAGE_NAMESPACE" IMAGE_TA
   -f "$ROOT_DIR/local-development-mock-auth/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
   --profile $DESIGNER_PROFILE \
-  --quiet-pull \
-  up -d
+  up -d --quiet-pull
 
 ./utils/list-versions.sh
 

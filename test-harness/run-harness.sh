@@ -37,4 +37,6 @@ COMPOSE_PROJECT_NAME="forms-harness" IMAGE_NAMESPACE="$IMAGE_NAMESPACE" IMAGE_TA
   -f "$SCRIPT_DIR/docker-compose.yml" \
   up -d
 
+./utils/list-versions.sh
+
 echo "[harness] Test harness started."

@@ -5,6 +5,7 @@ This directory contains instructions and configuration for spinning up all local
 ## Prerequisites
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/)
+- [jq](https://jqlang.org/) 
 
 
 ## Available Development Tools

@@ -7,13 +7,23 @@ do
   FULL_SERVICE_NAME=`echo $IMAGE_DETAILS | jq '.name' | tr -d '"'`
   SERVICE_NAME=`echo $FULL_SERVICE_NAME | sed "s/DEFRA\///"`
   echo ServiceName $SERVICE_NAME
+  CURL_URL="https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags"
   TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
-  TAG_1=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags`
-  TAG_2=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq '.results[]'`
-  echo Temp1 $TAG_1
+  TAG_FILTER2=".results[]"
+  TAG_FILTER3=".results[] | { name: .name, digest: .digest }"
+  TAG_FILTER4=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\")"
+  TAG_FILTER5=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\")"
+
+  TAG_2=`curl -s $CURL_URL | jq "$TAG_FILTER2"`
+  TAG_3=`curl -s $CURL_URL | jq "$TAG_FILTER3"`
+  TAG_4=`curl -s $CURL_URL | jq "$TAG_FILTER4"`
+  TAG_5=`curl -s $CURL_URL | jq "$TAG_FILTER5"`
   echo Temp2 $TAG_2
+  echo Temp3 $TAG_3
+  echo Temp4 $TAG_4
+  echo Temp5 $TAG_5
   echo Temp3 Filter $TAG_FILTER
-  TAG=`curl -s https://registry.hub.docker.com/v2/repositories/defradigital/$SERVICE_NAME/tags | jq "$TAG_FILTER" | jq .name`
+  TAG=`curl -s $CURL_URL | jq "$TAG_FILTER" | jq .name`
   echo $SERVICE_NAME $TAG
   fi
 done

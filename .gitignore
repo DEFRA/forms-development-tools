@@ -1,5 +1,4 @@
-*.env
-!example.env
+.env
 !local-development-mock-auth/compose/aws.env
 .DS_Store
 logs.txt

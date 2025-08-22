@@ -20,10 +20,16 @@ The following development tools and infrastructure services are available when r
 | redis        | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader | File upload infrastructure                     |                       | Yes                |
 
-To start all dependencies using Docker Compose, run:
+To start all dependencies using Docker Compose (if requiring AAD authentication), run:
 
 ```sh
 docker compose up
+```
+
+To start all dependencies using Docker Compose (if requiring mock OIDC authentication), run:
+
+```sh
+docker compose --profile oidc up
 ```
 
 This will spin up all the necessary containers for local development of the Defra Forms.

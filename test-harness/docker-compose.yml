@@ -2,7 +2,7 @@ services:
   forms-designer:
     image: defradigital/forms-designer:${FORMS_DESIGNER_TAG:-latest}
     profiles:
-      - download_designer
+      - forms-designer
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -30,7 +30,7 @@ services:
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
       OIDC_WELL_KNOWN_CONFIGURATION_URL: ${OIDC_WELL_KNOWN_CONFIGURATION_URL}
-      ROLE_EDITOR_GROUP_ID: 5b8a0214-74d3-4bf0-b665-102511c967b2
+      ROLE_EDITOR_GROUP_ID: ${ROLE_EDITOR_GROUP_ID}
       FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API}
       # SNS
       SNS_ENDPOINT: http://host.docker.internal:4566
@@ -48,6 +48,8 @@ services:
 
   forms-manager:
     image: defradigital/forms-manager:${FORMS_MANAGER_TAG:-latest}
+    profiles:
+      - forms-manager
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -55,10 +57,10 @@ services:
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-manager
       # OIDC (override for your IdP)
-      OIDC_JWKS_URI: ${MANAGER_OIDC_JWKS_URI:-https://example.invalid/jwks.json}
-      OIDC_VERIFY_AUD: ${MANAGER_OIDC_VERIFY_AUD:-forms-manager}
-      OIDC_VERIFY_ISS: ${MANAGER_OIDC_VERIFY_ISS:-https://example.invalid/}
-      ROLE_EDITOR_GROUP_ID: 5b8a0214-74d3-4bf0-b665-102511c967b2
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI:-https://example.invalid/jwks.json}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD:-forms-manager}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS:-https://example.invalid/}
+      ROLE_EDITOR_GROUP_ID: ${ROLE_EDITOR_GROUP_ID}
       # Entitlement API
       ENTITLEMENT_URL: http://host.docker.internal:3004
       FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API}
@@ -85,6 +87,8 @@ services:
 
   forms-runner:
     image: defradigital/forms-runner:${FORMS_RUNNER_TAG:-latest}
+    profiles:
+      - forms-runner
     environment:
       NODE_ENV: production
       PORT: 3009
@@ -126,6 +130,8 @@ services:
 
   forms-submission-api:
     image: defradigital/forms-submission-api:${FORMS_SUBMISSION_API_TAG:-latest}
+    profiles:
+      - forms-submission-api
     environment:
       NODE_ENV: production
       PORT: 3002
@@ -138,9 +144,9 @@ services:
       S3_ENDPOINT: http://host.docker.internal:4566
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
-      OIDC_JWKS_URI: ${SUBMISSION_OIDC_JWKS_URI}
-      OIDC_VERIFY_AUD: ${SUBMISSION_OIDC_VERIFY_AUD}
-      OIDC_VERIFY_ISS: ${SUBMISSION_OIDC_VERIFY_ISS}
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
     networks:
@@ -155,6 +161,8 @@ services:
 
   forms-entitlement-api:
     image: defradigital/forms-entitlement-api:${FORMS_ENTITLEMENT_API_TAG:-latest}
+    profiles:
+      - forms-entitlement-api
     environment:
       NODE_ENV: production
       PORT: 3004
@@ -162,10 +170,10 @@ services:
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-entitlement
       # OIDC
-      OIDC_JWKS_URI: ${ENTITLEMENT_OIDC_JWKS_URI}
-      OIDC_VERIFY_AUD: ${ENTITLEMENT_OIDC_VERIFY_AUD}
-      OIDC_VERIFY_ISS: ${ENTITLEMENT_OIDC_VERIFY_ISS}
-      ROLE_EDITOR_GROUP_ID: 5b8a0214-74d3-4bf0-b665-102511c967b2
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
+      ROLE_EDITOR_GROUP_ID: ${ROLE_EDITOR_GROUP_ID}
       # Azure Graph (override with real values if syncing from AAD)
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
@@ -187,6 +195,8 @@ services:
 
   forms-audit-api:
     image: defradigital/forms-audit-api:${FORMS_AUDIT_API_TAG:-latest}
+    profiles:
+      - forms-audit-api
     environment:
       NODE_ENV: production
       PORT: 3003

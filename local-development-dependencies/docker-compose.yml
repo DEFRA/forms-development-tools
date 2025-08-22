@@ -167,6 +167,57 @@ services:
     networks:
       - cdpuploader
 
+  oidc:
+    image: ghcr.io/soluto/oidc-server-mock:0.6.0
+    profiles:
+      - oidc
+    container_name: oidc-mock-test
+    ports:
+      - '5556:80'
+    environment:
+      ISSUER: http://oidc:80
+      PORT: 80
+      USERS_CONFIGURATION_PATH: /data/users.yml
+      CLIENTS_CONFIGURATION_PATH: /data/clients.yml
+      API_SCOPES_INLINE: |
+        - Name: "api://local-test-client/forms.user"
+          UserClaims:
+            - "oid"
+            - "name"
+            - "groups"
+            - "email_verified"
+            - "preferred_username"
+        - Name: "local-test-client"
+      API_RESOURCES_INLINE: |
+        - Name: "local-test-client"
+          DisplayName: "Forms Manager API Test Resource"
+          Scopes: ["local-test-client"]
+          UserClaims: ["oid", "groups", "email", "name", "preferred_username", "email_verified"]
+      SERVER_OPTIONS_INLINE: |
+        {
+          "IssuerUri": "http://oidc:80",
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          },
+          "Events": { "RaiseErrorEvents": true, "RaiseSuccessEvents": true, "RaiseInformationEvents": true }
+        }
+    volumes:
+      - ./oidc-config:/data:ro
+    networks:
+      - cdpuploader
+    healthcheck:
+      test:
+        ['CMD', 'curl', 'localhost:80/.well-known/openid-configuration']
+      interval: 10s
+      timeout: 10s
+      retries: 18
+      start_period: 10s
+
 networks:
   cdpuploader:
     driver: bridge

@@ -1,10 +1,68 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DESIGNER_PROFILE=download_designer
-if [ $# -ge 1 ] && [ "$1" == "omit-designer" ]
-then
-  DESIGNER_PROFILE="omit_designer"
+AUTH_MODE=""
+
+# List all possible profiles here.
+RUN_PROFILES=("forms-designer" "forms-manager" "forms-runner" "forms-submission-api" "forms-entitlement-api" "forms-audit-api")
+
+EXCLUDE_PROFILES=()
+if [[ $# -ge 1 ]]; then
+  for param in "$@"
+  do
+    if [[ "$param" == exclude=* ]]; then
+      # Any 'exclude's will cause elements to be removed from the runnables array.
+      IFS=', ' read -r -a OMIT_PROFILES <<< "${param:8}"
+      for profile in ${EXCLUDE_PROFILES[@]}; do
+        echo "*** EXCLUDING" $profile
+        RUN_PROFILES=("${RUN_PROFILES[@]/$profile}")
+      done
+    fi
+
+    if [[ "$param" == include=* ]]; then
+      # Any 'include's will cause elements to be added (from empty) to the runnables array.
+      IFS=', ' read -r -a INCLUDE_PROFILES <<< "${param:8}"
+      RUN_PROFILES=()
+      for profile in ${INCLUDE_PROFILES[@]}; do
+        echo "*** Explictly INCLUDING" $profile
+        RUN_PROFILES+=("$profile")
+      done
+    fi
+
+    if [[ "$param" == auth=* ]]; then
+      AUTH_PARAM=${param:5}
+      AUTH_PARAM_LOWER=`echo "$AUTH_PARAM" | tr '[:upper:]' '[:lower:]'`
+      AUTH_MODE=""
+      if [[ "$AUTH_PARAM_LOWER" == "entra" ]]; then
+        AUTH_MODE="AAD"
+      fi
+      if [[ "$AUTH_PARAM_LOWER" == "aad" ]]; then
+        AUTH_MODE="AAD"
+      fi
+      if [[ "$AUTH_PARAM_LOWER" == "mock" ]]; then
+        AUTH_MODE="mock"
+      fi
+      if [[ "$AUTH_PARAM_LOWER" == "oidc" ]]; then
+        AUTH_MODE="mock"
+      fi
+      if [[ "$AUTH_MODE" == "" ]]; then
+        echo "ERROR - invalid 'auth' parameter ($AUTH_PARAM)"
+        exit 1
+      fi
+    fi
+  done
+fi
+
+# Expand the profiles into a CLI clause
+PROFILE_PARAM_LIST=""
+for profile in ${RUN_PROFILES[@]}; do
+  PROFILE_PARAM_LIST=`echo $PROFILE_PARAM_LIST "--profile" $profile`
+done
+
+# Mock OIDC auth, so include this service
+if [[ "$AUTH_MODE" == "" ]] || [[ "$AUTH_MODE" == "mock" ]]; then
+  PROFILE_PARAM_LIST=`echo $PROFILE_PARAM_LIST "--profile oidc"`
+  AUTH_MODE="mock"
 fi
 
 # Resolve script directory
@@ -25,6 +83,11 @@ IMAGE_TAG="${docker_image_version:-latest}"
 
 ENV_FILE="$SCRIPT_DIR/.env"
 
+# Mock OIDC auth requires special config
+if [[ "$AUTH_MODE" == "mock" ]]; then
+  ENV_FILE="$SCRIPT_DIR/oidc-auth.env"
+fi
+
 echo "[harness] Using images: ${IMAGE_NAMESPACE}/*:${IMAGE_TAG}"
 if [[ -f "$ENV_FILE" ]]; then
   echo "[harness] Using env file: $ENV_FILE"
@@ -39,9 +102,9 @@ echo "[harness] Starting infra and application stack (merged compose files)..."
 COMPOSE_PROJECT_NAME="forms-harness" IMAGE_NAMESPACE="$IMAGE_NAMESPACE" IMAGE_TAG="$IMAGE_TAG" \
   docker compose \
   ${ENV_FILE:+--env-file "$ENV_FILE"} \
-  -f "$ROOT_DIR/local-development-mock-auth/docker-compose.yml" \
+  -f "$ROOT_DIR/local-development-dependencies/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
-  --profile $DESIGNER_PROFILE \
+  $PROFILE_PARAM_LIST \
   up -d --quiet-pull
 
 ./utils/list-versions.sh

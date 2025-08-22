@@ -28,35 +28,26 @@ The following development tools and infrastructure services are available when r
 | forms-entitlement-api | Entitlement (authorization) service   |                       | Yes                |
 | forms-audit-api | Audit service                               |                       | Yes                |
 
-Create a `.env` file with the following typical contents (or copy from `example.env`):
+If using AAD/Entra authentication (as opposed to the mocked OIDC authentication), you will need to create a `.env` file with the following typical contents:
 ```
 # forms-designer
-# forms-designer
-AZURE_CLIENT_ID="local-test-client"
-AZURE_CLIENT_SECRET="local-mock-secret"
-OIDC_WELL_KNOWN_CONFIGURATION_URL="http://localhost:5556/.well-known/openid-configuration"
+AZURE_CLIENT_ID="<client-id>"
+AZURE_CLIENT_SECRET="<client-secret>"
+OIDC_WELL_KNOWN_CONFIGURATION_URL="https://login.microsoftonline.com/<tenant>>/v2.0/.well-known/openid-configuration"
+ROLE_EDITOR_GROUP_ID=<AAD-group-id>
+
 REDIS_USERNAME=default
 REDIS_PASSWORD=my-password
 
 FEATURE_FLAG_USE_ENTITLEMENT_API=false
 
-# forms-manager
-MANAGER_OIDC_JWKS_URI="http://host.docker.internal:5556/.well-known/openid-configuration/jwks"
-MANAGER_OIDC_VERIFY_AUD="local-test-client"
-MANAGER_OIDC_VERIFY_ISS="http://oidc:80"
+# forms-manager, submission-api, entitlement-api
+OIDC_JWKS_URI="https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys"
+OIDC_VERIFY_AUD="<guid-audience>"
+OIDC_VERIFY_ISS="https://login.microsoftonline.com/<tenant>/v2.0"
 
 # forms-runner
 RUNNER_SESSION_COOKIE_PASSWORD="53409gjhfcdiklgjidfglkgjdflkelrku634"
-
-# submission-api
-SUBMISSION_OIDC_JWKS_URI="http://host.docker.internal:5556/.well-known/openid-configuration/jwks"
-SUBMISSION_OIDC_VERIFY_AUD="local-test-client"
-SUBMISSION_OIDC_VERIFY_ISS="http://oidc:80"
-
-# entitlement-api
-ENTITLEMENT_OIDC_JWKS_URI="http://host.docker.internal:5556/.well-known/openid-configuration/jwks"
-ENTITLEMENT_OIDC_VERIFY_AUD="local-test-client"
-ENTITLEMENT_OIDC_VERIFY_ISS="http://oidc:80"
 ```
 
 To start all dependencies, run:
@@ -64,9 +55,30 @@ To start all dependencies, run:
 ```sh
 ./run-harness.sh
 ```
-To start all dependencies **except forms-designer**, run:
-```sh
-./run-harness.sh omit-designer
-```
+
+Some command-line parameters are allowed:
+
+* include=SERVICES
+  * start the services specified, where SERVICES can be a CSV list of service names that are the forms-xxxx services (such as forms-designer, forms-manager etc)
+
+* exclude=SERVICES
+  * start all except the services specified, where SERVICES can be a CSV list of service names that are the forms-xxxx services (such as forms-designer, forms-manager etc)
+
+* auth=MODE
+  * set the authentication, where MODE can be either AAD or Entra (to denote AAD authentication), or either mock or OIDC (to denote mocked OIDC authentication). Default is mocked OIDC.
+     If AAD authentication is specified, you need to create a .env file with the necessary AAD config.
+
+Examples:
+  To start only forms-manager and forms-entitlement-api with AAD auth:
+
+  ```
+  ./run-harness.sh include=forms-manager,forms-entitlement-api auth=Entra
+  ```
+
+  To start everything except forms-designer with mocked OIDC auth:
+
+  ```
+  ./run-harness.sh exclude=forms-designer auth=mock
+  ```
 
 This will spin up all the necessary containers for local development of the Defra Forms.

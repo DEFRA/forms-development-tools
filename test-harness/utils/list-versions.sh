@@ -1,5 +1,6 @@
-IMAGES="`docker images --digests | awk '{printf "%s %s\n", $1, $3}' | sed '1d'`"
-
+# Compare downloaded Docker image digest against the digest listed on DockerHub
+# to determine the exact version number (when the image was pulled using tag 'latest')
+IMAGES=`docker images --digests --format '{{ .Repository }} {{ .Digest }}'`
 while IFS= read -r line || [[ -n $line ]]; do
   SERVICE_NAME=`echo $line | awk '{print $1}'`
   DIGEST=`echo $line | awk '{print $2}'`

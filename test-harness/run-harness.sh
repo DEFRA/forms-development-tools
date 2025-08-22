@@ -12,7 +12,7 @@ if [[ $# -ge 1 ]]; then
   do
     if [[ "$param" == exclude=* ]]; then
       # Any 'exclude's will cause elements to be removed from the runnables array.
-      IFS=', ' read -r -a OMIT_PROFILES <<< "${param:8}"
+      IFS=', ' read -r -a EXCLUDE_PROFILES <<< "${param:8}"
       for profile in ${EXCLUDE_PROFILES[@]}; do
         echo "*** EXCLUDING" $profile
         RUN_PROFILES=("${RUN_PROFILES[@]/$profile}")

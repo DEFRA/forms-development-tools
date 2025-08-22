@@ -107,6 +107,6 @@ COMPOSE_PROJECT_NAME="forms-harness" IMAGE_NAMESPACE="$IMAGE_NAMESPACE" IMAGE_TA
   $PROFILE_PARAM_LIST \
   up -d --quiet-pull
 
-./utils/list-versions.sh
+./utils/list-versions.sh | tee image-versions.txt
 
 echo "[harness] Test harness started."

@@ -3,3 +3,4 @@
 !local-development-mock-auth/compose/aws.env
 .DS_Store
 logs.txt
+image-versions.txt

@@ -23,7 +23,7 @@ services:
       retries: 3
     networks:
       cdpuploader:
-        ipv4_address: 10.0.2.20
+        ipv4_address: ${NETWORK_CDP_UPLOADER_IP:-10.0.2.20}
 
   redis:
     image: redis:7.2.3-alpine3.18
@@ -65,7 +65,7 @@ services:
       - 'cdp.127.0.0.1.sslip.io:host-gateway'
     dns:
       # Set the DNS server to be the LocalStack container
-      - 10.0.2.20
+      - ${NETWORK_CDP_UPLOADER_IP:-10.0.2.20}
     networks:
       - cdpuploader
 
@@ -145,7 +145,7 @@ services:
       - localstack
     dns:
       # Set the DNS server to be the LocalStack container
-      - 10.0.2.20
+      - ${NETWORK_CDP_UPLOADER_IP:-10.0.2.20}
     networks:
       - cdpuploader
   aws-manager:
@@ -163,7 +163,7 @@ services:
       - localstack
     dns:
       # Set the DNS server to be the LocalStack container
-      - 10.0.2.20
+      - ${NETWORK_CDP_UPLOADER_IP:-10.0.2.20}
     networks:
       - cdpuploader
 
@@ -224,4 +224,4 @@ networks:
     ipam:
       config:
         # Specify the subnet range for IP address allocation
-        - subnet: 10.0.2.0/24
+        - subnet: ${NETWORK_CDP_UPLOADER_SUBNET:-10.0.2.0/24}

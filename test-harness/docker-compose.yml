@@ -105,7 +105,7 @@ services:
       REDIS_USERNAME: ${REDIS_USERNAME}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_KEY_PREFIX: forms-runner
-      USE_SINGLE_INSTANCE_CACHE: 'false'
+      USE_SINGLE_INSTANCE_CACHE: true
       SESSION_COOKIE_PASSWORD: ${RUNNER_SESSION_COOKIE_PASSWORD}
       SESSION_TTL: 86400000
       # Optional analytics/notify/uploader

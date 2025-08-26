@@ -65,6 +65,7 @@ services:
       ENTITLEMENT_URL: http://host.docker.internal:3004
       FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API}
       # Events/storage (Localstack)
+      FORM_DEF_BUCKET_NAME: form-definition-storage
       AWS_REGION: eu-west-2
       SNS_ENDPOINT: http://host.docker.internal:4566
       S3_ENDPOINT: http://host.docker.internal:4566

@@ -11,6 +11,12 @@ Spins up the infrastructure and services to allow forms-designer, forms-manager,
 
 It includes the CDP uploader infrastructure relevant for `forms-runner` and `forms-submission-api`.
 
+Ensure you have the necessary `secrets.env` values which should be pulled through into both auth types.
+
+```
+NOTIFY_API_KEY=<notify api key>
+```
+
 Ensure you have the necessary `.env` values configured for AAD. See [`test-harness/README.md`](./test-harness/README.md).
 
 ```

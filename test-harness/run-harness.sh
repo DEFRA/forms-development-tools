@@ -5,7 +5,7 @@ set -euoa pipefail
 AUTH_MODE=""
 
 # List all possible profiles here.
-RUN_PROFILES=("forms-designer" "forms-manager" "forms-runner" "forms-submission-api" "forms-entitlement-api" "forms-audit-api")
+RUN_PROFILES=("forms-designer" "forms-manager" "forms-runner" "forms-submission-api" "forms-entitlement-api" "forms-audit-api" "forms-notify-listener")
 
 EXCLUDE_PROFILES=()
 if [[ $# -ge 1 ]]; then
@@ -79,10 +79,14 @@ fi
 
 source "$PROPS_FILE"
 
-ENV_FILE="$SCRIPT_DIR/.env"
+cat "$SCRIPT_DIR/.env" > "$SCRIPT_DIR/tmp.env"
+
 if [[ "$AUTH_MODE" == "mock" ]]; then
-  ENV_FILE="$SCRIPT_DIR/oidc-auth.env"
+  cat "$SCRIPT_DIR/oidc-auth.env" > "$SCRIPT_DIR/tmp.env"
 fi
+
+cat "$SCRIPT_DIR/secrets.env" >> "$SCRIPT_DIR/tmp.env"
+ENV_FILE="$SCRIPT_DIR/tmp.env"
 
 echo "[harness] Sourced variables from application.properties"
 echo "[harness] Using env file: $ENV_FILE (if present)"

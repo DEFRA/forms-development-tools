@@ -92,6 +92,8 @@ services:
       - forms-runner
     environment:
       NODE_ENV: production
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
       PORT: 3009
       # Public base URL for links
       BASE_URL: http://localhost:3009
@@ -117,6 +119,10 @@ services:
       UPLOADER_BUCKET: my-bucket
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
+      # Messaging
+      SNS_ENDPOINT: http://host.docker.internal:4566
+      SNS_ADAPTER_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events"
+      SNS_SAVE_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_events"
     ports:
       - '3009:3009'
     networks:
@@ -220,6 +226,35 @@ services:
       - '3003:3003'
     depends_on:
       - mongo
+      - localstack
+
+  forms-notify-listener:
+    image: defradigital/forms-notify-listener:${FORMS_NOTIFY_LISTENER_TAG:-latest}
+    profiles:
+      - forms-notify-listener
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      # SQS via Localstack (queue subscribed to SNS topic)
+      AWS_REGION: eu-west-2
+      SQS_ENDPOINT: http://host.docker.internal:4566
+      EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_notify_listener_events
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      TRACE_HEADER: x-trace-id
+      LOG_LEVEL: info
+      NOTIFY_API_KEY: ${NOTIFY_API_KEY}
+      NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
+      DESIGNER_URL: http://host.docker.internal:3000
+      MANAGER_URL: http://host.docker.internal:3001
+      RECEIVE_MESSAGE_TIMEOUT_MS: 5000
+    networks:
+      - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '3006:3006'
+    depends_on:
       - localstack
 
 # No volumes or infra services here; provided by local-development-mock-auth/docker-compose.yml

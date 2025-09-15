@@ -91,9 +91,9 @@ services:
     profiles:
       - forms-runner
     environment:
-      NODE_ENV: production
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      NODE_ENV: development
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
       PORT: 3009
       # Public base URL for links
       BASE_URL: http://localhost:3009
@@ -140,7 +140,7 @@ services:
     profiles:
       - forms-submission-api
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3002
       # Mongo
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
@@ -149,6 +149,8 @@ services:
       S3_BUCKET: form-definition-storage
       S3_REGION: eu-west-2
       S3_ENDPOINT: http://host.docker.internal:4566
+      SQS_ENDPOINT: http://host.docker.internal:4566
+      EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_submission_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
@@ -208,7 +210,7 @@ services:
     profiles:
       - forms-audit-api
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3003
       # Mongo
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true

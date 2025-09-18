@@ -69,7 +69,6 @@ services:
       AWS_REGION: eu-west-2
       SNS_ENDPOINT: http://host.docker.internal:4566
       S3_ENDPOINT: http://host.docker.internal:4566
-      S3_BUCKET: form-definition-storage
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       # SNS topic used for publishing events
@@ -91,9 +90,9 @@ services:
     profiles:
       - forms-runner
     environment:
-      NODE_ENV: production
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      NODE_ENV: development
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
       PORT: 3009
       # Public base URL for links
       BASE_URL: http://localhost:3009
@@ -140,15 +139,17 @@ services:
     profiles:
       - forms-submission-api
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3002
       # Mongo
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
-      MONGO_DATABASE: forms-submission
+      MONGO_DATABASE: forms-submission-api
       # S3 via Localstack
-      S3_BUCKET: form-definition-storage
+      S3_BUCKET: my-bucket
       S3_REGION: eu-west-2
       S3_ENDPOINT: http://host.docker.internal:4566
+      SQS_ENDPOINT: http://host.docker.internal:4566
+      EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_submission_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
@@ -208,7 +209,7 @@ services:
     profiles:
       - forms-audit-api
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3003
       # Mongo
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
@@ -248,7 +249,7 @@ services:
       LOG_LEVEL: info
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
-      DESIGNER_URL: http://host.docker.internal:3000
+      DESIGNER_URL: http://localhost:3000
       MANAGER_URL: http://host.docker.internal:3001
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
     networks:

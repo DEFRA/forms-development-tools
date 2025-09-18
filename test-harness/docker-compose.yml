@@ -114,8 +114,8 @@ services:
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
       FEEDBACK_LINK: 'http://test.com'
-      UPLOADER_URL: http://cdp-uploader:7337
-      UPLOADER_BUCKET: my-bucket
+      UPLOADER_URL: http://uploader.127.0.0.1.sslip.io:7300
+      UPLOADER_BUCKET_NAME: my-bucket
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
       # Messaging
@@ -128,6 +128,8 @@ services:
       - cdpuploader
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+      - 'cdp.127.0.0.1.sslip.io:host-gateway'
+      - 'uploader.127.0.0.1.sslip.io:host-gateway'
     depends_on:
       - forms-submission-api
       - forms-entitlement-api
@@ -213,7 +215,7 @@ services:
       PORT: 3003
       # Mongo
       MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
-      MONGO_DATABASE: forms-audit
+      MONGO_DATABASE: forms-audit-api
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2
       SQS_ENDPOINT: http://host.docker.internal:4566

@@ -95,3 +95,14 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_sub
 # subscriptions
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_events" \
   --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_submission_events"
+
+#
+# Forms Adaptor Template
+#
+# queues
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_adaptor_events
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_adaptor_events-deadletter
+
+# subscriptions
+aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \
+  --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_adaptor_events"

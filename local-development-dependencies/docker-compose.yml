@@ -52,15 +52,16 @@ services:
       PORT: 7337
       NODE_ENV: development
       REDIS_HOST: redis
-      LOCALSTACK_ENDPOINT: http://localhost.localstack.cloud:4566
-      S3_ENDPOINT: http://localhost.localstack.cloud:4566
-      SQS_ENDPOINT: http://localhost.localstack.cloud:4566
+      LOCALSTACK_ENDPOINT: http://host.docker.internal:4566
+      S3_ENDPOINT: http://host.docker.internal:4566
+      SQS_ENDPOINT: http://host.docker.internal:4566
       USE_SINGLE_INSTANCE_CACHE: true
       MOCK_VIRUS_SCAN_ENABLED: true
       MOCK_VIRUS_RESULT_DELAY: 3
       FORMS_SUBMISSION_API_URL: 'http://host.docker.internal:3002'
       CALLBACK_URL: 'http://host.docker.internal:3002/file'
     extra_hosts:
+      - 'localhost:host-gateway'
       - 'host.docker.internal:host-gateway'
       - 'cdp.127.0.0.1.sslip.io:host-gateway'
     dns:

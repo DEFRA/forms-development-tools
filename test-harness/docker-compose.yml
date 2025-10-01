@@ -169,8 +169,10 @@ services:
     ports:
       - '3002:3002'
     depends_on:
-      - mongo
-      - localstack
+      mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
 
   forms-entitlement-api:
     image: defradigital/forms-entitlement-api:${FORMS_ENTITLEMENT_API_TAG:-latest}
@@ -231,8 +233,10 @@ services:
     ports:
       - '3003:3003'
     depends_on:
-      - mongo
-      - localstack
+      mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
 
   forms-notify-listener:
     image: defradigital/forms-notify-listener:${FORMS_NOTIFY_LISTENER_TAG:-latest}
@@ -261,6 +265,7 @@ services:
     ports:
       - '3006:3006'
     depends_on:
-      - localstack
+      localstack:
+        condition: service_healthy
 
 # No volumes or infra services here; provided by local-development-mock-auth/docker-compose.yml

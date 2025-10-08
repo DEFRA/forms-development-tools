@@ -99,7 +99,7 @@ COMPOSE_PROJECT_NAME="forms-harness" docker compose \
   -f "$ROOT_DIR/local-development-dependencies/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
   $PROFILE_PARAM_LIST \
-  up -d --quiet-pull
+  up -d --pull always
 
 ./utils/list-versions.sh | tee image-versions.txt
 

@@ -255,7 +255,7 @@ services:
       LOG_LEVEL: info
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
-      NOTIFY_REPLY_TO_ID: '462e5ac0-28f1-4e51-9d8e-8d8c31f59f6a'
+      NOTIFY_REPLY_TO_ID: 'c0428382-7df0-4e57-89fa-20bb69e9e755'
       DESIGNER_URL: http://localhost:3000
       MANAGER_URL: http://host.docker.internal:3001
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000

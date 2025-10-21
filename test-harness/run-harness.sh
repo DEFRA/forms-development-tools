@@ -82,7 +82,7 @@ source "$PROPS_FILE"
 cat "$SCRIPT_DIR/.env" > "$SCRIPT_DIR/tmp.env"
 
 if [[ "$AUTH_MODE" == "mock" ]]; then
-  cat "$SCRIPT_DIR/oidc-auth.env" > "$SCRIPT_DIR/tmp.env"
+  cat "$SCRIPT_DIR/oidc-auth.env" >> "$SCRIPT_DIR/tmp.env"
 fi
 
 cat "$SCRIPT_DIR/secrets.env" >> "$SCRIPT_DIR/tmp.env"

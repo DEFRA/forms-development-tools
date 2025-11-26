@@ -6,6 +6,8 @@ This repository contains shared development tools and infrastructure for the Def
 
 Currently, the repository provides a Docker Compose setup to help developers spin up all the required dependencies for the following scenarios:
 
+**IMPORTANT** - you must enable host networking in Docker for the local environment to work properly (Settings -> Resources -> Network)
+
 ### 1. Local infrastructure for use with AAD/Entra authentication
 Spins up the infrastructure and services to allow forms-designer, forms-manager, forms-submission-api, forms-audit-api etc to be manually started, and for the authentication to use AAD/Entra.
 
@@ -75,3 +77,4 @@ Instructions for running all local dependencies can be found in [`test-harness/R
 ## Notes
 - This repository is intended for development and local testing only.
 - For more information about each service, refer to their respective repositories.
+- You must enable host networking in Docker for the local environment to work properly (Settings -> Resources -> Network)

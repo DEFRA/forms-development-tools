@@ -113,4 +113,4 @@ docker run --rm \
   -v "$SCRIPT_DIR/utils/seed-users.json:/seed-users.json" \
   mongo \
   mongoimport --uri "mongodb://host.docker.internal:27017/forms-entitlement?replicaSet=rs0&directConnection=true" \
-  --collection user-entitlement --file /seed-users.json --jsonArray --upsert
+  --collection user-entitlement --file /seed-users.json --jsonArray --mode=upsert --upsertFields=userId

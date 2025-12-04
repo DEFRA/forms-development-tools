@@ -91,10 +91,22 @@ aws --endpoint-url=http://localhost:4566 sns create-topic --name forms_runner_ev
 
 # queues
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission_events
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission-deadletter
+aws --endpoint-url=http://localhost:4566 sqs set-queue-attributes \
+    --queue-url http://sqs.eu-west-2.127.0.0.1:4566/000000000000/forms_submission \
+    --attributes '{
+      "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:forms_submission-deadletter\",\"maxReceiveCount\":\"3\"}",
+      "ReceiveMessageWaitTimeSeconds": "20",
+      "VisibilityTimeout": "60"
+    }'
 
 # subscriptions
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_events" \
   --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_submission_events"
+
+aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \
+  --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_submission"
 
 #
 # Forms Adaptor Template

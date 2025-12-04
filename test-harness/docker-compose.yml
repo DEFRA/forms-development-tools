@@ -151,7 +151,8 @@ services:
       S3_REGION: eu-west-2
       S3_ENDPOINT: http://host.docker.internal:4566
       SQS_ENDPOINT: http://host.docker.internal:4566
-      EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_submission_events
+      SAVE_AND_EXIT_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_submission_events
+      SUBMISSION_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_submission
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}

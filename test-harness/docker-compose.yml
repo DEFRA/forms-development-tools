@@ -98,7 +98,7 @@ services:
       BASE_URL: http://localhost:3009
       # Service URLs
       MANAGER_URL: http:/host.docker.internal:3001
-      DESIGNER_URL: http://localhost:3000
+      DESIGNER_URL: http://host.docker.internal:3000
       SUBMISSION_URL: http://host.docker.internal:3002
       # Redis/session
       REDIS_HOST: host.docker.internal
@@ -163,6 +163,8 @@ services:
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: ${NOTIFY_TEMPLATE_ID}
       NOTIFY_REPLY_TO_ID: ${NOTIFY_REPLY_TO_ID}
+      DESIGNER_URL: http://localhost:3000
+      MANAGER_URL: http://host.docker.internal:3001
     networks:
       - cdpuploader
     extra_hosts:

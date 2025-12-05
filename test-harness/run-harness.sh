@@ -104,3 +104,13 @@ COMPOSE_PROJECT_NAME="forms-harness" docker compose \
 ./utils/list-versions.sh | tee image-versions.txt
 
 echo "[harness] Test harness started."
+
+# Seed the database with test users using mongoimport and the official mongo image
+# This avoids needing to install the mongo shell locally.
+echo "[harness] Seeding MongoDB with test users via mongoimport..."
+docker run --rm \
+  --network host \
+  -v "$SCRIPT_DIR/utils/seed-users.json:/seed-users.json" \
+  mongo \
+  mongoimport --uri "mongodb://host.docker.internal:27017/forms-entitlement?replicaSet=rs0&directConnection=true" \
+  --collection user-entitlement --file /seed-users.json --jsonArray --mode=upsert --upsertFields=userId

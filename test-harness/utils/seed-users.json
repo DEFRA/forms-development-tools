@@ -1,0 +1,29 @@
+[
+  {
+    "userId": "86758ba9-92e7-4287-9751-7705e449688e",
+    "roles": ["admin"],
+    "scopes": [
+      "form-delete",
+      "form-edit",
+      "form-read",
+      "form-publish",
+      "user-create",
+      "user-delete",
+      "user-edit"
+    ],
+    "email": "test.account@localhost",
+    "displayName": "Test account"
+},
+{
+    "userId": "7049296f-2156-4d61-8ac3-349276438ef9",
+    "roles": [
+        "form-creator"
+    ],
+    "scopes": [
+        "form-edit",
+        "form-read"
+    ],
+    "email": "test.account.2@localhost",
+    "displayName": "Test account 2"
+}
+]

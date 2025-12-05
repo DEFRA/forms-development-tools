@@ -64,6 +64,7 @@ services:
       # Entitlement API
       ENTITLEMENT_URL: http://host.docker.internal:3004
       FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API}
+      FEATURE_FLAG_PUBLISH_AUDIT_EVENTS: ${FEATURE_FLAG_PUBLISH_AUDIT_EVENTS}
       # Events/storage (Localstack)
       FORM_DEF_BUCKET_NAME: form-definition-storage
       AWS_REGION: eu-west-2

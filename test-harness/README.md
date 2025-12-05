@@ -40,6 +40,7 @@ REDIS_USERNAME=default
 REDIS_PASSWORD=my-password
 
 FEATURE_FLAG_USE_ENTITLEMENT_API=false
+FEATURE_FLAG_PUBLISH_AUDIT_EVENTS=false
 
 # forms-manager, submission-api, entitlement-api
 OIDC_JWKS_URI="https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys"

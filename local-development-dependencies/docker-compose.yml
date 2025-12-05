@@ -226,3 +226,4 @@ networks:
       config:
         # Specify the subnet range for IP address allocation
         - subnet: ${NETWORK_CDP_UPLOADER_SUBNET:-10.0.2.0/24}
+          gateway: ${NETWORK_CDP_UPLOADER_GATEWAY:-10.0.2.1}

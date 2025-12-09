@@ -20,6 +20,7 @@
         "form-creator"
     ],
     "scopes": [
+        "form-delete",
         "form-edit",
         "form-read"
     ],

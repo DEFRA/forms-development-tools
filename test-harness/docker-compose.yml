@@ -54,7 +54,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       # Mongo
-      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-manager
       # OIDC (override for your IdP)
       OIDC_JWKS_URI: ${OIDC_JWKS_URI:-https://example.invalid/jwks.json}
@@ -144,7 +144,7 @@ services:
       NODE_ENV: development
       PORT: 3002
       # Mongo
-      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-submission-api
       # S3 via Localstack
       S3_BUCKET: my-bucket
@@ -185,7 +185,7 @@ services:
       NODE_ENV: production
       PORT: 3004
       # Mongo
-      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-entitlement
       # OIDC
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
@@ -220,7 +220,7 @@ services:
       NODE_ENV: development
       PORT: 3003
       # Mongo
-      MONGO_URI: mongodb://host.docker.internal:27017/?replicaSet=rs0&directConnection=true
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-audit-api
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2

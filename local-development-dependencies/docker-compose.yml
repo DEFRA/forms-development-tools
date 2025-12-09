@@ -106,6 +106,8 @@ services:
       retries: 30
     environment:
       MONGO_INITDB_DATABASE: forms-submission-api
+    networks:
+      - cdpuploader
 
   mongo-express:
     image: mongo-express
@@ -115,6 +117,8 @@ services:
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       ME_CONFIG_BASICAUTH: false
+    networks:
+      - cdpuploader
 
   # Prefer to run the app using `npm run dev`, but if you experience Docker networking issues
   # you may want to uncomment the below and run it all in Docker.

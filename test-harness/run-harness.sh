@@ -107,10 +107,11 @@ echo "[harness] Test harness started."
 
 # Seed the database with test users using mongoimport and the official mongo image
 # This avoids needing to install the mongo shell locally.
+# Use the forms-harness_cdpuploader network to connect to mongo container directly
 echo "[harness] Seeding MongoDB with test users via mongoimport..."
 docker run --rm \
-  --network host \
+  --network forms-harness_cdpuploader \
   -v "$SCRIPT_DIR/utils/seed-users.json:/seed-users.json" \
   mongo \
-  mongoimport --uri "mongodb://host.docker.internal:27017/forms-entitlement?replicaSet=rs0&directConnection=true" \
+  mongoimport --uri "mongodb://mongo:27017/forms-entitlement?replicaSet=rs0&directConnection=true" \
   --collection user-entitlement --file /seed-users.json --jsonArray --mode=upsert --upsertFields=userId

@@ -42,9 +42,11 @@ services:
     depends_on:
       - forms-manager
       - redis
+    networks:
+      - cdpuploader
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    network_mode: host
+      - 'localhost:host-gateway'
 
   forms-manager:
     image: defradigital/forms-manager:${FORMS_MANAGER_TAG:-latest}

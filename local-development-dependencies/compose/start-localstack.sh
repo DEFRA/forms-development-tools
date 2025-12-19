@@ -89,6 +89,8 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:
 aws --endpoint-url=http://localhost:4566 sns create-topic --name forms_runner_events
 
 # queues
+# 'Save and exit' queue is forms_submission_events
+# 'Form submissions' queue is forms_submission
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission_events
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_submission-deadletter
@@ -116,3 +118,14 @@ aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_ada
 # subscriptions
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \
   --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_adaptor_events"
+
+#
+# Forms-sharepoint-listener
+#
+# queues
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_sharepoint_events
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_sharepoint_events-deadletter
+
+# subscriptions
+aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \
+  --protocol sqs --attributes RawMessageDelivery=true --notification-endpoint "arn:aws:sqs:eu-west-2:000000000000:forms_sharepoint_events"

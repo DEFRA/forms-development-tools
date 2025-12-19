@@ -5,7 +5,7 @@ set -euoa pipefail
 AUTH_MODE=""
 
 # List all possible profiles here.
-RUN_PROFILES=("forms-designer" "forms-manager" "forms-runner" "forms-submission-api" "forms-entitlement-api" "forms-audit-api" "forms-notify-listener")
+RUN_PROFILES=("forms-designer" "forms-manager" "forms-runner" "forms-submission-api" "forms-entitlement-api" "forms-audit-api" "forms-notify-listener" "forms-sharepoint-listener")
 
 EXCLUDE_PROFILES=()
 if [[ $# -ge 1 ]]; then

@@ -78,6 +78,7 @@ services:
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_manager_events
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
+      FEATURE_FLAG_PUBLISH_AUDIT_EVENTS: true
     ports:
       - '3001:3001'
     networks:

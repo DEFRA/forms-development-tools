@@ -12,6 +12,7 @@ services:
       MANAGER_URL: http://host.docker.internal:3001
       SUBMISSION_URL: http://host.docker.internal:3002
       ENTITLEMENT_URL: http://host.docker.internal:3004
+      AUDIT_URL: http://host.docker.internal:3003
       FILE_DOWNLOAD_PASSWORD_TTL: 1233455
       SESSION_COOKIE_TTL: 86400000
       IS_SECURE_OVERRIDE: false

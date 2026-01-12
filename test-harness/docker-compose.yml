@@ -170,6 +170,9 @@ services:
       NOTIFY_REPLY_TO_ID: ${NOTIFY_REPLY_TO_ID}
       DESIGNER_URL: http://localhost:3000
       MANAGER_URL: http://host.docker.internal:3001
+      COGNITO_JWKS_URI: ${OIDC_JWKS_URI}
+      COGNITO_CLIENT_ID: dummy
+      COGNITO_VERIFY_ISS: dummy
     networks:
       - cdpuploader
     extra_hosts:

@@ -281,4 +281,34 @@ services:
       localstack:
         condition: service_healthy
 
+  forms-sharepoint-listener:
+    image: defradigital/forms-sharepoint-listener:${FORMS_SHAREPOINT_LISTENER_TAG:-latest}
+    profiles:
+      - forms-sharepoint-listener
+    environment:
+      NODE_ENV: development
+      PORT: 3007
+      # SQS via Localstack (queue subscribed to SNS topic)
+      AWS_REGION: eu-west-2
+      SQS_ENDPOINT: http://host.docker.internal:4566
+      EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_sharepoint_listener_events
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      TRACE_HEADER: x-trace-id
+      LOG_LEVEL: info
+      RECEIVE_MESSAGE_TIMEOUT_MS: 5000
+      SHAREPOINT_TENANT_ID: ${SHAREPOINT_TENANT_ID:-6f504113-6b64-43f2-ade9-242e05780007}
+      SHAREPOINT_CLIENT_ID: ${SHAREPOINT_CLIENT_ID:-dummy}
+      SHAREPOINT_CLIENT_SECRET: ${SHAREPOINT_CLIENT_SECRET:-dummy}
+      SHAREPOINT_FORM_MAPPINGS: ${SHAREPOINT_FORM_MAPPINGS:-{"mappings":[]}}
+    networks:
+      - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '3007:3007'
+    depends_on:
+      localstack:
+        condition: service_healthy
+
 # No volumes or infra services here; provided by local-development-mock-auth/docker-compose.yml

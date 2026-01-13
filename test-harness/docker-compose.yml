@@ -301,6 +301,7 @@ services:
       SHAREPOINT_CLIENT_ID: ${SHAREPOINT_CLIENT_ID:-dummy}
       SHAREPOINT_CLIENT_SECRET: ${SHAREPOINT_CLIENT_SECRET:-dummy}
       SHAREPOINT_FORM_MAPPINGS: ${SHAREPOINT_FORM_MAPPINGS:-{"mappings":[]}}
+      MANAGER_URL: http://host.docker.internal:3001
     networks:
       - cdpuploader
     extra_hosts:

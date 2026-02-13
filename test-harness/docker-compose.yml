@@ -192,6 +192,7 @@ services:
 
   forms-entitlement-api:
     image: defradigital/forms-entitlement-api:${FORMS_ENTITLEMENT_API_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-entitlement-api
     environment:

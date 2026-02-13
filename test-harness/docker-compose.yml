@@ -1,6 +1,7 @@
 services:
   forms-designer:
     image: defradigital/forms-designer:${FORMS_DESIGNER_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-designer
     environment:
@@ -52,6 +53,7 @@ services:
 
   forms-manager:
     image: defradigital/forms-manager:${FORMS_MANAGER_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-manager
     environment:
@@ -92,6 +94,7 @@ services:
 
   forms-runner:
     image: defradigital/forms-runner:${FORMS_RUNNER_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-runner
     environment:
@@ -144,6 +147,7 @@ services:
 
   forms-submission-api:
     image: defradigital/forms-submission-api:${FORMS_SUBMISSION_API_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-submission-api
     environment:
@@ -223,6 +227,7 @@ services:
 
   forms-audit-api:
     image: defradigital/forms-audit-api:${FORMS_AUDIT_API_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-audit-api
     environment:
@@ -253,6 +258,7 @@ services:
 
   forms-notify-listener:
     image: defradigital/forms-notify-listener:${FORMS_NOTIFY_LISTENER_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-notify-listener
     environment:
@@ -284,6 +290,7 @@ services:
 
   forms-sharepoint-listener:
     image: defradigital/forms-sharepoint-listener:${FORMS_SHAREPOINT_LISTENER_TAG:-latest}
+    platform: linux/amd64
     profiles:
       - forms-sharepoint-listener
     environment:

@@ -113,5 +113,5 @@ docker run --rm \
   --network forms-harness_cdpuploader \
   -v "$SCRIPT_DIR/utils/seed-users.json:/seed-users.json" \
   mongo \
-  mongoimport --uri "mongodb://mongo:27017/forms-entitlement?replicaSet=rs0&directConnection=true" \
+  mongoimport --uri "mongodb://mongo:27017/forms-entitlement-api?replicaSet=rs0&directConnection=true" \
   --collection user-entitlement --file /seed-users.json --jsonArray --mode=upsert --upsertFields=userId

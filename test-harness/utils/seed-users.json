@@ -1,5 +1,23 @@
 [
   {
+    "userId": "a346065b-3717-413b-b95b-39336e5afa52",
+    "roles": ["superadmin"],
+    "scopes": [
+      "form-delete",
+      "form-edit",
+      "form-read",
+      "form-publish",
+      "user-create",
+      "user-delete",
+      "user-edit",
+      "forms-feedback",
+      "forms-backup",
+      "reset-save-and-exit"
+    ],
+    "email": "superadmin@internal.test",
+    "displayName": "Test account (Superadmin)"
+  },
+  {
     "userId": "86758ba9-92e7-4287-9751-7705e449688e",
     "roles": ["admin"],
     "scopes": [
@@ -9,21 +27,24 @@
       "form-publish",
       "user-create",
       "user-delete",
-      "user-edit"
+      "user-edit",
+      "forms-feedback"
     ],
-    "email": "test.account@localhost",
-    "displayName": "Test account"
-},
-{
+    "email": "admin@internal.test",
+    "displayName": "Test account (Admin)"
+  },
+  {
     "userId": "7049296f-2156-4d61-8ac3-349276438ef9",
-    "roles": [
-        "form-creator"
-    ],
-    "scopes": [
-        "form-edit",
-        "form-read"
-    ],
-    "email": "test.account.2@localhost",
-    "displayName": "Test account 2"
-}
+    "roles": ["form-creator"],
+    "scopes": ["form-delete", "form-edit", "form-read"],
+    "email": "form-creator@internal.test",
+    "displayName": "Test account (Form creator)"
+  },
+  {
+    "userId": "807214c3-47e7-4cbb-a277-5a935284fd4d",
+    "roles": ["form-publisher"],
+    "scopes": ["form-delete", "form-edit", "form-read", "form-publish"],
+    "email": "forms-publisher@internal.test",
+    "displayName": "Test account (Form publisher)"
+  }
 ]

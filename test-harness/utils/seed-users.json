@@ -44,7 +44,7 @@
     "userId": "807214c3-47e7-4cbb-a277-5a935284fd4d",
     "roles": ["form-publisher"],
     "scopes": ["form-delete", "form-edit", "form-read", "form-publish"],
-    "email": "forms-publisher@internal.test",
+    "email": "form-publisher@internal.test",
     "displayName": "Test account (Form publisher)"
   }
 ]

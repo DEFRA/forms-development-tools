@@ -243,6 +243,7 @@ services:
       EVENTS_SQS_QUEUE_URL: http://host.docker.internal:4566/000000000000/forms_audit_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      RECEIVE_MESSAGE_TIMEOUT_MS: 5000
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
     networks:

@@ -120,7 +120,7 @@ services:
       # Optional analytics/notify/uploader
       GA_TRACKING_ID: ${GA_TRACKING_ID:-}
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
-      ORDNANCE_SURVEY_API_KEY: ${ORDNANCE_SURVEY_API_KEY}
+      ORDNANCE_SURVEY_API_KEY: ${ORDNANCE_SURVEY_API_KEY:-dummy}
       NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
       FEEDBACK_LINK: 'http://test.com'
       UPLOADER_URL: http://uploader.127.0.0.1.sslip.io:7300

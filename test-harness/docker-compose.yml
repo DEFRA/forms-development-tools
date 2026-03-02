@@ -73,8 +73,8 @@ services:
       # Events/storage (Localstack)
       FORM_DEF_BUCKET_NAME: form-definition-storage
       AWS_REGION: eu-west-2
-      SNS_ENDPOINT: http://host.docker.internal:4566
-      S3_ENDPOINT: http://host.docker.internal:4566
+      SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       # SNS topic used for publishing events
@@ -128,7 +128,7 @@ services:
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
       # Messaging
-      SNS_ENDPOINT: http://host.docker.internal:4566
+      SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       SNS_ADAPTER_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events"
       SNS_SAVE_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_events"
     ports:

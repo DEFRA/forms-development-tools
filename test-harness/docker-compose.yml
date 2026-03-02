@@ -159,10 +159,10 @@ services:
       # S3 via Localstack
       S3_BUCKET: my-bucket
       S3_REGION: eu-west-2
-      S3_ENDPOINT: http://localstack:4566
-      SQS_ENDPOINT: http://localstack:4566
-      SAVE_AND_EXIT_QUEUE_URL: http://localstack:4566/000000000000/forms_submission_events
-      SUBMISSION_QUEUE_URL: http://localstack:4566/000000000000/forms_submission
+      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566}
+      SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      SAVE_AND_EXIT_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission_events
+      SUBMISSION_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
@@ -239,8 +239,8 @@ services:
       MONGO_DATABASE: forms-audit-api
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2
-      SQS_ENDPOINT: http://localstack:4566
-      EVENTS_SQS_QUEUE_URL: http://localstack:4566/000000000000/forms_audit_events
+      SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_audit_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
@@ -268,8 +268,8 @@ services:
       PORT: 3006
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2
-      SQS_ENDPOINT: http://localstack:4566
-      EVENTS_SQS_QUEUE_URL: http://localstack:4566/000000000000/forms_notify_listener_events
+      SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_notify_listener_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       TRACE_HEADER: x-trace-id
@@ -300,8 +300,8 @@ services:
       PORT: 3007
       # SQS via Localstack (queue subscribed to SNS topic)
       AWS_REGION: eu-west-2
-      SQS_ENDPOINT: http://localstack:4566
-      EVENTS_SQS_QUEUE_URL: http://localstack:4566/000000000000/forms_sharepoint_listener_events
+      SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_sharepoint_listener_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       TRACE_HEADER: x-trace-id

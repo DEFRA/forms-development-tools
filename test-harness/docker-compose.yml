@@ -159,7 +159,7 @@ services:
       # S3 via Localstack
       S3_BUCKET: my-bucket
       S3_REGION: eu-west-2
-      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566}
+      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       SAVE_AND_EXIT_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission_events
       SUBMISSION_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission

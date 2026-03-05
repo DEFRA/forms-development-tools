@@ -12,21 +12,21 @@ This directory contains instructions and configuration for spinning up all local
 
 The following development tools and infrastructure services are available when running `./run-harness.sh`:
 
-| Name         | Description                                    | Development tool URL  | Used in production |
-|--------------|------------------------------------------------|-----------------------|--------------------|
-| localstack   | Local AWS cloud service emulator (used for S3) |                       | No                 |
-| s3manager    | Local S3-compatible storage manager (minio)    | http://localhost:8082 | No                 |
-| mongo        | MongoDB database for backends                  |                       | Yes                |
-| mongo-express| Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
-| redis        | Redis cache/message broker for frontends       |                       | Yes                |
-| cdp-uploader | File upload infrastructure                     |                       | Yes                |
-| oidc         | Mock OIDC authentication server                |                       | No                 |
-| forms-designer | Forms UI editor                              | http://localhost:3000 | Yes                |
-| forms-manager | Forms file management                         |                       | Yes                |
-| forms-runner | Forms runner                                   |                       | Yes                |
-| forms-submission-api | Forms submission service               |                       | Yes                |
-| forms-entitlement-api | Entitlement (authorization) service   |                       | Yes                |
-| forms-audit-api | Audit service                               |                       | Yes                |
+| Name                  | Description                                    | Development tool URL  | Used in production |
+| --------------------- | ---------------------------------------------- | --------------------- | ------------------ |
+| localstack            | Local AWS cloud service emulator (used for S3) |                       | No                 |
+| s3manager             | Local S3-compatible storage manager (minio)    | http://localhost:8082 | No                 |
+| mongo                 | MongoDB database for backends                  |                       | Yes                |
+| mongo-express         | Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
+| redis                 | Redis cache/message broker for frontends       |                       | Yes                |
+| cdp-uploader          | File upload infrastructure                     |                       | Yes                |
+| oidc                  | Mock OIDC authentication server                |                       | No                 |
+| forms-designer        | Forms UI editor                                | http://localhost:3000 | Yes                |
+| forms-manager         | Forms file management                          |                       | Yes                |
+| forms-runner          | Forms runner                                   |                       | Yes                |
+| forms-submission-api  | Forms submission service                       |                       | Yes                |
+| forms-entitlement-api | Entitlement (authorization) service            |                       | Yes                |
+| forms-audit-api       | Audit service                                  |                       | Yes                |
 
 If using AAD/Entra authentication (as opposed to the mocked OIDC authentication), you will need to create a `.env` file with the following typical contents:
 ```
@@ -82,3 +82,13 @@ Examples:
   ```
 
 This will spin up all the necessary containers for local development of the Defra Forms.
+
+## Issues
+
+If you encounter an issue with uploading files using JavaScript, it will likely be because `uploader.127.0.0.1.sslip.io` is not resolving to `127.0.0.1` on your machine. This may be caused by your home router and how it's handling DNS. A way to resolve this is to add an entry to your hosts file. 
+
+On Mac, you can do this by running this command:
+
+```bash
+sudo sh -c 'echo "127.0.0.1 uploader.127.0.0.1.sslip.io cdp.127.0.0.1.sslip.io" >> /etc/hosts'
+```

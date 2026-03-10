@@ -79,6 +79,7 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       # SNS topic used for publishing events
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_manager_events
+      PUBLIC_KEY_FOR_SECRETS: ${PUBLIC_KEY_FOR_SECRETS}
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
       FEATURE_FLAG_PUBLISH_AUDIT_EVENTS: ${FEATURE_FLAG_PUBLISH_AUDIT_EVENTS:-false}
@@ -131,6 +132,7 @@ services:
       SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       SNS_ADAPTER_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events"
       SNS_SAVE_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_runner_events"
+      PRIVATE_KEY_FOR_SECRETS: ${PRIVATE_KEY_FOR_SECRETS}
     ports:
       - '3009:3009'
     networks:
@@ -318,6 +320,24 @@ services:
       - 'host.docker.internal:host-gateway'
     ports:
       - '3007:3007'
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  wiremock:
+    image: wiremock/wiremock:3.13.2
+    container_name: wiremock-test
+    ports:
+      - '127.0.0.1:8085:8080'
+    command:
+      [
+        '--verbose',
+        '--enable-browser-proxying'
+      ]
+    volumes:
+      - ../test-harness/wiremock:/home/wiremock
+    networks:
+      - cdpuploader
     depends_on:
       localstack:
         condition: service_healthy

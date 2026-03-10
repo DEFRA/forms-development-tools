@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/v1/payments/invalid-payment-id"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "message": "Not found",
+      "error_identifier": "PAYMENT_NOT_FOUND"
+    }
+  }
+}

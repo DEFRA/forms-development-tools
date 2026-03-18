@@ -120,6 +120,12 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:
 # queues
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_adaptor_events
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_adaptor_events-deadletter
+aws --endpoint-url=http://localhost:4566 sqs set-queue-attributes \
+    --queue-url http://sqs.eu-west-2.127.0.0.1:4566/000000000000/forms_adaptor_events \
+    --attributes '{
+      "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:forms_adaptor_events-deadletter\",\"maxReceiveCount\":\"3\"}",
+      "VisibilityTimeout": "60"
+    }'
 
 # subscriptions
 aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:eu-west-2:000000000000:forms_runner_submission_events" \

@@ -181,8 +181,8 @@ services:
       MANAGER_URL: http://host.docker.internal:3001
       ENTITLEMENT_URL: http://host.docker.internal:3004
       COGNITO_JWKS_URI: ${OIDC_JWKS_URI}
-      COGNITO_CLIENT_ID: ${OIDC_VERIFY_AUD}
-      COGNITO_VERIFY_ISS: ${OIDC_VERIFY_ISS}
+      COGNITO_CLIENT_ID: dummy
+      COGNITO_VERIFY_ISS: dummy
     networks:
       - cdpuploader
     extra_hosts:

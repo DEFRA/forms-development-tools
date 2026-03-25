@@ -40,6 +40,8 @@ services:
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_designer_events
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      ORDNANCE_SURVEY_API_KEY: test
+      ORDNANCE_SURVEY_API_SECRET: test
     ports:
       - '3000:3000'
     depends_on:

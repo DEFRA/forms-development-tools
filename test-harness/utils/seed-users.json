@@ -12,7 +12,8 @@
       "user-edit",
       "forms-feedback",
       "forms-backup",
-      "reset-save-and-exit"
+      "reset-save-and-exit",
+      "dead-letter-queues"
     ],
     "email": "superadmin@internal.test",
     "displayName": "Test account (Superadmin)"

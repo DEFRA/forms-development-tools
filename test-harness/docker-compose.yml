@@ -169,6 +169,8 @@ services:
       SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       SAVE_AND_EXIT_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission_events
       SUBMISSION_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission
+      FORM_SUBMISSIONS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_submission-deadletter'
+      SAVE_AND_EXIT_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_submission_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
@@ -249,11 +251,16 @@ services:
       SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_audit_events
       ENTITLEMENT_URL: http://host.docker.internal:3004
+      EVENTS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_audit_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
+      # OIDC
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
     networks:
       - cdpuploader
     extra_hosts:
@@ -315,6 +322,7 @@ services:
       AWS_REGION: eu-west-2
       SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_sharepoint_listener_events
+      EVENTS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_sharepoint_listener_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       TRACE_HEADER: x-trace-id
@@ -326,6 +334,10 @@ services:
       SHAREPOINT_FORM_MAPPINGS: ${SHAREPOINT_FORM_MAPPINGS:-{"mappings":[]}}
       MANAGER_URL: http://host.docker.internal:3001
       ENTITLEMENT_URL: http://host.docker.internal:3004
+      # OIDC
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
     networks:
       - cdpuploader
     extra_hosts:

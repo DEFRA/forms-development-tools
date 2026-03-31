@@ -34,7 +34,6 @@ If using AAD/Entra authentication (as opposed to the mocked OIDC authentication)
 AZURE_CLIENT_ID="<client-id>"
 AZURE_CLIENT_SECRET="<client-secret>"
 OIDC_WELL_KNOWN_CONFIGURATION_URL="https://login.microsoftonline.com/<tenant>>/v2.0/.well-known/openid-configuration"
-ROLE_EDITOR_GROUP_ID=<AAD-group-id>
 
 REDIS_USERNAME=default
 REDIS_PASSWORD=my-password

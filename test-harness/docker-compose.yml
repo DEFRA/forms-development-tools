@@ -35,7 +35,7 @@ services:
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
       OIDC_WELL_KNOWN_CONFIGURATION_URL: ${OIDC_WELL_KNOWN_CONFIGURATION_URL}
       ROLE_EDITOR_GROUP_ID: ${ROLE_EDITOR_GROUP_ID}
-      FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API:-true}
+      FEATURE_FLAG_USE_ENTITLEMENT_API: true
       FEATURE_FLAG_ALLOW_PAYMENTS: ${FEATURE_FLAG_ALLOW_PAYMENTS:-true}
       # SNS
       SNS_ENDPOINT: http://host.docker.internal:4566
@@ -63,6 +63,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
+      HOST: '0.0.0.0'
+      SERVICE_VERSION: ''
       # Mongo
       MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
       MONGO_DATABASE: forms-manager
@@ -70,22 +72,28 @@ services:
       OIDC_JWKS_URI: ${OIDC_JWKS_URI:-https://example.invalid/jwks.json}
       OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD:-forms-manager}
       OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS:-https://example.invalid/}
-      ROLE_EDITOR_GROUP_ID: ${ROLE_EDITOR_GROUP_ID}
       # Entitlement API
       ENTITLEMENT_URL: http://host.docker.internal:3004
-      FEATURE_FLAG_USE_ENTITLEMENT_API: ${FEATURE_FLAG_USE_ENTITLEMENT_API:-true}
       # Events/storage (Localstack)
       FORM_DEF_BUCKET_NAME: form-definition-storage
       AWS_REGION: eu-west-2
-      SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
-      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       # SNS topic used for publishing events
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_manager_events
+      SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       TRACE_HEADER: x-trace-id
+      LOG_ENABLED: true
       LOG_LEVEL: info
+      LOG_FORMAT: 'pino-pretty'
+      HTTP_PROXY: ''
+      CDP_HTTPS_PROXY: ''
+      ENABLE_SECURE_CONTEXT: false
+      ENABLE_METRICS: false
+      ROLE_EDITOR_GROUP_ID: 'ignore'
       FEATURE_FLAG_PUBLISH_AUDIT_EVENTS: ${FEATURE_FLAG_PUBLISH_AUDIT_EVENTS:-false}
+      FEATURE_FLAG_USE_ENTITLEMENT_API: true
       # PUBLIC key for secrets is a test value - do not use for any deployments
       PUBLIC_KEY_FOR_SECRETS: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQ0lqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUE0WU53YUJjenlBdWpJZ2k2aTBmawpINUVYeGxtTmNBd1AzUkpRaDB2ckxjeDIxU2RCSkFOUU5JWmdTcWhST3ViUlozWTJWQ2Zsbkd3cFVSTTNrY0tFCkNHUlk2Nk5leVUwL3QzS2hVOUY1cG1heVBSVUFiWkRjalFCL0xYbVNGUUdGelZDQlp0ZjBIeHJiSnBUNDFiSGIKR05udFpDdm94WjZQOUJxdU4wa2c0Y1JXcTdyWUozVE1xWXArc1RzQU01UFZwMVh6WklIRFJ2UVJ2bktnMDVUUQovRFA1cXcvYkdwelVsQ01WVU9MTHhxL2xTY040RnhDRTRUUi9kSWNNM25wTU1PUUVjaEhLcEE2SWs3UmhmQml0CjZBSEpINWN2c0dWUTFHUmlvUXBIWXBWclZLRFV5ZmIrS3VzbjlWUTVTQ3JGZDJ3WWRaRzBkdVNOZFp3VklJQm8KVElWZjlrSUMrZjl5YTVLMmcvalJhMXUyVGdNc3UvZnM4UWVRZHk2disxNkFtWFA1cXNXYUtFK00zRkJoRitrZAozbS91YjNJVFRRVmplYWY1M2ZsTVlMZlZmN2NVR2FQN0VIajlUY0dGYVlGTzhuWGNWbS9lT2lkMXBGL3p5NCtzCnpFZG5oOFNRYm5ncElwdFJiMk51Wmw5RWZNR01CTFlyQ3FiWnMyYU1KV0N5M1FGWFZDeTYzUzZhRDkrbzQ1N0cKUDNGVnNZY2d2eHAzTGVTQ0phUHMzL0FlSjh1MUFSeHZwMG02ZjdPLy9yMFFQYzJnd2RyZjRVMUkwdlduclh2eApCc2RMWU5NMXVYVjhMKzExYloxeGpVaFU4QldTd3dnTTdQMGxqVTJ4UE9WbG55MlFGeXh0ZTgzK0E5SXNBcmFxCmthNlhEdDhYZkNZYm84dEpnem9mbEs4Q0F3RUFBUT09Ci0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ=="
     ports:
@@ -292,9 +300,9 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       TRACE_HEADER: x-trace-id
       LOG_LEVEL: info
-      OIDC_JWKS_URI: http://${LOCALSTACK_HOST:-host.docker.internal}:5556/.well-known/openid-configuration/jwks
-      OIDC_VERIFY_AUD: local-test-client
-      OIDC_VERIFY_ISS: http://oidc:80
+      OIDC_JWKS_URI: ${OIDC_JWKS_URI}
+      OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
+      OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: '3d448938-8a8b-40c2-a3de-414597f976e1'
       NOTIFY_REPLY_TO_ID: 'c0428382-7df0-4e57-89fa-20bb69e9e755'

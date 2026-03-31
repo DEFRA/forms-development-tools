@@ -39,8 +39,6 @@ ROLE_EDITOR_GROUP_ID=<AAD-group-id>
 REDIS_USERNAME=default
 REDIS_PASSWORD=my-password
 
-FEATURE_FLAG_USE_ENTITLEMENT_API=false
-
 # forms-manager, submission-api, entitlement-api
 OIDC_JWKS_URI="https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys"
 OIDC_VERIFY_AUD="<guid-audience>"

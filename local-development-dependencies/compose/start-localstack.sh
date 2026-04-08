@@ -81,7 +81,7 @@ aws --endpoint-url=http://localhost:4566 sqs set-queue-attributes \
     --queue-url http://sqs.eu-west-2.127.0.0.1:4566/000000000000/forms_notify_listener_events \
     --attributes '{
       "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:forms_notify_listener_events-deadletter\",\"maxReceiveCount\":\"3\"}",
-      "VisibilityTimeout": "60"
+      "VisibilityTimeout": "0"
     }'
 
 # subscriptions

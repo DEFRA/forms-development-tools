@@ -15,7 +15,7 @@ while IFS= read -r line || [[ -n $line ]]; do
   DIGEST=`echo $line | awk '{print $2}'`
   if printf '%s\0' "${LATEST_VERSIONS_ARR[@]}" | grep -Fxqz -- $SERVICE_NAME; then
     CURL_URL="https://registry.hub.docker.com/v2/repositories/$SERVICE_NAME/tags"
-    TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\") | pick(.name)"
+    TAG_FILTER=".results[] | { name: .name, digest: .digest } | select (.digest == \"$DIGEST\") | select (.name != \"latest\")"
     URL_RESPONSE=`curl -s $CURL_URL`
     URL_RESP_LOWER=`echo $URL_RESPONSE | tr '[:upper:]' '[:lower:]'`
     if [[ $URL_RESP_LOWER != *"not found"* ]]; then

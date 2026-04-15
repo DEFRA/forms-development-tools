@@ -1,9 +1,15 @@
 - ClientId: "local-test-client"
   ClientSecrets:
     - "local-mock-secret"
-  AllowedGrantTypes: ["authorization_code"]
-  RequirePkce : false
-  RedirectUris: ["http://localhost:3000", "http://localhost:3000/auth/callback", "http://localhost:3000/auth/sign-out", "http://localhost:3000/account/signed-out"]
+  AllowedGrantTypes: ["authorization_code", "password"]
+  RequirePkce: false
+  RedirectUris:
+    [
+      "http://localhost:3000",
+      "http://localhost:3000/auth/callback",
+      "http://localhost:3000/auth/sign-out",
+      "http://localhost:3000/account/signed-out",
+    ]
   AllowedScopes:
     - "openid"
     - "profile"

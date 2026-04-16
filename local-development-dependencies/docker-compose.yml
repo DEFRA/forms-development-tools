@@ -59,7 +59,6 @@ services:
       MOCK_VIRUS_SCAN_ENABLED: true
       MOCK_VIRUS_RESULT_DELAY: 3
       FORMS_SUBMISSION_API_URL: 'http://${LOCALSTACK_HOST:-host.docker.internal}:3002'
-      CALLBACK_URL: 'http://localhost:3002/file'
     extra_hosts:
       - 'localhost:host-gateway'
       - 'host.docker.internal:host-gateway'

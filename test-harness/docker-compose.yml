@@ -278,6 +278,8 @@ services:
     profiles:
       - forms-audit-api
     environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
       NODE_ENV: development
       PORT: 3003
       # Mongo
@@ -292,12 +294,20 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
-      TRACE_HEADER: x-trace-id
+      SQS_MAX_NUMBER_OF_MESSAGES: 10
+      SQS_VISIBILITY_TIMEOUT: 1
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
       LOG_LEVEL: info
+      CDP_HTTPS_PROXY: ''
       # OIDC
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
       OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
       OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
+      ENABLE_METRICS: false
+      ENABLE_SECURE_CONTEXT: false
+      CACHE_ENABLED: false
     networks:
       - cdpuploader
     extra_hosts:
@@ -316,6 +326,8 @@ services:
     profiles:
       - forms-notify-listener
     environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
       NODE_ENV: development
       PORT: 3006
       # SQS via Localstack (queue subscribed to SNS topic)
@@ -325,8 +337,9 @@ services:
       EVENTS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_notify_listener_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
-      TRACE_HEADER: x-trace-id
+      TRACING_HEADER: x-trace-id
       LOG_LEVEL: info
+      CDP_HTTPS_PROXY: ''
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
       OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
       OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
@@ -337,6 +350,9 @@ services:
       MANAGER_URL: http://host.docker.internal:3001
       ENTITLEMENT_URL: http://host.docker.internal:3004
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
+      SQS_MAX_NUMBER_OF_MESSAGES: 10
+      SQS_VISIBILITY_TIMEOUT: 1
+      FILE_EXPIRY_IN_MONTHS: 9
     networks:
       - cdpuploader
     extra_hosts:

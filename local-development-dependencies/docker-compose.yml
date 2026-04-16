@@ -144,8 +144,8 @@ services:
     environment:
       ENDPOINT: localhost.localstack.cloud:4566
       USE_SSL: false
-      ACCESS_KEY_ID: dummy
-      SECRET_ACCESS_KEY: dummy
+      ACCESS_KEY_ID: test
+      SECRET_ACCESS_KEY: test
     depends_on:
       - localstack
     dns:
@@ -153,17 +153,18 @@ services:
       - ${NETWORK_CDP_UPLOADER_IP:-10.0.2.20}
     networks:
       - cdpuploader
+
   aws-manager:
     image: visualvincent/guistack:latest
     ports:
       - 127.0.0.1:5000:80
     environment:
       AWS_REGION: eu-west-2
-      AWS_S3_ENDPOINT_URL: http://localstack:4566
-      AWS_SNS_ENDPOINT_URL: http://localstack:4566
-      AWS_SQS_ENDPOINT_URL: http://localstack:4566
-      ACCESS_KEY_ID: dummy
-      SECRET_ACCESS_KEY: dummy
+      AWS_S3_ENDPOINT_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      AWS_SNS_ENDPOINT_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      AWS_SQS_ENDPOINT_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
     depends_on:
       - localstack
     dns:

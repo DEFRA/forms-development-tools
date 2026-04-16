@@ -166,7 +166,10 @@ services:
     profiles:
       - forms-submission-api
     environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
       NODE_ENV: development
+      SERVICE_VERSION: ''
       PORT: 3002
       # Mongo
       MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
@@ -180,13 +183,19 @@ services:
       SUBMISSION_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_submission
       FORM_SUBMISSIONS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_submission-deadletter'
       SAVE_AND_EXIT_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_submission_events-deadletter'
+      AWS_REGION: eu-west-2
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       OIDC_JWKS_URI: ${OIDC_JWKS_URI}
       OIDC_VERIFY_AUD: ${OIDC_VERIFY_AUD}
       OIDC_VERIFY_ISS: ${OIDC_VERIFY_ISS}
-      TRACE_HEADER: x-trace-id
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
       LOG_LEVEL: info
+      CDP_HTTPS_PROXY: ''
+      ENABLE_METRICS: false
+      ENABLE_SECURE_CONTEXT: false
       NOTIFY_API_KEY: ${NOTIFY_API_KEY}
       NOTIFY_TEMPLATE_ID: ${NOTIFY_TEMPLATE_ID}
       NOTIFY_REPLY_TO_ID: ${NOTIFY_REPLY_TO_ID}
@@ -194,8 +203,17 @@ services:
       MANAGER_URL: http://host.docker.internal:3001
       ENTITLEMENT_URL: http://host.docker.internal:3004
       COGNITO_JWKS_URI: ${OIDC_JWKS_URI}
-      COGNITO_CLIENT_ID: dummy
+      COGNITO_CLIENT_IDS: '{}'
       COGNITO_VERIFY_ISS: dummy
+      LOADED_PREFIX: prefix
+      RECEIVE_MESSAGE_TIMEOUT_MS: 5000
+      SQS_MAX_NUMBER_OF_MESSAGES: 10
+      SQS_VISIBILITY_TIMEOUT: 1
+      SAVE_AND_EXIT_EXPIRY_IN_DAYS: 28
+      EMAIL_USERS_EXPIRING_SOON_SAVED_FOR_LATER_LINK_ENABLED: false
+      EMAIL_USERS_EXPIRING_SOON_SAVED_FOR_LATER_LINK_CRON: '0 3 * * *'
+      EMAIL_USERS_EXPIRING_SOON_SAVED_FOR_LATER_LINK_EXPIRY_WINDOW_HOURS: 8
+      EMAIL_USERS_EXPIRING_SOON_SAVED_FOR_LATER_LINK_MINIMUM_HOURS_REMAINING: 4
     networks:
       - cdpuploader
     extra_hosts:
@@ -214,6 +232,8 @@ services:
     profiles:
       - forms-entitlement-api
     environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
       NODE_ENV: production
       PORT: 3004
       # Mongo
@@ -229,11 +249,19 @@ services:
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
       SYNC_ADMIN_USERS_ENABLED: ${SYNC_ADMIN_USERS_ENABLED:-false}
-      TRACE_HEADER: x-trace-id
+      SYNC_ADMIN_USERS_CRON: '0 3 * * *'
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
       LOG_LEVEL: info
+      CDP_HTTPS_PROXY: ''
+      ENABLE_METRICS: false
+      ENABLE_SECURE_CONTEXT: false
       AWS_REGION: eu-west-2
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      SNS_TOPIC_ARN: "arn:aws:sns:eu-west-2:000000000000:forms_entitlement_events"
     networks:
       - cdpuploader
     extra_hosts:

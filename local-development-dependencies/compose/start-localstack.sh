@@ -24,6 +24,7 @@ aws --endpoint-url=http://localhost:4566 s3api put-bucket-versioning \
 # queues
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-clamav-results
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-uploader-scan-results-callback.fifo --attributes "{\"FifoQueue\":\"true\",\"ContentBasedDeduplication\": \"true\"}"
+aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name cdp-uploader-download-requests
 
 # test harness
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name mock-clamav

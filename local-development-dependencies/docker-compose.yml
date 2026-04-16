@@ -52,13 +52,13 @@ services:
       PORT: 7337
       NODE_ENV: development
       REDIS_HOST: redis
-      LOCALSTACK_ENDPOINT: http://host.docker.internal:4566
-      S3_ENDPOINT: http://host.docker.internal:4566
-      SQS_ENDPOINT: http://host.docker.internal:4566
+      LOCALSTACK_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      S3_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
+      SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       USE_SINGLE_INSTANCE_CACHE: true
       MOCK_VIRUS_SCAN_ENABLED: true
       MOCK_VIRUS_RESULT_DELAY: 3
-      FORMS_SUBMISSION_API_URL: 'http://host.docker.internal:3002'
+      FORMS_SUBMISSION_API_URL: 'http://${LOCALSTACK_HOST:-host.docker.internal}:3002'
       CALLBACK_URL: 'http://localhost:3002/file'
     extra_hosts:
       - 'localhost:host-gateway'

@@ -312,6 +312,8 @@ services:
       SQS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
       EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_audit_events
       ENTITLEMENT_URL: http://host.docker.internal:3004
+      MANAGER_URL: http://host.docker.internal:3001
+      SUBMISSION_URL: http://host.docker.internal:3002
       EVENTS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_audit_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
@@ -330,6 +332,7 @@ services:
       ENABLE_METRICS: false
       ENABLE_SECURE_CONTEXT: false
       CACHE_ENABLED: false
+      METRICS_CRONTAB: "* * * * *"
     networks:
       - cdpuploader
     extra_hosts:

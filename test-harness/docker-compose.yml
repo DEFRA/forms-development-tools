@@ -332,7 +332,7 @@ services:
       ENABLE_METRICS: false
       ENABLE_SECURE_CONTEXT: false
       CACHE_ENABLED: false
-      METRICS_CRONTAB: "* * * * *"
+      METRICS_CRONTAB: "0 3 * * *"
     networks:
       - cdpuploader
     extra_hosts:

@@ -56,9 +56,16 @@ For each flagged dependency, examine the codebase to confirm it is genuinely
 unused — not dynamically required, loaded via framework plugin, or referenced
 only in config. Common false positives:
 
-- `@types/*` packages referenced only by TypeScript (always keep unless package itself is removed)
+- `@types/*` packages referenced only by TypeScript (always keep unless the package itself is removed)
 - Packages loaded in config files not scanned by knip (e.g. `.babelrc`, `jest.config.*`)
-- Peer dependencies required by other packages at runtime
+- Peer dependencies pulled in transitively by other packages at runtime
+- **String-referenced packages** — pino transports (`target: 'pino-pretty'`), hapi plugins
+  registered by name, webpack loaders, and similar patterns load packages via string at
+  runtime. Knip cannot detect these. Search for the package name as a string, not just
+  as an import, before removing:
+  ```bash
+  grep -r "'<package-name>'\|\"<package-name>\"" <repo-path>/src --include="*.ts" --include="*.js"
+  ```
 
 Remove confirmed unused deps from `package.json` in `<repo-path>`, then:
 

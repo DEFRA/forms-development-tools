@@ -1,10 +1,8 @@
 ---
 name: dependency-management
-description: >
-  Use to run a full dependency management sweep on a Node.js microservice.
-  Detects unused dependencies, updates to latest versions (including major
-  upgrades where safe), runs full CI verification, and opens stacked PRs.
-  Invoke with the absolute path to the target repo.
+description: Run a full dependency management sweep on a Node.js microservice — remove unused deps, update to latest versions (including safe major upgrades), verify CI, and open stacked PRs. Invoke with the target repo path.
+disable-model-invocation: true
+allowed-tools: Bash
 ---
 
 # Dependency Management Skill
@@ -16,11 +14,10 @@ One repo at a time. Target `forms-runner` first, then repeat for others.
 
 ## Setup
 
-All scripts are in `forms-development-tools/dependency-management/scripts/`.
-Set `SCRIPTS` to that directory before starting:
+Scripts are bundled with this skill. Set `SCRIPTS` once at the start of the session:
 
 ```bash
-SCRIPTS="/Users/nodepoint/Development/forms/forms-development-tools/dependency-management/scripts"
+SCRIPTS="${CLAUDE_SKILL_DIR}/scripts"
 ```
 
 ## Step 1 — Preflight

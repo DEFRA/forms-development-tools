@@ -3,7 +3,7 @@
 Use this runbook to detect and remove unused dependencies, update to the latest
 available versions, and open PRs — one repo at a time.
 
-All scripts live in `dependency-management/scripts/`. Run them from `forms-development-tools/`.
+All scripts live in `skills/dependency-management/scripts/`. Run them from `forms-development-tools/`.
 
 ---
 
@@ -22,7 +22,7 @@ Replace `<repo>` with the absolute path to the target microservice.
 ### Step 1 — Preflight
 
 ```bash
-./dependency-management/scripts/01-preflight.sh <repo>
+./skills/dependency-management/scripts/01-preflight.sh <repo>
 ```
 
 Creates branch `chore/dependency-management-<YYYY-MM-DD>` from `origin/main`.
@@ -33,7 +33,7 @@ Fails if the repo has uncommitted changes. Stash or commit before proceeding.
 ### Step 2 — Detect unused dependencies
 
 ```bash
-./dependency-management/scripts/02-detect-unused.sh <repo>
+./skills/dependency-management/scripts/02-detect-unused.sh <repo>
 ```
 
 Review the output. For each flagged dependency, check whether it is genuinely
@@ -44,7 +44,7 @@ plugin, or referenced only in config files). Remove confirmed unused deps from
 ### Step 3 — Verify removals
 
 ```bash
-./dependency-management/scripts/04-verify.sh <repo>
+./skills/dependency-management/scripts/04-verify.sh <repo>
 ```
 
 If it fails, restore the dep that caused the failure and re-verify.
@@ -58,7 +58,7 @@ git -C <repo> commit -m "chore: remove unused dependencies"
 ### Step 4 — Detect available updates
 
 ```bash
-./dependency-management/scripts/03-update-deps.sh <repo>
+./skills/dependency-management/scripts/03-update-deps.sh <repo>
 ```
 
 Review the output. Classify each major update (`isMajor: true`) as:
@@ -72,7 +72,7 @@ run `npm install` in `<repo>`.
 ### Step 5 — Verify updates
 
 ```bash
-./dependency-management/scripts/04-verify.sh <repo>
+./skills/dependency-management/scripts/04-verify.sh <repo>
 ```
 
 If a specific update caused a failure, pin it at its previous version in
@@ -97,7 +97,7 @@ For each medium major, create a stacked branch from the baseline:
 BASELINE="chore/dependency-management-2026-05-21"   # from Step 1 output
 PACKAGE="express"
 
-./dependency-management/scripts/01-preflight.sh <repo> \
+./skills/dependency-management/scripts/01-preflight.sh <repo> \
   --base "$BASELINE" \
   --branch "${BASELINE}-${PACKAGE}"
 ```
@@ -105,16 +105,16 @@ PACKAGE="express"
 Apply the update, make required code changes, run `npm install`, verify:
 
 ```bash
-./dependency-management/scripts/04-verify.sh <repo>
+./skills/dependency-management/scripts/04-verify.sh <repo>
 ```
 
 Commit, then write a PR description and verify with `--dry-run` before creating:
 
 ```bash
-./dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
   --base "$BASELINE" --dry-run
 
-./dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
   --base "$BASELINE"
 ```
 
@@ -153,9 +153,9 @@ Write a markdown file describing the changes (e.g. `/tmp/pr-baseline.md`):
 Verify first, then create:
 
 ```bash
-./dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md --dry-run
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md --dry-run
 
-./dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md
 ```
 
 ---

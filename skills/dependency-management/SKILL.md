@@ -64,10 +64,10 @@ only in config. Common false positives:
   grep -r "'<package-name>'\|\"<package-name>\"" <repo-path>/src --include="*.ts" --include="*.js"
   ```
 
-Remove confirmed unused deps from `package.json` in `<repo-path>`, then:
+Remove confirmed unused deps. npm handles `package.json` and the lockfile atomically:
 
 ```bash
-npm install --prefix <repo-path>
+npm --prefix <repo-path> uninstall <dep1> <dep2> ...
 ```
 
 ## Step 3 — Verify removals
@@ -78,8 +78,13 @@ STATUS=$(node -p "JSON.parse('$OUT').status")
 ```
 
 If `failed`: read `step` and `error` from output. Investigate which removed
-dep caused the failure, restore it in `package.json`, re-run `npm install`,
-and re-verify. Repeat until `passed`.
+dep caused the failure, restore it and re-verify:
+
+```bash
+npm --prefix <repo-path> install <dep>
+```
+
+Repeat until `passed`.
 
 Commit:
 
@@ -120,16 +125,21 @@ grep -r "from '<package-name>" <repo-path>/src --include="*.ts" --include="*.js"
 
 ## Step 5 — Apply minor/patch and simple major updates
 
-Edit `package.json` in `<repo-path>` to apply the chosen version ranges, then:
+Apply updates using npm — it handles `package.json` and the lockfile atomically:
 
 ```bash
-npm install --prefix <repo-path>
+npm --prefix <repo-path> install dep1@^x.y.z dep2@^x.y.z ...
 OUT=$("$SCRIPTS/04-verify.sh" <repo-path>)
 ```
 
 If `failed`: identify which update broke CI (binary search by reverting half
-the updates and re-verifying). Pin the offender at its previous version.
-Re-run `npm install` and re-verify. Repeat until `passed`.
+the updates and re-verifying). Pin the offender at its previous version:
+
+```bash
+npm --prefix <repo-path> install <offending-dep>@<previous-version>
+```
+
+Re-verify. Repeat until `passed`.
 
 Commit:
 
@@ -155,10 +165,11 @@ OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> \
 STACKED_BRANCH=$(node -p "JSON.parse('$OUT').branch")
 ```
 
-Apply the update in `package.json`, make required source code changes,
-run `npm install`, then verify:
+Apply the update using npm, then make any required source code changes:
 
 ```bash
+npm --prefix <repo-path> install <package>@<new-version>
+# make any required source code changes
 OUT=$("$SCRIPTS/04-verify.sh" <repo-path>)
 ```
 

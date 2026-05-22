@@ -23,7 +23,7 @@ SCRIPTS="${CLAUDE_SKILL_DIR}/scripts"
 ## Step 1 — Preflight
 
 ```bash
-OUT=$("$SCRIPTS/01-preflight.sh" <repo-path>)
+OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> --format json)
 ```
 
 Check `status` in output. If `error`, report to the user and stop — the repo
@@ -44,7 +44,7 @@ BASELINE=$(git -C <repo-path> branch --show-current)
 ## Step 2 — Detect unused dependencies
 
 ```bash
-OUT=$("$SCRIPTS/02-detect-unused.sh" <repo-path>)
+OUT=$("$SCRIPTS/02-detect-unused.sh" <repo-path> --format json)
 UNUSED_DEPS=$(node -p "JSON.parse('$OUT').unusedDependencies.join(', ')")
 UNUSED_DEV=$(node -p "JSON.parse('$OUT').unusedDevDependencies.join(', ')")
 ```
@@ -73,7 +73,7 @@ npm --prefix <repo-path> uninstall <dep1> <dep2> ...
 ## Step 3 — Verify removals
 
 ```bash
-OUT=$("$SCRIPTS/04-verify.sh" <repo-path>)
+OUT=$("$SCRIPTS/04-verify.sh" <repo-path> --format json)
 STATUS=$(node -p "JSON.parse('$OUT').status")
 ```
 
@@ -96,7 +96,7 @@ git -C <repo-path> commit -m "chore: remove unused dependencies"
 ## Step 4 — Detect available updates
 
 ```bash
-OUT=$("$SCRIPTS/03-update-deps.sh" <repo-path> --target latest)
+OUT=$("$SCRIPTS/03-update-deps.sh" <repo-path> --target latest --format json)
 ```
 
 Separate the output into:
@@ -129,7 +129,7 @@ Apply updates using npm — it handles `package.json` and the lockfile atomicall
 
 ```bash
 npm --prefix <repo-path> install dep1@^x.y.z dep2@^x.y.z ...
-OUT=$("$SCRIPTS/04-verify.sh" <repo-path>)
+OUT=$("$SCRIPTS/04-verify.sh" <repo-path> --format json)
 ```
 
 If `failed`: identify which update broke CI (binary search by reverting half
@@ -159,7 +159,7 @@ git -C <repo-path> commit -m "chore: upgrade <package> to v<N>"
 For each medium major update, create a stacked branch from the baseline:
 
 ```bash
-OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> \
+OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> --format json \
   --base "$BASELINE" \
   --branch "${BASELINE}-<package-name>")
 STACKED_BRANCH=$(node -p "JSON.parse('$OUT').branch")
@@ -170,7 +170,7 @@ Apply the update using npm, then make any required source code changes:
 ```bash
 npm --prefix <repo-path> install <package>@<new-version>
 # make any required source code changes
-OUT=$("$SCRIPTS/04-verify.sh" <repo-path>)
+OUT=$("$SCRIPTS/04-verify.sh" <repo-path> --format json)
 ```
 
 If failed: investigate, fix, re-verify. If the fix is too complex, reclassify
@@ -198,7 +198,7 @@ Verify first, then create:
   --base "$BASELINE" --dry-run
 
 OUT=$("$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-<package>.md \
-  --base "$BASELINE")
+  --base "$BASELINE" --format json)
 STACKED_PR_URL=$(node -p "JSON.parse('$OUT').url")
 ```
 
@@ -239,7 +239,7 @@ Verify first, then create:
 ```bash
 "$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-baseline.md --dry-run
 
-OUT=$("$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-baseline.md)
+OUT=$("$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-baseline.md --format json)
 node -p "JSON.parse('$OUT').url"
 ```
 

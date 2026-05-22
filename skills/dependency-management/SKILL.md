@@ -93,23 +93,20 @@ git -C <repo-path> add package.json package-lock.json
 git -C <repo-path> commit -m "chore: remove unused dependencies"
 ```
 
-## Step 4 — Detect available updates
+## Step 4 — Detect and classify all available updates
 
 ```bash
 OUT=$("$SCRIPTS/03-update-deps.sh" <repo-path> --target latest --format json)
 ```
 
-Separate the output into:
-- Minor/patch updates (`isMajor: false`) — apply all
-- Major updates (`isMajor: true`) — classify each:
+Classify every update before applying any of them:
+- Minor/patch (`isMajor: false`) — all go into the baseline branch
+- Major (`isMajor: true`) — classify each individually:
 
 **Classification criteria (cognitive complexity, not file count):**
-- **Simple**: changelog shows only renamed/moved exports, no behaviour change.
-  Or: codebase does not use the changed API at all. Apply in baseline branch.
-- **Medium**: changelog shows bounded breaking changes affecting code we use,
-  requiring straightforward (non-architectural) updates. Stacked PR.
-- **Large**: migration requires redesigning how the package integrates,
-  evaluating alternatives, or understanding architectural trade-offs. Defer.
+- **Simple** — no usage changes needed, or purely mechanical find/replace. Goes into baseline branch.
+- **Medium** — bounded code changes that are straightforward but non-trivial. Gets its own stacked branch and PR.
+- **Large** — requires architectural decisions, significant rethinking, or evaluation of alternatives. Deferred and documented.
 
 To read a changelog:
 
@@ -123,9 +120,16 @@ To check codebase usage of a package:
 grep -r "from '<package-name>" <repo-path>/src --include="*.ts" --include="*.js" -l
 ```
 
-## Step 5 — Apply minor/patch and simple major updates
+After classifying, record three explicit lists before proceeding:
+- **Simple majors** (will be applied in Step 5 alongside minor/patch)
+- **Medium majors** (will each get a stacked branch and PR in Step 6 — this is mandatory, not optional)
+- **Large majors** (will be deferred and documented in the baseline PR)
 
-Apply updates using npm — it handles `package.json` and the lockfile atomically:
+## Step 5 — Apply minor/patch and simple major updates (baseline branch)
+
+You are on `$BASELINE` throughout this step.
+
+Apply minor/patch updates and simple majors using npm:
 
 ```bash
 npm --prefix <repo-path> install dep1@^x.y.z dep2@^x.y.z ...
@@ -141,22 +145,31 @@ npm --prefix <repo-path> install <offending-dep>@<previous-version>
 
 Re-verify. Repeat until `passed`.
 
-Commit:
+Commit all minor/patch updates together:
 
 ```bash
 git -C <repo-path> add package.json package-lock.json
 git -C <repo-path> commit -m "chore: update dependencies to latest minor/patch"
 ```
 
-For each simple major applied, add a separate commit:
+For each simple major, a separate commit:
 
 ```bash
 git -C <repo-path> commit -m "chore: upgrade <package> to v<N>"
 ```
 
-## Step 6 — Handle medium major updates (stacked PRs)
+## Step 6 — Medium major updates (stacked branches) — MANDATORY
 
-For each medium major update, create a stacked branch from the baseline:
+**Do not open any PRs until this step is complete for every medium major.**
+
+The branch structure is: `main ← $BASELINE ← medium-A | medium-B | medium-C`
+
+Each medium major gets its own branch off `$BASELINE` and its own PR targeting `$BASELINE`.
+They are independent — each branches from `$BASELINE`, not from each other.
+
+For each medium major:
+
+**6a. Create a stacked branch from the baseline:**
 
 ```bash
 OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> --format json \
@@ -165,7 +178,7 @@ OUT=$("$SCRIPTS/01-preflight.sh" <repo-path> --format json \
 STACKED_BRANCH=$(node -p "JSON.parse('$OUT').branch")
 ```
 
-Apply the update using npm, then make any required source code changes:
+**6b. Apply the update and fix any breakage:**
 
 ```bash
 npm --prefix <repo-path> install <package>@<new-version>
@@ -173,16 +186,23 @@ npm --prefix <repo-path> install <package>@<new-version>
 OUT=$("$SCRIPTS/04-verify.sh" <repo-path> --format json)
 ```
 
-If failed: investigate, fix, re-verify. If the fix is too complex, reclassify
-as Large, revert the branch (`git -C <repo-path> checkout "$BASELINE"`), and
-document the deferral.
+If failed: investigate, fix, re-verify. If the fix turns out to be too complex,
+reclassify as Large: check out the baseline (`git -C <repo-path> checkout "$BASELINE"`),
+note it in the deferred list, and move on to the next medium major.
 
-When passing, commit and write the stacked PR description to a temp file:
+**6c. Commit and open the stacked PR:**
+
+```bash
+git -C <repo-path> add -A
+git -C <repo-path> commit -m "chore: upgrade <package> to v<N>"
+```
+
+Write `/tmp/pr-<package>.md`:
 
 ```markdown
 ## Upgrade <package> to v<N>
 
-**Why:** <reason this is a medium, not large, migration>
+**Why:** <reason this is medium, not large>
 
 **What changed in the package:**
 - <breaking change from changelog>
@@ -190,8 +210,6 @@ When passing, commit and write the stacked PR description to a temp file:
 **What changed in the codebase:**
 - <files modified and why>
 ```
-
-Verify first, then create:
 
 ```bash
 "$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-<package>.md \
@@ -202,18 +220,22 @@ OUT=$("$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-<package>.md \
 STACKED_PR_URL=$(node -p "JSON.parse('$OUT').url")
 ```
 
-Repeat for each medium major. **Always use `--base "$BASELINE"`** — stacked
-PRs are independent of each other, all branching from the baseline.
+Record the PR URL — it goes into the baseline PR body in Step 7.
 
-Switch back to baseline when done with all stacked PRs:
+**6d. Return to the baseline branch before the next medium major:**
 
 ```bash
 git -C <repo-path> checkout "$BASELINE"
 ```
 
+Repeat 6a–6d for every medium major. Only proceed to Step 7 once all medium
+majors have either a stacked PR URL or a deferral reason.
+
 ## Step 7 — Create the baseline PR
 
-Write a PR description to `/tmp/pr-baseline.md` covering all decisions made:
+**Only open this after Step 6 is fully complete.**
+
+Write `/tmp/pr-baseline.md` covering everything done in this workflow run:
 
 ```markdown
 ## Dependency management
@@ -224,17 +246,15 @@ Write a PR description to `/tmp/pr-baseline.md` covering all decisions made:
 ### Updated (minor/patch)
 - `<package>`: <from> → <to>
 
-### Major updates — applied (simple)
+### Major updates — applied (simple, in this PR)
 - `<package>`: <from> → <to> — <one-line reason it was simple>
 
-### Major updates — stacked PRs
-- `<package>`: <stacked PR URL>
+### Major updates — stacked PRs (merge after this PR lands)
+- `<package>`: <PR URL>
 
 ### Major updates — deferred (large)
-- `<package>`: <available version> — <reason for deferral, rough effort estimate>
+- `<package>`: <available version> — <reason, rough effort estimate>
 ```
-
-Verify first, then create:
 
 ```bash
 "$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-baseline.md --dry-run
@@ -243,4 +263,4 @@ OUT=$("$SCRIPTS/05-create-pr.sh" <repo-path> /tmp/pr-baseline.md --format json)
 node -p "JSON.parse('$OUT').url"
 ```
 
-Report the PR URLs to the developer.
+Report all PR URLs to the developer: the baseline PR first, then each stacked PR.

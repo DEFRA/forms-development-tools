@@ -13,7 +13,11 @@
       "forms-feedback",
       "forms-backup",
       "reset-save-and-exit",
-      "dead-letter-queues"
+      "dead-letter-queues",
+      "regenerate-metrics",
+      "forms-inspect",
+      "forms-report",
+      "forms-feedback-all-forms"
     ],
     "email": "superadmin@internal.test",
     "displayName": "Test account (Superadmin)"
@@ -29,7 +33,9 @@
       "user-create",
       "user-delete",
       "user-edit",
-      "forms-feedback"
+      "forms-feedback",
+      "forms-report",
+      "forms-feedback-all-forms"
     ],
     "email": "admin@internal.test",
     "displayName": "Test account (Admin)"
@@ -37,14 +43,20 @@
   {
     "userId": "7049296f-2156-4d61-8ac3-349276438ef9",
     "roles": ["form-creator"],
-    "scopes": ["form-delete", "form-edit", "form-read"],
+    "scopes": ["form-delete", "form-edit", "form-read", "forms-feedback"],
     "email": "form-creator@internal.test",
     "displayName": "Test account (Form creator)"
   },
   {
     "userId": "807214c3-47e7-4cbb-a277-5a935284fd4d",
     "roles": ["form-publisher"],
-    "scopes": ["form-delete", "form-edit", "form-read", "form-publish"],
+    "scopes": [
+      "form-delete",
+      "form-edit",
+      "form-read",
+      "form-publish",
+      "forms-feedback"
+    ],
     "email": "form-publisher@internal.test",
     "displayName": "Test account (Form publisher)"
   }

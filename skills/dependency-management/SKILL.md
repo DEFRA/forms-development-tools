@@ -22,13 +22,12 @@ Scripts are bundled with this skill. Set `SCRIPTS` and resolve the repo path fro
 SCRIPTS="${CLAUDE_SKILL_DIR}/scripts"
 
 # Resolve repo path — $ARGUMENTS may be a name (e.g. "forms-runner") or an absolute path.
-# If a bare name is given, look for a sibling directory next to forms-development-tools.
+# A bare name is resolved relative to the current working directory.
 REPO_NAME="$ARGUMENTS"
 if [[ "$REPO_NAME" == /* ]]; then
   REPO="$REPO_NAME"
 else
-  FORMS_ROOT="$(cd "$(dirname "$CLAUDE_SKILL_DIR")/../.." && pwd)"
-  REPO="$FORMS_ROOT/$REPO_NAME"
+  REPO="$(pwd)/$REPO_NAME"
 fi
 ```
 

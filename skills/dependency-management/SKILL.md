@@ -288,15 +288,12 @@ Write `/tmp/pr-$(basename "$REPO")-<package>.md`:
 **Merge order:** merge the baseline PR first, then this one.
 ```
 
-Preview and create the PR (both target `$BASELINE`, not `main`):
+Create the PR (targets `$BASELINE`, not `main`):
 
 ```bash
-"$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
-  --base "$BASELINE" --dry-run
-
 OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
   --base "$BASELINE" --format json)
-STACKED_PR_URL=$(node -p "JSON.parse('$OUT').url")
+STACKED_PR_URL=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).url")
 STACKED_PRS+=("<package>: $STACKED_PR_URL")
 ```
 
@@ -337,13 +334,11 @@ Write `/tmp/pr-$(basename "$REPO")-baseline.md` covering everything done in this
 - `<package>`: <available version> — <reason, rough effort estimate>
 ```
 
-Preview and create:
+Create:
 
 ```bash
-"$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-baseline.md" --dry-run
-
 OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-baseline.md" --format json)
-BASELINE_PR_URL=$(node -p "JSON.parse('$OUT').url")
+BASELINE_PR_URL=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).url")
 ```
 
 Report all URLs to the developer:

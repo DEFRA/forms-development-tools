@@ -4,7 +4,6 @@ set -euo pipefail
 REPO_PATH=""
 DESC_FILE=""
 BASE_BRANCH="main"
-DRY_RUN=false
 FORMAT="tabular"
 # shellcheck source=lib.sh
 source "$(dirname "$0")/lib.sh"
@@ -12,7 +11,6 @@ source "$(dirname "$0")/lib.sh"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --base)      BASE_BRANCH="$2"; shift 2 ;;
-    --dry-run)   DRY_RUN=true; shift ;;
     --format)    FORMAT="$2"; shift 2 ;;
     -*)          err "Unknown option: $1" ;;
     *)
@@ -24,7 +22,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$REPO_PATH" || -z "$DESC_FILE" ]]; then
-  err "Usage: 05-create-pr.sh <repo-path> <description-file> [--base <branch>] [--dry-run] [--format tabular|json]"
+  err "Usage: 05-create-pr.sh <repo-path> <description-file> [--base <branch>] [--format tabular|json]"
 fi
 
 [[ ! -d "$REPO_PATH" ]] && err "Directory not found: $REPO_PATH"
@@ -34,26 +32,6 @@ cd "$REPO_PATH"
 
 BRANCH=$(git branch --show-current)
 TITLE="chore: dependency management ($(basename "$REPO_PATH"))"
-
-if [[ "$DRY_RUN" == true ]]; then
-  if [[ "$FORMAT" == "json" ]]; then
-    echo "DRY RUN — would execute:" >&2
-    echo "  gh pr create \\" >&2
-    echo "    --title \"$TITLE\" \\" >&2
-    echo "    --body-file \"$DESC_FILE\" \\" >&2
-    echo "    --base \"$BASE_BRANCH\" \\" >&2
-    echo "    --head \"$BRANCH\"" >&2
-    printf '{"status":"dry-run","title":"%s","base":"%s","head":"%s","bodyFile":"%s"}\n' \
-      "$TITLE" "$BASE_BRANCH" "$BRANCH" "$DESC_FILE"
-  else
-    echo "Dry run — would create:"
-    printf '  %-12s %s\n' "Title:"  "$TITLE"
-    printf '  %-12s %s\n' "Base:"   "$BASE_BRANCH"
-    printf '  %-12s %s\n' "Head:"   "$BRANCH"
-    printf '  %-12s %s\n' "Body:"   "$DESC_FILE"
-  fi
-  exit 0
-fi
 
 echo "Creating PR from '$BRANCH' into '$BASE_BRANCH'..." >&2
 PR_URL=$(gh pr create \

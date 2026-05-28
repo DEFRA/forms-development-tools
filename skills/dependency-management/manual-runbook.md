@@ -232,12 +232,9 @@ Write `/tmp/pr-<repo-name>-<package>.md`:
 **Merge order:** merge the baseline PR first, then this one.
 ```
 
-Preview and create the PR (targets `$BASELINE`, not `main`):
+Create the PR (targets `$BASELINE`, not `main`):
 
 ```bash
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-<package>.md \
-  --base "$BASELINE" --dry-run
-
 ./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-<package>.md \
   --base "$BASELINE"
 ```
@@ -279,11 +276,9 @@ Write `/tmp/pr-<repo-name>-baseline.md`:
 - `webpack`: 4.x → 5.x — requires config rewrite; significant effort
 ```
 
-Verify first, then create:
+Create:
 
 ```bash
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-baseline.md --dry-run
-
 ./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-baseline.md
 ```
 

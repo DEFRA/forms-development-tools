@@ -26,7 +26,7 @@ fi
 
 cd "$REPO_PATH"
 
-if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+if [[ -n "$(git status --porcelain)" ]]; then
   err "Repository has uncommitted changes or untracked files"
 fi
 

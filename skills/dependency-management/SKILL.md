@@ -117,7 +117,7 @@ git -C "$REPO" commit -m "chore: remove unused dependencies"
 ## Step 4 — Detect and classify all available updates
 
 ```bash
-OUT=$("$SCRIPTS/03-update-deps.sh" "$REPO" --target latest --format json)
+OUT=$("$SCRIPTS/03-update-deps.sh" "$REPO" --format json)
 ```
 
 **If the updates object is empty, skip Steps 5 and 6 and go straight to Step 7.**

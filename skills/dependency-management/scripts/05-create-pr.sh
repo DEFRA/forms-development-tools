@@ -6,13 +6,15 @@ DESC_FILE=""
 BASE_BRANCH="main"
 DRY_RUN=false
 FORMAT="tabular"
+# shellcheck source=lib.sh
+source "$(dirname "$0")/lib.sh"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --base)      BASE_BRANCH="$2"; shift 2 ;;
     --dry-run)   DRY_RUN=true; shift ;;
     --format)    FORMAT="$2"; shift 2 ;;
-    -*)          printf '{"status":"error","error":"Unknown option: %s"}\n' "$1"; exit 1 ;;
+    -*)          err "Unknown option: $1" ;;
     *)
       if [[ -z "$REPO_PATH" ]]; then REPO_PATH="$1"
       elif [[ -z "$DESC_FILE" ]]; then DESC_FILE="$1"
@@ -20,15 +22,6 @@ while [[ $# -gt 0 ]]; do
       shift ;;
   esac
 done
-
-err() {
-  if [[ "$FORMAT" == "json" ]]; then
-    printf '{"status":"error","error":"%s"}\n' "$1"
-  else
-    echo "Error: $1" >&2
-  fi
-  exit 1
-}
 
 if [[ -z "$REPO_PATH" || -z "$DESC_FILE" ]]; then
   err "Usage: 05-create-pr.sh <repo-path> <description-file> [--base <branch>] [--dry-run] [--format tabular|json]"

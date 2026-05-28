@@ -3,23 +3,16 @@ set -euo pipefail
 
 REPO_PATH=""
 FORMAT="tabular"
+# shellcheck source=lib.sh
+source "$(dirname "$0")/lib.sh"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --format) FORMAT="$2"; shift 2 ;;
-    -*)       printf '{"status":"error","error":"Unknown option: %s"}\n' "$1"; exit 1 ;;
+    -*)       err "Unknown option: $1" ;;
     *)        REPO_PATH="$1"; shift ;;
   esac
 done
-
-err() {
-  if [[ "$FORMAT" == "json" ]]; then
-    printf '{"status":"error","error":"%s"}\n' "$1"
-  else
-    echo "Error: $1" >&2
-  fi
-  exit 1
-}
 
 [[ -z "$REPO_PATH" ]] && err "Usage: 02-detect-unused.sh <repo-path> [--format tabular|json]"
 [[ ! -d "$REPO_PATH" ]] && err "Directory not found: $REPO_PATH"

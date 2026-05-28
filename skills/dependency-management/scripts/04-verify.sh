@@ -28,14 +28,14 @@ cd "$REPO_PATH"
 
 run_step() {
   local step="$1"
-  local cmd="$2"
+  shift
   local output
   if [[ "$FORMAT" == "tabular" ]]; then
     printf '  %-8s ' "$step"
   else
-    echo "Running: $cmd..." >&2
+    echo "Running: $*..." >&2
   fi
-  if output=$(eval "$cmd" 2>&1); then
+  if output=$("$@" 2>&1); then
     [[ "$FORMAT" == "tabular" ]] && echo "✓"
   else
     if [[ "$FORMAT" == "json" ]]; then
@@ -51,11 +51,11 @@ console.log(JSON.stringify({ status: 'failed', step: process.env.STEP, error: pr
 }
 
 [[ "$FORMAT" == "tabular" ]] && echo "Verifying:"
-run_step "build" "npm run build"
-run_step "test"  "npm test"
+run_step "build" npm run build
+run_step "test"  npm test
 # Delete incremental tsc cache before lint so type-checking matches a clean CI run
 rm -f "$REPO_PATH/tsconfig.tsbuildinfo"
-run_step "lint"  "npm run lint"
+run_step "lint"  npm run lint
 
 if [[ "$FORMAT" == "json" ]]; then
   echo '{"status":"passed"}'

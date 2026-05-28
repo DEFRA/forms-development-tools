@@ -20,6 +20,7 @@ done
 cd "$REPO_PATH"
 
 echo "Running npm-check-updates..." >&2
+# ncu exits non-zero when updates are found, so || true prevents set -e from aborting
 NCU_RAW=$(npx --yes npm-check-updates --jsonUpgraded --target latest 2>/dev/null || true)
 
 NCU_RAW="$NCU_RAW" FORMAT="$FORMAT" node -e "
@@ -33,6 +34,7 @@ for (const [name, toRange] of Object.entries(proposed)) {
   const stripRange = s => s.replace(/^[\^~>=<]+/, '').split('.')[0];
   const fromMajor = parseInt(stripRange(fromRange), 10);
   const toMajor   = parseInt(stripRange(toRange),   10);
+  // unrecognised range formats (workspace:*, compound ranges) default to major so they aren't silently applied to the baseline branch
   const isMajor = (isNaN(fromMajor) || isNaN(toMajor)) ? true : toMajor > fromMajor;
   updates[name] = { from: fromRange, to: toRange, isMajor };
 }

@@ -33,7 +33,7 @@ fi
 cd "$REPO_PATH"
 
 BRANCH=$(git branch --show-current)
-TITLE="chore: dependency management — $BRANCH"
+TITLE="chore: dependency management ($(basename "$REPO_PATH"))"
 
 if [[ "$DRY_RUN" == true ]]; then
   if [[ "$FORMAT" == "json" ]]; then

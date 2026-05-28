@@ -35,7 +35,8 @@ for (const [name, toRange] of Object.entries(proposed)) {
   const stripRange = s => s.replace(/^[\^~>=<]+/, '').split('.')[0];
   const fromMajor = parseInt(stripRange(fromRange), 10);
   const toMajor   = parseInt(stripRange(toRange),   10);
-  updates[name] = { from: fromRange, to: toRange, isMajor: toMajor > fromMajor };
+  const isMajor = (isNaN(fromMajor) || isNaN(toMajor)) ? true : toMajor > fromMajor;
+  updates[name] = { from: fromRange, to: toRange, isMajor };
 }
 console.log(JSON.stringify({ updates }));
 ")

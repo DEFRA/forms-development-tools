@@ -45,7 +45,7 @@ has uncommitted changes that must be resolved first.
 If `ready`, store the branch name:
 
 ```bash
-BASELINE=$(node -p "JSON.parse('$OUT').branch")
+BASELINE=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).branch")
 ```
 
 **If resuming on a later day:** read the branch from git instead of re-running preflight:
@@ -60,8 +60,8 @@ Verify `$BASELINE` starts with `chore/dependency-management-` before continuing.
 
 ```bash
 OUT=$("$SCRIPTS/02-detect-unused.sh" "$REPO" --format json)
-UNUSED_DEPS=$(node -p "JSON.parse('$OUT').unusedDependencies")
-UNUSED_DEV=$(node -p "JSON.parse('$OUT').unusedDevDependencies")
+UNUSED_DEPS=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).unusedDependencies")
+UNUSED_DEV=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).unusedDevDependencies")
 ```
 
 **If both arrays are empty, skip to Step 4.**
@@ -153,7 +153,7 @@ npx --yes changelog <package-name>
 To check codebase usage of a package:
 
 ```bash
-grep -r "from '<package-name>\|require('<package-name>" "$REPO" \
+grep -rE "from ['\"]<package-name>['\"]|require\(['\"]<package-name>" "$REPO" \
   --include="*.ts" --include="*.js" --include="*.mjs" --include="*.cjs" -l \
   --exclude-dir=node_modules --exclude-dir=.git
 ```

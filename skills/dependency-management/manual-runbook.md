@@ -118,7 +118,7 @@ npx --yes changelog <package-name>
 To check codebase usage of a package:
 
 ```bash
-grep -r "from '<package-name>\|require('<package-name>" <repo> \
+grep -rE "from ['\"]<package-name>['\"]|require\(['\"]<package-name>" <repo> \
   --include="*.ts" --include="*.js" --include="*.mjs" --include="*.cjs" -l \
   --exclude-dir=node_modules --exclude-dir=.git
 ```

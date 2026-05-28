@@ -111,10 +111,10 @@ Apply the update, make required code changes, run `npm install`, verify:
 Commit, then write a PR description and verify with `--dry-run` before creating:
 
 ```bash
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-express.md \
   --base "$BASELINE" --dry-run
 
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-express.md \
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-express.md \
   --base "$BASELINE"
 ```
 
@@ -129,7 +129,7 @@ git -C <repo> checkout "$BASELINE"
 
 ### Step 7 — Create the baseline PR
 
-Write a markdown file describing the changes (e.g. `/tmp/pr-baseline.md`):
+Write a markdown file describing the changes (e.g. `/tmp/pr-<repo-name>-baseline.md`):
 
 ```markdown
 ## Dependency management
@@ -153,9 +153,9 @@ Write a markdown file describing the changes (e.g. `/tmp/pr-baseline.md`):
 Verify first, then create:
 
 ```bash
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md --dry-run
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-baseline.md --dry-run
 
-./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-baseline.md
+./skills/dependency-management/scripts/05-create-pr.sh <repo> /tmp/pr-<repo-name>-baseline.md
 ```
 
 ---

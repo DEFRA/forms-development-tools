@@ -272,7 +272,7 @@ git -C "$REPO" add -A
 git -C "$REPO" commit -m "chore: upgrade <package> to v<N>"
 ```
 
-Write `/tmp/pr-<package>.md`:
+Write `/tmp/pr-$(basename "$REPO")-<package>.md`:
 
 ```markdown
 ## Upgrade <package> to v<N>
@@ -291,10 +291,10 @@ Write `/tmp/pr-<package>.md`:
 Preview and create the PR (both target `$BASELINE`, not `main`):
 
 ```bash
-"$SCRIPTS/05-create-pr.sh" "$REPO" /tmp/pr-<package>.md \
+"$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
   --base "$BASELINE" --dry-run
 
-OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" /tmp/pr-<package>.md \
+OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
   --base "$BASELINE" --format json)
 STACKED_PR_URL=$(node -p "JSON.parse('$OUT').url")
 STACKED_PRS+=("<package>: $STACKED_PR_URL")
@@ -313,7 +313,7 @@ has either a recorded PR URL in `$STACKED_PRS` or an explicit deferral reason.
 
 **Only open this after Step 6 is fully complete.**
 
-Write `/tmp/pr-baseline.md` covering everything done in this workflow run:
+Write `/tmp/pr-$(basename "$REPO")-baseline.md` covering everything done in this workflow run:
 
 ```markdown
 ## Dependency management
@@ -340,9 +340,9 @@ Write `/tmp/pr-baseline.md` covering everything done in this workflow run:
 Preview and create:
 
 ```bash
-"$SCRIPTS/05-create-pr.sh" "$REPO" /tmp/pr-baseline.md --dry-run
+"$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-baseline.md" --dry-run
 
-OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" /tmp/pr-baseline.md --format json)
+OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-baseline.md" --format json)
 BASELINE_PR_URL=$(node -p "JSON.parse('$OUT').url")
 ```
 

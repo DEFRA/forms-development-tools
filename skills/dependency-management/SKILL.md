@@ -127,13 +127,22 @@ Classify every update before applying any of them:
 - Minor/patch (`isMajor: false`) — all go into the baseline branch
 - Major (`isMajor: true`) — classify each individually:
 
-**Classification criteria (cognitive complexity, not file count):**
-- **Simple** — no usage changes needed, or purely mechanical find/replace (renamed import,
-  moved export). The changelog shows no behaviour changes. Goes into the baseline branch.
-- **Medium** — bounded code changes that are straightforward but non-trivial. Gets its own
-  stacked branch and PR.
-- **Large** — requires architectural decisions, significant rethinking, or evaluation of
-  alternatives. Deferred and documented.
+**Classification criteria — base this on implementation effort, not semantic version number:**
+- **Simple** — goes into the baseline branch. Covers:
+  - No code changes needed at all, OR
+  - A small number of trivial code changes (rename an import, swap a class name,
+    update a config key, add a cast). The kind of changes a developer fixes in
+    under 10 minutes without reading docs. Skipping major versions does NOT
+    automatically make something medium — check what actually changed in the code we use.
+- **Medium** — gets its own stacked branch and PR. Covers:
+  - A moderate amount of bounded, straightforward changes across multiple files.
+    For example: a new required option everywhere an API is called, a changed
+    method signature used in several places, a config format that needs rewriting.
+    The work is clear and finite, but not trivial.
+- **Large** — deferred and documented. Covers:
+  - Significant rethinking, architectural decisions, or evaluation of alternatives.
+    For example: a framework that changes its rendering model, a validator that
+    changes its schema DSL, a linter that renames half its rule set.
 
 To read a changelog:
 
@@ -144,17 +153,17 @@ npx --yes changelog <package-name>
 To check codebase usage of a package:
 
 ```bash
-grep -r "from '<package-name>" "$REPO" \
-  --include="*.ts" --include="*.js" -l \
+grep -r "from '<package-name>\|require('<package-name>" "$REPO" \
+  --include="*.ts" --include="*.js" --include="*.mjs" --include="*.cjs" -l \
   --exclude-dir=node_modules --exclude-dir=.git
 ```
 
 **After classifying, show the user the three lists and wait for confirmation before
 proceeding:**
 
-- Simple majors: `[list]`
-- Medium majors: `[list]` — each will get a stacked branch and PR (mandatory)
-- Large majors: `[list]` — will be deferred and documented
+- Simple majors: `[list]` (or none)
+- Medium majors: `[list]` (or none — if any exist, each gets a stacked branch and PR)
+- Large majors: `[list]` (or none — will be deferred and documented)
 
 Do not proceed until the user confirms or adjusts the classification.
 
@@ -191,18 +200,27 @@ npm --prefix "$REPO" install <package>@<new-version>
 OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 ```
 
-If verify `failed` for a simple major and fixing it requires code changes beyond a
-mechanical find/replace, **reclassify it as Medium**: revert the install, add it to
-the medium list, and handle it in Step 6 instead.
+If verify `failed`:
+- If the fix is trivial (rename an import, update a config key, add a type cast,
+  adjust a single call site) — make the fix, re-verify, then commit with `git add -A`.
+- If fixing it requires more than trivial effort — changes across many files, API
+  redesign, reading docs to understand — **reclassify it as Medium**: revert the
+  install, add it to the medium list, and handle it in Step 6 instead.
 
-If `passed`, commit each simple major separately:
+```bash
+npm --prefix "$REPO" install <package>@<previous-version>  # revert
+```
+
+If `passed` (either immediately or after a trivial fix), commit each simple major separately:
 
 ```bash
 git -C "$REPO" add -A
 git -C "$REPO" commit -m "chore: upgrade <package> to v<N>"
 ```
 
-## Step 6 — Medium major updates (stacked branches) — MANDATORY
+## Step 6 — Medium major updates (stacked branches)
+
+**If the medium list is empty, skip to Step 7.**
 
 **Do not open any PRs until this step is complete for every medium major.**
 

@@ -53,6 +53,8 @@ console.log(JSON.stringify({ status: 'failed', step: process.env.STEP, error: pr
 [[ "$FORMAT" == "tabular" ]] && echo "Verifying:"
 run_step "build" "npm run build"
 run_step "test"  "npm test"
+# Delete incremental tsc cache before lint so type-checking matches a clean CI run
+rm -f "$REPO_PATH/tsconfig.tsbuildinfo"
 run_step "lint"  "npm run lint"
 
 if [[ "$FORMAT" == "json" ]]; then

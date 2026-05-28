@@ -22,12 +22,13 @@ Scripts are bundled with this skill. Set `SCRIPTS` and resolve the repo path fro
 SCRIPTS="${CLAUDE_SKILL_DIR}/scripts"
 
 # Resolve repo path — $ARGUMENTS may be a name (e.g. "forms-runner") or an absolute path.
-# All repos live under /Users/nodepoint/Development/forms/
+# If a bare name is given, look for a sibling directory next to forms-development-tools.
 REPO_NAME="$ARGUMENTS"
 if [[ "$REPO_NAME" == /* ]]; then
   REPO="$REPO_NAME"
 else
-  REPO="/Users/nodepoint/Development/forms/$REPO_NAME"
+  FORMS_ROOT="$(cd "$(dirname "$CLAUDE_SKILL_DIR")/../.." && pwd)"
+  REPO="$FORMS_ROOT/$REPO_NAME"
 fi
 ```
 

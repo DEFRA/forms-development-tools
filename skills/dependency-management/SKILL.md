@@ -1,6 +1,6 @@
 ---
 name: dependency-management
-description: Run a full dependency management sweep on a Node.js microservice — remove unused deps, update to latest versions (including safe major upgrades), verify CI, and open stacked PRs. Invoke with the target repo path.
+description: Use when performing a dependency sweep on a forms-* Node.js microservice — one repo at a time.
 disable-model-invocation: true
 allowed-tools: Bash
 argument-hint: [repo-path]

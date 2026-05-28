@@ -43,20 +43,21 @@ if (process.env.FORMAT === 'json') {
   if (entries.length === 0) { console.log('All dependencies are up to date.'); process.exit(0); }
   const minors = entries.filter(([,v]) => !v.isMajor);
   const majors = entries.filter(([,v]) =>  v.isMajor);
-  const col = 42;
+  const PACKAGE_COL = 42;
+  const VERSION_COL = 16;
   const row = (name, from, to) =>
-    '  ' + name.padEnd(col) + from.padEnd(16) + to;
+    '  ' + name.padEnd(PACKAGE_COL) + from.padEnd(VERSION_COL) + to;
   if (minors.length > 0) {
     console.log('Minor/patch updates (' + minors.length + '):');
-    console.log('  ' + 'Package'.padEnd(col) + 'From'.padEnd(16) + 'To');
-    console.log('  ' + '-'.repeat(col + 32));
+    console.log('  ' + 'Package'.padEnd(PACKAGE_COL) + 'From'.padEnd(VERSION_COL) + 'To');
+    console.log('  ' + '-'.repeat(PACKAGE_COL + VERSION_COL * 2));
     minors.forEach(([k,v]) => console.log(row(k, v.from, v.to)));
   }
   if (majors.length > 0) {
     if (minors.length > 0) console.log('');
     console.log('Major updates (' + majors.length + '):');
-    console.log('  ' + 'Package'.padEnd(col) + 'From'.padEnd(16) + 'To');
-    console.log('  ' + '-'.repeat(col + 32));
+    console.log('  ' + 'Package'.padEnd(PACKAGE_COL) + 'From'.padEnd(VERSION_COL) + 'To');
+    console.log('  ' + '-'.repeat(PACKAGE_COL + VERSION_COL * 2));
     majors.forEach(([k,v]) => console.log(row(k, v.from, v.to)));
   }
 }

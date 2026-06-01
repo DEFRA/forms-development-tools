@@ -21,6 +21,7 @@ cd "$REPO_PATH"
 
 echo "Running knip..." >&2
 KNIP_RAW=$(npx --yes knip --reporter json 2>/dev/null || true)
+[[ -z "$KNIP_RAW" ]] && err "knip produced no output — check the project configuration"
 
 KNIP_RAW="$KNIP_RAW" FORMAT="$FORMAT" node -e "
 const data = JSON.parse(process.env.KNIP_RAW);

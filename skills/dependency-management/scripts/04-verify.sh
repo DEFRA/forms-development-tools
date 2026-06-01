@@ -32,9 +32,7 @@ run_step() {
     [[ "$FORMAT" == "tabular" ]] && echo "✓"
   else
     if [[ "$FORMAT" == "json" ]]; then
-      STEP="$step" ERR="$output" node -e "
-console.log(JSON.stringify({ status: 'failed', step: process.env.STEP, error: process.env.ERR }));
-"
+      jq -n --arg step "$step" --arg error "$output" '{"status":"failed","step":$step,"error":$error}'
     else
       echo "✗"
       echo "$output" | sed 's/^/    /'

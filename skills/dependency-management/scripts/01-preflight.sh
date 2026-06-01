@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_PATH=""
 BASE_BRANCH="origin/main"
 BRANCH_NAME=""
-FORMAT="tabular"
+FORMAT="json"
 # shellcheck source=lib.sh
 source "$(dirname "$0")/lib.sh"
 
@@ -12,14 +12,13 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --base)   BASE_BRANCH="$2"; shift 2 ;;
     --branch) BRANCH_NAME="$2"; shift 2 ;;
-    --format) FORMAT="$2"; shift 2 ;;
     -*)       err "Unknown option: $1" ;;
     *)        REPO_PATH="$1"; shift ;;
   esac
 done
 
 if [[ -z "$REPO_PATH" ]]; then
-  err "Usage: 01-preflight.sh <repo-path> [--base <branch>] [--branch <name>] [--format tabular|json]"
+  err "Usage: 01-preflight.sh <repo-path> [--base <branch>] [--branch <name>]"
 fi
 
 [[ ! -d "$REPO_PATH" ]] && err "Directory not found: $REPO_PATH"
@@ -45,9 +44,4 @@ else
   git checkout -b "$BRANCH_NAME" "$BASE_BRANCH" >&2
 fi
 
-if [[ "$FORMAT" == "json" ]]; then
-  printf '{"branch":"%s","status":"ready"}\n' "$BRANCH_NAME"
-else
-  printf '%-10s %s\n' "Branch:" "$BRANCH_NAME"
-  printf '%-10s %s\n' "Status:" "ready"
-fi
+printf '{"branch":"%s","status":"ready"}\n' "$BRANCH_NAME"

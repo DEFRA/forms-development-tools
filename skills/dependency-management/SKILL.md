@@ -36,7 +36,7 @@ Confirm the directory exists before proceeding. If it does not, report the error
 ## Step 1 — Preflight
 
 ```bash
-OUT=$("$SCRIPTS/01-preflight.sh" "$REPO" --format json)
+OUT=$("$SCRIPTS/01-preflight.sh" "$REPO")
 ```
 
 Check `status` in output. If `error`, report to the user and stop — the repo
@@ -117,7 +117,7 @@ git -C "$REPO" commit -m "chore: remove unused dependencies"
 ## Step 4 — Detect and classify all available updates
 
 ```bash
-OUT=$("$SCRIPTS/03-update-deps.sh" "$REPO" --format json)
+OUT=$("$SCRIPTS/03-detect-updates.sh" "$REPO")
 ```
 
 **If the updates object is empty, skip Steps 5 and 6 and go straight to Step 7.**
@@ -240,7 +240,7 @@ For each medium major, work through 6a–6d:
 **6a. Create a stacked branch from the baseline:**
 
 ```bash
-OUT=$("$SCRIPTS/01-preflight.sh" "$REPO" --format json \
+OUT=$("$SCRIPTS/01-preflight.sh" "$REPO" \
   --base "$BASELINE" \
   --branch "${BASELINE}-<package-name>")
 STACKED_BRANCH=$(node -p "JSON.parse('$OUT').branch")

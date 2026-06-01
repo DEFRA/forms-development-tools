@@ -91,15 +91,3 @@ how widely it is used. Then decide:
 
 Once the branch is ready, push it and open a PR on GitHub. Use the branch name as the
 title and describe what was removed, updated, and deferred in the PR body.
-
----
-
-## Resuming on a later day
-
-Do not re-run the script. The branch already exists. Find its name:
-
-```bash
-git -C <repo> branch --show-current
-```
-
-Verify it starts with `chore/dependency-management-` before continuing.

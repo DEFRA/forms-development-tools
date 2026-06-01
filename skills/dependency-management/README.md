@@ -81,8 +81,9 @@ changelog (`npx --yes changelog <package-name>`) and search the codebase to unde
 how widely it is used. Then decide:
 
 - **Straightforward** (minimal code changes) — apply, verify, commit.
-- **Involved** (architectural changes, many call sites) — use the AI skill, which
-  classifies majors by effort and handles stacked PRs where needed.
+- **Involved** (architectural changes, many call sites) — create a separate branch off
+  the baseline and raise a stacked PR targeting it, or defer if you only intend to
+  ship the minor/patch updates.
 
 ---
 

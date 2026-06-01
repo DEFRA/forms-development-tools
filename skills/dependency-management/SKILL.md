@@ -94,9 +94,11 @@ npm --prefix "$REPO" uninstall <dep1> <dep2> ...
 ```bash
 OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 STATUS=$(echo "$OUT" | jq -r '.status')
+STEP=$(echo "$OUT" | jq -r '.step')
+ERROR=$(echo "$OUT" | jq -r '.error')
 ```
 
-If `failed`: read `step` and `error` from output. Identify which removed dep caused
+If `failed`: use `$STEP` and `$ERROR` to identify which removed dep caused
 the failure. Restore it and re-verify:
 
 ```bash
@@ -118,9 +120,10 @@ git -C "$REPO" commit -m "chore: remove unused dependencies"
 
 ```bash
 OUT=$("$SCRIPTS/03-detect-updates.sh" "$REPO")
+UPDATE_COUNT=$(echo "$OUT" | jq '.updates | length')
 ```
 
-**If the updates object is empty, skip Steps 5 and 6 and go straight to Step 7.**
+**If `$UPDATE_COUNT` is `0`, skip Steps 5 and 6 and go straight to Step 7.**
 
 Classify every update before applying any of them:
 

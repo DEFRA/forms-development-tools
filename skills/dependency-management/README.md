@@ -19,7 +19,6 @@ reports unused dependencies and pending major updates for you to action manually
 
 ### Prerequisites
 
-- `gh` CLI installed and authenticated (`gh auth status`)
 - `git` configured with access to the target repo's remote
 - `jq` installed (`jq --version`)
 - Node.js available (scripts use `npx` for zero-install tooling)

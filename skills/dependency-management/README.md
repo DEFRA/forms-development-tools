@@ -70,47 +70,20 @@ verify it is genuinely unused before removing it. Common false positives:
 - Packages referenced only in config files knip doesn't scan (e.g. `jest.config.*`, `babel.config.*`)
 - Peer dependencies pulled in transitively at runtime
 - **String-referenced packages** — pino transports, hapi plugins registered by name, and
-  webpack loaders are loaded via string at runtime; knip cannot detect these. Search broadly:
-  ```bash
-  grep -r "'<package-name>'\|\"<package-name>\"" <repo> \
-    --include="*.ts" --include="*.js" --include="*.mjs" --include="*.cjs" \
-    --exclude-dir=node_modules --exclude-dir=.git
-  ```
+  webpack loaders are loaded via string at runtime; knip cannot detect these. Search the
+  whole codebase for the package name as a string before concluding it is unused.
 
-Remove confirmed unused deps, verify, and commit:
-
-```bash
-npm --prefix <repo> uninstall <dep1> <dep2> ...
-./skills/dependency-management/scripts/04-verify.sh <repo>
-git -C <repo> add -A
-git -C <repo> commit -m "chore: remove unused dependencies"
-```
+Once confirmed, uninstall, verify (build/test/lint), and commit.
 
 ### Major updates
 
 The script lists pending major updates but does not apply them. For each, read the
-changelog and check how widely the package is used in the codebase:
+changelog (`npx --yes changelog <package-name>`) and search the codebase to understand
+how widely it is used. Then decide:
 
-```bash
-npx --yes changelog <package-name>
-
-grep -rE "from ['\"]<package-name>['\"]|require\(['\"]<package-name>" <repo> \
-  --include="*.ts" --include="*.js" --include="*.mjs" --include="*.cjs" -l \
-  --exclude-dir=node_modules --exclude-dir=.git
-```
-
-For straightforward majors (minimal code changes, no architectural impact), apply and
-verify one at a time:
-
-```bash
-npm --prefix <repo> install <package>@<new-version>
-./skills/dependency-management/scripts/04-verify.sh <repo>
-git -C <repo> add -A
-git -C <repo> commit -m "chore: upgrade <package> to v<N>"
-```
-
-For anything more involved, use the AI skill — it classifies majors by implementation
-effort, handles the required code changes, and opens stacked PRs where needed.
+- **Straightforward** (minimal code changes) — apply, verify, commit.
+- **Involved** (architectural changes, many call sites) — use the AI skill, which
+  classifies majors by effort and handles stacked PRs where needed.
 
 ---
 

@@ -42,8 +42,7 @@ The script will:
 
 ### If verification fails
 
-The script exits and shows which packages were installed. Binary search to find the
-offending package and pin it at its previous version:
+The script exits. Find the offending package and pin it at its previous version:
 
 ```bash
 npm --prefix <repo> install <offending-dep>@<previous-version>

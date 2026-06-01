@@ -45,7 +45,7 @@ has uncommitted changes that must be resolved first.
 If `ready`, store the branch name:
 
 ```bash
-BASELINE=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).branch")
+BASELINE=$(echo "$OUT" | jq -r '.branch')
 ```
 
 **If resuming on a later day:** read the branch from git instead of re-running preflight:
@@ -60,8 +60,8 @@ Verify `$BASELINE` starts with `chore/dependency-management-` before continuing.
 
 ```bash
 OUT=$("$SCRIPTS/02-detect-unused.sh" "$REPO" --format json)
-UNUSED_DEPS=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).unusedDependencies")
-UNUSED_DEV=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).unusedDevDependencies")
+UNUSED_DEPS=$(echo "$OUT" | jq -r '.unusedDependencies | join(" ")')
+UNUSED_DEV=$(echo "$OUT" | jq -r '.unusedDevDependencies | join(" ")')
 ```
 
 **If both arrays are empty, skip to Step 4.**
@@ -93,7 +93,7 @@ npm --prefix "$REPO" uninstall <dep1> <dep2> ...
 
 ```bash
 OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
-STATUS=$(node -p "JSON.parse('$OUT').status")
+STATUS=$(echo "$OUT" | jq -r '.status')
 ```
 
 If `failed`: read `step` and `error` from output. Identify which removed dep caused
@@ -243,7 +243,7 @@ For each medium major, work through 6a–6d:
 OUT=$("$SCRIPTS/01-preflight.sh" "$REPO" \
   --base "$BASELINE" \
   --branch "${BASELINE}-<package-name>")
-STACKED_BRANCH=$(node -p "JSON.parse('$OUT').branch")
+STACKED_BRANCH=$(echo "$OUT" | jq -r '.branch')
 ```
 
 **6b. Apply the update, fix any breakage, and verify:**
@@ -293,7 +293,7 @@ Create the PR (targets `$BASELINE`, not `main`):
 ```bash
 OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
   --base "$BASELINE" --format json)
-STACKED_PR_URL=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).url")
+STACKED_PR_URL=$(echo "$OUT" | jq -r '.url')
 STACKED_PRS+=("<package>: $STACKED_PR_URL")
 ```
 
@@ -338,7 +338,7 @@ Create:
 
 ```bash
 OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-baseline.md" --format json)
-BASELINE_PR_URL=$(OUT="$OUT" node -p "JSON.parse(process.env.OUT).url")
+BASELINE_PR_URL=$(echo "$OUT" | jq -r '.url')
 ```
 
 Report all URLs to the developer:

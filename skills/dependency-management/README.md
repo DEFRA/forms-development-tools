@@ -1,4 +1,4 @@
-# Dependency Management — Manual Runbook
+# Dependency Management
 
 Two ways to run a dependency sweep on a forms-* microservice.
 

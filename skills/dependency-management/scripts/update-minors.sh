@@ -25,11 +25,6 @@ echo "==> Preflight"
 PREFLIGHT=$("$SCRIPTS/01-preflight.sh" "$REPO_PATH")
 BRANCH=$(echo "$PREFLIGHT" | jq -r '.branch')
 
-# ── Unused dependencies ────────────────────────────────────────────────────────
-echo ""
-echo "==> Scanning for unused dependencies"
-"$SCRIPTS/02-detect-unused.sh" "$REPO_PATH"
-
 # ── Detect updates ─────────────────────────────────────────────────────────────
 echo ""
 echo "==> Detecting available updates"
@@ -63,10 +58,16 @@ else
   echo "✓ Committed on branch: $BRANCH"
 fi
 
-# ── Major updates summary ──────────────────────────────────────────────────────
+# ── Follow-up ──────────────────────────────────────────────────────────────────
+echo ""
+echo "── Follow-up ────────────────────────────────────────────────────────────────"
+echo ""
+echo "==> Scanning for unused dependencies"
+"$SCRIPTS/02-detect-unused.sh" "$REPO_PATH"
+
 if [[ -n "$MAJOR_LINES" ]]; then
   echo ""
-  echo "── Major updates pending (need review) ──────────────────────────────────────"
+  echo "==> Major updates pending (need review)"
   echo "$MAJOR_LINES"
   echo ""
   echo "  Run the AI dependency-management skill to classify and apply these."

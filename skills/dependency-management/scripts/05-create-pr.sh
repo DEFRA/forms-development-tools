@@ -31,7 +31,7 @@ fi
 cd "$REPO_PATH"
 
 BRANCH=$(git branch --show-current)
-TITLE="chore: dependency management ($(basename "$REPO_PATH"))"
+TITLE="chore: dependency management"
 
 echo "Creating PR from '$BRANCH' into '$BASE_BRANCH'..." >&2
 PR_URL=$(gh pr create \

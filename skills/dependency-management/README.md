@@ -89,11 +89,8 @@ how widely it is used. Then decide:
 
 ## Opening a PR
 
-Once the branch is ready, write a description file and create the PR:
-
-```bash
-./skills/dependency-management/scripts/05-create-pr.sh <repo> <description-file>
-```
+Once the branch is ready, push it and open a PR on GitHub. Use the branch name as the
+title and describe what was removed, updated, and deferred in the PR body.
 
 ---
 

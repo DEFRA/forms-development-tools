@@ -20,40 +20,73 @@ fi
 
 [[ ! -d "$REPO_PATH" ]] && echo "Error: Directory not found: $REPO_PATH" >&2 && exit 1
 
+cd "$REPO_PATH"
+
 # ── Preflight ──────────────────────────────────────────────────────────────────
 echo "==> Preflight"
 PREFLIGHT=$("$SCRIPTS/01-preflight.sh" "$REPO_PATH")
 BRANCH=$(echo "$PREFLIGHT" | jq -r '.branch')
+
+verify_and_commit() {
+  local msg="$1"
+  echo ""
+  echo "==> Verifying"
+  if ! "$SCRIPTS/04-verify.sh" "$REPO_PATH"; then
+    echo ""
+    echo "✗ Verification failed — see errors above."
+    echo "  To revert a package: npm install <package>@<previous-version>"
+    exit 1
+  fi
+  git add -A
+  git commit -m "$msg"
+  echo ""
+  echo "✓ Committed on branch: $BRANCH"
+}
 
 # ── Detect updates ─────────────────────────────────────────────────────────────
 echo ""
 echo "==> Detecting available updates"
 UPDATES_JSON=$("$SCRIPTS/03-detect-updates.sh" "$REPO_PATH")
 
-MINOR_ARGS=$(echo "$UPDATES_JSON" | jq -r '[.updates | to_entries[] | select(.value.isMajor == false) | "\(.key)@\(.value.to)"] | join(" ")')
-
+PATCH_ARGS=$(echo "$UPDATES_JSON" | jq -r '[.updates | to_entries[] | select(.value.isMajor == false and .value.isPatch == true) | "\(.key)@\(.value.to)"] | join(" ")')
+MINOR_ARGS=$(echo "$UPDATES_JSON" | jq -r '[.updates | to_entries[] | select(.value.isMajor == false and .value.isPatch == false) | "\(.key)@\(.value.to)"] | join(" ")')
 MAJOR_LINES=$(echo "$UPDATES_JSON" | jq -r '.updates | to_entries[] | select(.value.isMajor == true) | "  \(.key): \(.value.from) → \(.value.to)"')
 
-# ── Install minor/patch ────────────────────────────────────────────────────────
-if [[ -z "$MINOR_ARGS" ]]; then
-  echo "  All minor/patch dependencies are up to date."
-else
+# ── Skip installs if package.json has uncommitted changes ──────────────────────
+SKIP_INSTALLS=false
+if [[ -n "$(git status --porcelain -- package.json)" ]]; then
   echo ""
-  echo "==> Installing minor/patch updates"
+  echo "⚠ package.json has uncommitted changes — skipping dependency installs."
+  echo "  Re-run to apply remaining updates."
+  SKIP_INSTALLS=true
+fi
+
+# ── Install patches ────────────────────────────────────────────────────────────
+if [[ "$SKIP_INSTALLS" == false && -n "$PATCH_ARGS" ]]; then
+  echo ""
+  echo "==> Installing patch updates"
   # shellcheck disable=SC2086
-  npm --prefix "$REPO_PATH" install $MINOR_ARGS
+  npm install $PATCH_ARGS
+  verify_and_commit "chore: update patch dependencies"
+fi
 
+# ── Install minors ────────────────────────────────────────────────────────────
+if [[ "$SKIP_INSTALLS" == false && -n "$MINOR_ARGS" ]]; then
   echo ""
-  echo "==> Verifying"
-  if ! "$SCRIPTS/04-verify.sh" "$REPO_PATH"; then
-    echo ""
-    echo "✗ Verification failed — see errors above."
-    echo "  To revert a package: npm --prefix \"$REPO_PATH\" install <package>@<previous-version>"
-    exit 1
-  fi
+  echo "==> Installing minor updates"
+  # shellcheck disable=SC2086
+  npm install $MINOR_ARGS
+  verify_and_commit "chore: update minor dependencies"
+fi
 
-  git -C "$REPO_PATH" add -A
-  git -C "$REPO_PATH" commit -m "chore: update dependencies to latest minor/patch"
+if [[ "$SKIP_INSTALLS" == false && -z "$PATCH_ARGS" && -z "$MINOR_ARGS" ]]; then
+  echo "  All minor/patch dependencies are up to date."
+fi
+
+# ── Commit any remaining uncommitted changes (e.g. a manual revert) ───────────
+if [[ -n "$(git status --porcelain)" ]]; then
+  git add -A
+  git commit -m "chore: update dependencies"
   echo ""
   echo "✓ Committed on branch: $BRANCH"
 fi

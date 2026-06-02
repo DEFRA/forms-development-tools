@@ -41,19 +41,13 @@ The script will:
 
 ### If verification fails
 
-The script exits. Find the offending package and pin it at its previous version:
+The script exits. Find the offending package and revert it:
 
 ```bash
 npm --prefix <repo> install <offending-dep>@<previous-version>
-./skills/dependency-management/scripts/04-verify.sh <repo>
 ```
 
-Repeat until clean, then commit manually:
-
-```bash
-git -C <repo> add -A
-git -C <repo> commit -m "chore: update dependencies to latest minor/patch"
-```
+Then re-run the script. It will detect the uncommitted change to `package.json`, skip dependency installs, commit the current state, and continue to report unused dependencies and pending major updates.
 
 ---
 

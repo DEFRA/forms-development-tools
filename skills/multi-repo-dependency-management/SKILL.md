@@ -45,7 +45,7 @@ Batch the repos into groups of 4. For each batch, make one sequential call to `A
   - `multiSelect`: `true`
   - `options`: up to 4 entries, one per repo in this batch. Each option's `label` is the repo basename; `description` is its absolute path.
 
-Make `ceil(N/4)` sequential calls. Accumulate every selected label into `SELECTED`.
+Make `ceil(N/4)` sequential calls. For each selected option, accumulate its `description` (the absolute repo path) into `SELECTED` — not the `label`.
 
 After all batches: state "Running sweep on N repos: repo1, repo2, ..." and proceed immediately — do not ask for further confirmation.
 
@@ -73,7 +73,7 @@ For each repo in `SELECTED` in order (index I, total N):
 
 **4b.** Invoke the `dependency-management` skill via the `Skill` tool, passing the absolute repo path as the argument.
 
-The skill runs fully in the main conversation thread. All prompts — including the major update classification in its Step 4 — are interactive and require your input as normal.
+The skill runs fully in the main conversation thread. All prompts — including the major update classification in its Step 4 — are interactive and require your input as normal. If the inner skill stops with an error (e.g. preflight fails due to uncommitted changes), append `<repo-basename>: FAILED — <reason>` to `$LOG` and continue to the next repo. Process repos one at a time. Do not use subagents or the Agent tool to parallelize invocations.
 
 **4c.** Once the skill completes, append a summary block to `$LOG`. Write this from your own knowledge of what was just completed — no additional user input required:
 
@@ -81,6 +81,14 @@ The skill runs fully in the main conversation thread. All prompts — including 
 <repo-basename>:   <outcome, e.g. "3 minor/patch updated, 1 stacked PR, 1 deferred">
   Baseline PR:  <URL or "(none)">
   Stacked PRs:  <URL — package-name> ... (or "(none)")
+  Deferred:     <package-name (reason)> ... (or "(none)")
+
+```
+
+If the inner skill failed hard, write instead:
+```
+<repo-basename>:   FAILED
+  Reason: <error summary>
 
 ```
 

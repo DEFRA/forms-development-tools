@@ -1,7 +1,6 @@
 ---
 name: dependency-management
 description: Use when performing a dependency sweep on a forms-* Node.js microservice — one repo at a time.
-disable-model-invocation: true
 allowed-tools: Bash
 argument-hint: [repo-path]
 ---

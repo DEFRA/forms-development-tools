@@ -329,7 +329,7 @@ Create the PR (targets `$BASELINE`, not `main`):
 
 ```bash
 OUT=$("$SCRIPTS/05-create-pr.sh" "$REPO" "/tmp/pr-$(basename "$REPO")-<package>.md" \
-  --base "$BASELINE" --format json)
+  --base "$BASELINE" --title "chore: <package-name> dependency update" --format json)
 STACKED_PR_URL=$(echo "$OUT" | jq -r '.url')
 STACKED_PRS+=("<package>: $STACKED_PR_URL")
 ```

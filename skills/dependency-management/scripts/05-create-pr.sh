@@ -5,6 +5,7 @@ REPO_PATH=""
 DESC_FILE=""
 BASE_BRANCH="main"
 FORMAT="tabular"
+TITLE="chore: bulk dependency update"
 # shellcheck source=lib.sh
 source "$(dirname "$0")/lib.sh"
 
@@ -12,6 +13,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --base)      BASE_BRANCH="$2"; shift 2 ;;
     --format)    FORMAT="$2"; shift 2 ;;
+    --title)     TITLE="$2"; shift 2 ;;
     -*)          err "Unknown option: $1" ;;
     *)
       if [[ -z "$REPO_PATH" ]]; then REPO_PATH="$1"
@@ -22,7 +24,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$REPO_PATH" || -z "$DESC_FILE" ]]; then
-  err "Usage: 05-create-pr.sh <repo-path> <description-file> [--base <branch>] [--format tabular|json]"
+  err "Usage: 05-create-pr.sh <repo-path> <description-file> [--base <branch>] [--title <title>] [--format tabular|json]"
 fi
 
 [[ ! -d "$REPO_PATH" ]] && err "Directory not found: $REPO_PATH"

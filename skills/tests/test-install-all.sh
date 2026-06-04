@@ -26,26 +26,26 @@ SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/claude-install.sh"
 if SKILLS_DIR="$TMPSKILLS" bash "$SCRIPT"; then
   : # installer ran, check markers below
 else
-  echo "FAIL: top-level installer itself exited nonzero"; ((FAIL++))
+  echo "FAIL: top-level installer itself exited nonzero"; ((++FAIL))
 fi
 
 # Assertions
 if [[ -f "$TMPSKILLS/skill-a/installed" ]]; then
   echo "PASS: skill-a installer was called"; ((PASS++))
 else
-  echo "FAIL: skill-a installer was not called"; ((FAIL++))
+  echo "FAIL: skill-a installer was not called"; ((++FAIL))
 fi
 
 if [[ -f "$TMPSKILLS/skill-b/installed" ]]; then
   echo "PASS: skill-b installer was called"; ((PASS++))
 else
-  echo "FAIL: skill-b installer was not called"; ((FAIL++))
+  echo "FAIL: skill-b installer was not called"; ((++FAIL))
 fi
 
 if [[ ! -f "$TMPSKILLS/skill-c/installed" ]]; then
   echo "PASS: skill-c (no installer) was correctly skipped"; ((PASS++))
 else
-  echo "FAIL: skill-c was called despite having no installer"; ((FAIL++))
+  echo "FAIL: skill-c was called despite having no installer"; ((++FAIL))
 fi
 
 echo "Results: $PASS passed, $FAIL failed"

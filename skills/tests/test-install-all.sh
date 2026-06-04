@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 PASS=0; FAIL=0
 
 TMPSKILLS=$(mktemp -d)
@@ -11,21 +11,23 @@ cat > "$TMPSKILLS/skill-a/claude-install.sh" << 'INSTALLER'
 #!/usr/bin/env bash
 touch "$(dirname "$0")/installed"
 INSTALLER
-chmod +x "$TMPSKILLS/skill-a/claude-install.sh"
 
 mkdir -p "$TMPSKILLS/skill-b"
 cat > "$TMPSKILLS/skill-b/claude-install.sh" << 'INSTALLER'
 #!/usr/bin/env bash
 touch "$(dirname "$0")/installed"
 INSTALLER
-chmod +x "$TMPSKILLS/skill-b/claude-install.sh"
 
 # skill-c has no installer — must be silently skipped
 mkdir -p "$TMPSKILLS/skill-c"
 
 # Run the top-level installer, pointing it at the temp dir via env var
 SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/claude-install.sh"
-SKILLS_DIR="$TMPSKILLS" bash "$SCRIPT"
+if SKILLS_DIR="$TMPSKILLS" bash "$SCRIPT"; then
+  : # installer ran, check markers below
+else
+  echo "FAIL: top-level installer itself exited nonzero"; ((FAIL++))
+fi
 
 # Assertions
 if [[ -f "$TMPSKILLS/skill-a/installed" ]]; then

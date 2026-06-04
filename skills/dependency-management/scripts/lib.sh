@@ -3,7 +3,7 @@
 
 err() {
   if [[ "$FORMAT" == "json" ]]; then
-    printf '{"status":"error","error":"%s"}\n' "$1"
+    printf '{"status":"error","error":"%s"}\n' "$1" >&2
   else
     echo "Error: $1" >&2
   fi

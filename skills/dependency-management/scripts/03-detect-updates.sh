@@ -30,12 +30,13 @@ const proposed = JSON.parse(process.env.NCU_RAW || '{}');
 const updates = {};
 for (const [name, toRange] of Object.entries(proposed)) {
   const fromRange = allCurrent[name] || '0.0.0';
-  const stripRange = s => s.replace(/^[\^~>=<]+/, '').split('.')[0];
-  const fromMajor = parseInt(stripRange(fromRange), 10);
-  const toMajor   = parseInt(stripRange(toRange),   10);
+  const parseParts = s => s.replace(/^[\^~>=<]+/, '').split('.').map(n => parseInt(n, 10));
+  const [fromMajor, fromMinor] = parseParts(fromRange);
+  const [toMajor,   toMinor  ] = parseParts(toRange);
   // unrecognised range formats (workspace:*, compound ranges) default to major so they aren't silently applied to the baseline branch
   const isMajor = (isNaN(fromMajor) || isNaN(toMajor)) ? true : toMajor > fromMajor;
-  updates[name] = { from: fromRange, to: toRange, isMajor };
+  const isPatch = !isMajor && !isNaN(fromMinor) && !isNaN(toMinor) && toMinor === fromMinor;
+  updates[name] = { from: fromRange, to: toRange, isMajor, isPatch };
 }
 console.log(JSON.stringify({ updates }));
 "

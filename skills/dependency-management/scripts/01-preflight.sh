@@ -25,16 +25,21 @@ fi
 
 cd "$REPO_PATH"
 
+if [[ -z "$BRANCH_NAME" ]]; then
+  BRANCH_NAME="chore/dependency-management-$(date +%Y-%m-%d)"
+fi
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [[ -n "$(git status --porcelain)" ]]; then
-  err "Repository has uncommitted changes or untracked files"
+  if [[ "$CURRENT_BRANCH" == "$BRANCH_NAME" ]]; then
+    echo "Resuming on branch '$BRANCH_NAME' with uncommitted changes..." >&2
+  else
+    err "Uncommitted changes found. Clean up first: git stash or git reset --hard HEAD"
+  fi
 fi
 
 echo "Fetching from origin..." >&2
 git fetch origin >&2 || echo "Warning: could not fetch from origin (continuing with local refs)" >&2
-
-if [[ -z "$BRANCH_NAME" ]]; then
-  BRANCH_NAME="chore/dependency-management-$(date +%Y-%m-%d)"
-fi
 
 if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
   echo "Branch '$BRANCH_NAME' already exists — checking out..." >&2

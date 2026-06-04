@@ -128,24 +128,24 @@ UPDATE_COUNT=$(echo "$OUT" | jq '.updates | length')
 Classify every update before applying any of them:
 
 - Minor/patch (`isMajor: false`) — all go into the baseline branch
-- Major (`isMajor: true`) — classify each individually:
+- Major (`isMajor: true`) — classify each as **to attempt** or **deferred (large)**:
 
-**Classification criteria — base this on implementation effort, not semantic version number:**
-- **Simple** — goes into the baseline branch. Covers:
-  - No code changes needed at all, OR
-  - A small number of trivial code changes (rename an import, swap a class name,
-    update a config key, add a cast). The kind of changes a developer fixes in
-    under 10 minutes without reading docs. Skipping major versions does NOT
-    automatically make something medium — check what actually changed in the code we use.
-- **Medium** — gets its own stacked branch and PR. Covers:
-  - A moderate amount of bounded, straightforward changes across multiple files.
-    For example: a new required option everywhere an API is called, a changed
-    method signature used in several places, a config format that needs rewriting.
-    The work is clear and finite, but not trivial.
-- **Large** — deferred and documented. Covers:
-  - Significant rethinking, architectural decisions, or evaluation of alternatives.
-    For example: a framework that changes its rendering model, a validator that
-    changes its schema DSL, a linter that renames half its rule set.
+**Do not pre-classify majors as simple vs stacked.** Only decide at the changelog level
+whether an update is too architectural to attempt at all. Everything else is attempted in
+the baseline branch in Step 5; the actual simple/stacked decision is made from observed
+effort, not changelog assumptions.
+
+**Deferred (large) — skip without attempting** when the changelog shows:
+  - Architectural rethinking required (e.g. a framework changes its rendering model, a
+    validator changes its schema DSL, a linter renames half its rule set)
+  - Evaluating alternatives is part of the migration (the recommended upgrade path
+    involves choosing between competing options or tools)
+  - The migration scope is indeterminate from the changelog alone
+
+**To attempt — everything else.** Even packages with documented breaking changes belong
+here unless they clearly meet the deferred criteria above. Breaking changes in areas the
+codebase may not use, or that turn out to require only trivial fixes, are discovered in
+Step 5 — not assumed now.
 
 To read a changelog:
 
@@ -161,18 +161,28 @@ grep -rE "from ['\"]<package-name>['\"]|require\(['\"]<package-name>" "$REPO" \
   --exclude-dir=node_modules --exclude-dir=.git
 ```
 
-**After classifying, show the user the three lists and wait for confirmation before
+**After classifying, show the user the two lists and wait for confirmation before
 proceeding:**
 
-- Simple majors: `[list]` (or none)
-- Medium majors: `[list]` (or none — if any exist, each gets a stacked branch and PR)
-- Large majors: `[list]` (or none — will be deferred and documented)
+- Majors to attempt: `[list]` (or none — will be tried in the baseline; moved to a stacked branch only if the actual changes required are significant)
+- Large majors (deferred): `[list]` (or none — too architectural to attempt in this run)
 
 Do not proceed until the user confirms or adjusts the classification.
 
-## Step 5 — Apply minor/patch and simple major updates (baseline branch)
+## Step 5 — Apply minor/patch updates and attempt major updates (baseline branch)
+
+> **Verification rule: run `04-verify.sh` after every `npm install` without exception.**
+> Never commit or proceed to the next package without a passing verify.
 
 You are on `$BASELINE` throughout this step.
+
+Keep a running list of majors reclassified to stacked during this step:
+
+```bash
+RECLASSIFIED_TO_STACKED=()
+```
+
+**5a — Minor/patch updates:**
 
 Apply all minor/patch updates in one npm command:
 
@@ -185,9 +195,10 @@ If `failed`: binary search to find the offending update. Pin it at its previous 
 
 ```bash
 npm --prefix "$REPO" install <offending-dep>@<previous-version>
+OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 ```
 
-Re-verify. Repeat until `passed`. Note any pinned packages for the PR body.
+Repeat until `passed`. Note any pinned packages for the PR body.
 
 Commit:
 
@@ -196,40 +207,63 @@ git -C "$REPO" add -A
 git -C "$REPO" commit -m "chore: update dependencies to latest minor/patch"
 ```
 
-Then apply each simple major **one at a time**, verifying after each:
+**5b — Major updates (attempt in baseline, decide from observed effort):**
+
+Attempt each major in the "to attempt" list **one at a time**:
 
 ```bash
 npm --prefix "$REPO" install <package>@<new-version>
 OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 ```
 
-If verify `failed`:
-- If the fix is trivial (rename an import, update a config key, add a type cast,
-  adjust a single call site) — make the fix, re-verify, then commit with `git add -A`.
-- If fixing it requires more than trivial effort — changes across many files, API
-  redesign, reading docs to understand — **reclassify it as Medium**: revert the
-  install, add it to the medium list, and handle it in Step 6 instead.
+**Decide based on what you observe — not on changelog assumptions:**
 
-```bash
-npm --prefix "$REPO" install <package>@<previous-version>  # revert
-```
+- **Passed immediately:** commit to baseline.
+  ```bash
+  git -C "$REPO" add -A
+  git -C "$REPO" commit -m "chore: upgrade <package> to v<N>"
+  ```
 
-If `passed` (either immediately or after a trivial fix), commit each simple major separately:
+- **Failed with a trivial fix** (rename an import, update a config key, add a type cast,
+  adjust a single call site — fixed in under 10 minutes without reading docs): make the
+  fix, re-verify, then commit to baseline.
+  ```bash
+  # make fix
+  OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
+  git -C "$REPO" add -A
+  git -C "$REPO" commit -m "chore: upgrade <package> to v<N>"
+  ```
 
-```bash
-git -C "$REPO" add -A
-git -C "$REPO" commit -m "chore: upgrade <package> to v<N>"
-```
+- **Failed and fixing requires significant effort** (changes across many files, new
+  required options throughout, method signatures changed in several places, reading docs
+  to understand the migration): **reclassify as stacked.** Revert and add to the stacked list.
+  ```bash
+  npm --prefix "$REPO" install <package>@<previous-version>
+  OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)  # verify the revert
+  RECLASSIFIED_TO_STACKED+=("<package>@<new-version>")
+  ```
 
-## Step 6 — Medium major updates (stacked branches)
+- **Failed and turns out architectural** (not just code changes — requires evaluating
+  options or rethinking structure): **reclassify as deferred (large).** Revert and note
+  the reason.
+  ```bash
+  npm --prefix "$REPO" install <package>@<previous-version>
+  OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)  # verify the revert
+  ```
 
-**If the medium list is empty, skip to Step 7.**
+The threshold for stacking is observed effort, not changelog language. A package with
+documented breaking changes that requires no code changes stays in the baseline. A
+package that seemed minor but requires touching many files moves to a stacked branch.
 
-**Do not open any PRs until this step is complete for every medium major.**
+## Step 6 — Stacked major updates (reclassified during Step 5)
 
-The branch structure is: `main ← $BASELINE ← medium-A | medium-B | medium-C`
+**If `$RECLASSIFIED_TO_STACKED` is empty, skip to Step 7.**
 
-Each medium major gets its own branch off `$BASELINE` and its own PR targeting `$BASELINE`.
+**Do not open any PRs until this step is complete for every stacked major.**
+
+The branch structure is: `main ← $BASELINE ← stacked-A | stacked-B | stacked-C`
+
+Each stacked major gets its own branch off `$BASELINE` and its own PR targeting `$BASELINE`.
 They are independent — each branches from `$BASELINE`, not from each other.
 
 Keep a running list of stacked PR URLs — you will need all of them for Step 7:
@@ -238,7 +272,7 @@ Keep a running list of stacked PR URLs — you will need all of them for Step 7:
 STACKED_PRS=()  # accumulate as: STACKED_PRS+=("<package>: <URL>")
 ```
 
-For each medium major, work through 6a–6d:
+For each stacked major in `$RECLASSIFIED_TO_STACKED`, work through 6a–6d:
 
 **6a. Create a stacked branch from the baseline:**
 
@@ -260,7 +294,7 @@ OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 If `failed`: investigate, fix source code, re-run verify. Repeat until `passed`.
 
 If the fix turns out to be too complex (architectural, not just code changes), reclassify
-as Large: check out the baseline, note the deferral reason, move to the next medium major.
+as Large: check out the baseline, note the deferral reason, move to the next stacked major.
 
 ```bash
 git -C "$REPO" checkout "$BASELINE"
@@ -280,7 +314,7 @@ Write `/tmp/pr-$(basename "$REPO")-<package>.md`:
 ```markdown
 ## Upgrade <package> to v<N>
 
-**Why this is medium, not large:** <reason>
+**Why this is stacked:** <reason — what actual changes were required and why they warranted a separate PR>
 
 **What changed in the package:**
 - <breaking change from changelog>
@@ -300,14 +334,15 @@ STACKED_PR_URL=$(echo "$OUT" | jq -r '.url')
 STACKED_PRS+=("<package>: $STACKED_PR_URL")
 ```
 
-**6d. Return to the baseline branch before the next medium major:**
+**6d. Return to the baseline branch before the next stacked major:**
 
 ```bash
 git -C "$REPO" checkout "$BASELINE"
 ```
 
-Repeat 6a–6d for every medium major. Only proceed to Step 7 once every medium major
-has either a recorded PR URL in `$STACKED_PRS` or an explicit deferral reason.
+Repeat 6a–6d for every stacked major in `$RECLASSIFIED_TO_STACKED`. Only proceed to
+Step 7 once every stacked major has either a recorded PR URL in `$STACKED_PRS` or an
+explicit deferral reason.
 
 ## Step 7 — Create the baseline PR
 
@@ -325,8 +360,8 @@ Write `/tmp/pr-$(basename "$REPO")-baseline.md` covering everything done in this
 - `<package>`: <from> → <to>
 - `<package>`: <from> → <to> (pinned — <reason>)
 
-### Major updates — applied (simple, in this PR)
-- `<package>`: <from> → <to> — <one-line reason it was simple>
+### Major updates — applied in this PR
+- `<package>`: <from> → <to> — <one-line note on what, if anything, changed in the codebase>
 
 ### Major updates — stacked PRs
 <!-- These PRs target this branch, not main. Merge this PR first,

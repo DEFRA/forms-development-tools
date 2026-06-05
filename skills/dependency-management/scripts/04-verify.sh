@@ -47,6 +47,10 @@ run_step "test"  npm test
 # Delete incremental tsc cache before lint so type-checking matches a clean CI run
 rm -f "$REPO_PATH/tsconfig.tsbuildinfo"
 run_step "lint"  npm run lint
+# Run prettier check if the repo has a format:check script
+if node -e "process.exit(require('./package.json').scripts?.['format:check'] ? 0 : 1)" 2>/dev/null; then
+  run_step "format" npm run format:check
+fi
 
 if [[ "$FORMAT" == "json" ]]; then
   echo '{"status":"passed"}'

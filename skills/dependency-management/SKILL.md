@@ -172,6 +172,7 @@ Do not proceed until the user confirms or adjusts the classification.
 
 > **Verification rule: run `04-verify.sh` after every `npm install` without exception.**
 > Never commit or proceed to the next package without a passing verify.
+> **Never substitute `04-verify.sh` with individual commands** such as `npm run lint`, `npm test`, `npm run build`, or any combination of them. They are not equivalent — `04-verify.sh` is the only accepted verification method and covers checks that individual commands miss.
 
 You are on `$BASELINE` throughout this step.
 

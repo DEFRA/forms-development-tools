@@ -36,7 +36,9 @@ Confirm the directory exists before proceeding. If it does not, report the error
 
 > These rules are absolute. There are no exceptions.
 
-**Never add `legacy-peer-deps=true` to `.npmrc`**, for any reason. If you find yourself considering it, stop — it means the installed package combination is officially unsupported by the packages themselves, not a configuration quirk to work around.
+### Do not add `legacy-peer-deps=true` to `.npmrc`
+
+Adding `legacy-peer-deps=true` to `.npmrc` is **prohibited**. Never add this setting, never uncomment it, never suggest it. If you find yourself considering it, stop — a peer conflict is not a configuration problem to silence, it is a signal that the package combination is officially unsupported. The answer is always to revert the conflicting upgrade, not to bypass the check.
 
 **Never pass `--legacy-peer-deps` or `--force` to any `npm install` command** in this workflow.
 

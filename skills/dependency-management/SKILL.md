@@ -32,6 +32,34 @@ fi
 
 Confirm the directory exists before proceeding. If it does not, report the error and stop.
 
+## Peer dependency constraints — red line rules
+
+> These rules are absolute. There are no exceptions.
+
+**Never add `legacy-peer-deps=true` to `.npmrc`**, for any reason. If you find yourself considering it, stop — it means the installed package combination is officially unsupported by the packages themselves, not a configuration quirk to work around.
+
+**Never pass `--legacy-peer-deps` or `--force` to any `npm install` command** in this workflow.
+
+**If `npm install` produces a peer conflict** — either an ERESOLVE error or peer dependency warnings in the output — treat the install as failed regardless of whether npm eventually wrote a lock file:
+- Do not run verify
+- Do not commit
+- Revert the package immediately: `npm --prefix "$REPO" install <package>@<previous-version>`
+- Classify the upgrade as **deferred**, citing the peer conflict as the reason
+
+**Peer-linked packages must move together.** A peer conflict means package A and package B are coupled — they can only be upgraded as a pair. If A declares `peer B@"^X"` and you want to upgrade B past `^X`, first check whether A has a release that widens its peer range to include the new B. If no such release exists yet, defer B's upgrade — upgrading B alone is unsupported even if tests pass locally, and it will fail in CI or in other environments.
+
+Before attempting a major upgrade, check for peer constraints:
+
+```bash
+# What peers does the new version require?
+npm info <package>@<new-version> peerDependencies
+
+# Which installed packages declare peers that constrain <package>?
+npm --prefix "$REPO" ls 2>&1 | grep "peer dep\|WARN\|peer" | grep "<package>"
+```
+
+If a peer conflict is found at this point, stop — do not attempt the install. Mark the upgrade as deferred with a note identifying the blocking peer dependency.
+
 ## Step 1 — Preflight
 
 ```bash
@@ -212,7 +240,21 @@ git -C "$REPO" commit -m "chore: update dependencies to latest minor/patch"
 Attempt each major in the "to attempt" list **one at a time**:
 
 ```bash
-npm --prefix "$REPO" install <package>@<new-version>
+INSTALL_OUT=$(npm --prefix "$REPO" install <package>@<new-version> 2>&1)
+echo "$INSTALL_OUT"
+```
+
+**Before running verify, check the install output for peer conflicts:**
+
+```bash
+echo "$INSTALL_OUT" | grep -i "ERESOLVE\|peer dep\|peer eslint\|peer joi\|Conflicting peer\|Could not resolve"
+```
+
+If any peer conflict is found in the output: **stop immediately.** Do not run verify. Revert, classify as deferred, and move to the next package. See the red-line rules above.
+
+If the install output is clean, proceed:
+
+```bash
 OUT=$("$SCRIPTS/04-verify.sh" "$REPO" --format json)
 ```
 

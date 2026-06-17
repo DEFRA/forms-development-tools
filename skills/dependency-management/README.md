@@ -1,14 +1,35 @@
 # Dependency Management
 
-Two ways to run a dependency sweep on a forms-* microservice.
+Two ways to run a dependency sweep on a Node.js repo.
 
 ---
 
 ## Mode 1 — AI skill (recommended)
 
-Invoke `/dependency-management <repo>` in Claude Code. The skill handles everything:
-unused dependency detection and removal, update classification, minor/patch updates,
-stacked PRs for medium majors, and deferral of large majors.
+### Install
+
+From the repo root:
+
+```bash
+./skills/claude-install.sh
+```
+
+This installs all skills. To install only this one:
+
+```bash
+./skills/dependency-management/claude-install.sh
+```
+
+### Use
+
+Invoke in Claude Code:
+
+```
+/dependency-management <repo-path-or-name>
+```
+
+The skill handles everything: unused dependency detection and removal, update classification,
+minor/patch updates, stacked PRs for medium majors, and deferral of large majors.
 
 ---
 

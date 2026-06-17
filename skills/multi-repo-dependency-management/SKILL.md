@@ -1,6 +1,7 @@
 ---
 name: multi-repo-dependency-management
-description: Use when performing a dependency sweep across multiple repos. Scans a base directory for repos with package.json, lets user select which to update, then runs the dependency-management skill on each sequentially in the main thread.
+description: Use when performing a dependency sweep across multiple Node.js repos in a single session.
+allowed-tools: Bash, AskUserQuestion, Skill
 argument-hint: [base-directory]
 ---
 

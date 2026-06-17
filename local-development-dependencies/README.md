@@ -1,6 +1,8 @@
-# Local Development Dependencies with AAD/Entra authentication
+# Local Development Dependencies
 
-This directory contains instructions and configuration for spinning up all local development dependencies required by the Defra Forms application suite using Docker Compose.
+Spins up the runtime infrastructure required by the Defra Forms microservices — MongoDB, Redis, S3 (LocalStack), and CDP uploader — via Docker Compose. No forms microservices are started here.
+
+If you want the full stack including the forms microservices, see the [test harness](../test-harness/README.md) instead.
 
 ## Prerequisites
 - [Docker](https://www.docker.com/get-started)

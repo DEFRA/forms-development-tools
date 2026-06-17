@@ -1,6 +1,6 @@
 ---
 name: dependency-management
-description: Use when performing a dependency sweep on a forms-* Node.js microservice — one repo at a time.
+description: Use when performing a dependency sweep on a Node.js repo — one repo at a time.
 allowed-tools: Bash
 argument-hint: [repo-path]
 ---

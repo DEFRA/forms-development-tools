@@ -1,6 +1,8 @@
-# Local Development Dependencies With Mock Authentication
+# Test Harness
 
-This directory contains instructions and configuration for spinning up all local development dependencies required by the Defra Forms application suite, including a mock authentication service.
+Spins up the full Defra Forms stack — all forms microservices (designer, manager, runner, submission, entitlement, audit) plus their runtime dependencies — via a single `run-harness.sh` script. Use this if you want everything running without starting services individually.
+
+If you only need the backing infrastructure (MongoDB, Redis, S3, CDP uploader) and plan to run the microservices yourself, see [`local-development-dependencies`](../local-development-dependencies/README.md) instead.
 
 ## Prerequisites
 - [Docker](https://www.docker.com/get-started)

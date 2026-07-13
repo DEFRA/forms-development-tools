@@ -16,5 +16,3 @@ Shared development tools and infrastructure for the Defra Forms application suit
 The microsite deploys automatically to GitHub Pages on push to `main`
 (`.github/workflows/deploy-docs.yml`), served at
 `https://defra.github.io/forms-development-tools/`.
-
-**One-time setup:** in the repository settings, set **Pages → Build and deployment → Source** to **GitHub Actions**.

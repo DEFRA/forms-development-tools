@@ -111,8 +111,11 @@ model {
   auditApi      -> auditMeta
 
   // submission / upload flow
-  runner      -> submissions
+  // ordering (enforced in forms-runner, shown in the submissionSequence view):
+  // upload temporary file -> persist -> publish owned topic -> publish extra topics
   runner      -> cdpUploader   'Upload files'
+  runner      -> submissionApi 'Persist files'
+  runner      -> submissions
   runner      -> exTopic
   cdpUploader -> submissionApi 'Scan, deliver to S3 and make a callback'
 
@@ -256,6 +259,22 @@ views {
       border dotted
       opacity 40%
     }
+  }
+
+  dynamic view submissionSequence {
+    title 'Form submission sequence'
+    autoLayout LeftRight
+    // The order matters and is guaranteed by forms-runner: a user's file is only
+    // held temporarily until it is persisted in forms-submission-api. Nothing is
+    // published to any topic until persistence has completed - so downstream
+    // consumers never see an event whose files are not yet handled. The owned
+    // submission topic is written first, then any additional per-form topics.
+
+    runner        -> cdpUploader     'Upload file (held as temporary)'
+    runner        -> submissionApi   'Persist files'
+    submissionApi -> submissionFiles 'Store - files now guaranteed handled'
+    runner        -> submissions     'Publish (owned submission topic)'
+    runner        -> exTopic         'Publish (additional topic, if configured per form)'
   }
 
   // Style by ownership - applies across every generated view.

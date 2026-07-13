@@ -191,7 +191,7 @@ views {
       include entitlements, entitlementsDb, entitlementsAudit
     }
     group 'Submission' {
-      include submissionApi, submissionMeta, submissionFiles
+      include submissionApi, submissionMeta, submissionFiles, saveQueue
     }
     group 'Audit' {
       include auditApi, auditMeta, auditEvents
@@ -203,9 +203,6 @@ views {
     }
     group 'Sharepoint' {
       include sharepointQueue, sharepointListener
-    }
-    group 'Save and return' {
-      include saveQueue
     }
     group 'Example' {
       include exTopic, exQueue, exListener, externalApi

@@ -144,7 +144,7 @@ views {
   // this is the default view (id `index`), so LikeC4 doesn't auto-generate
   // a separate redundant landscape view
   view index {
-    title 'Defra Forms - internals'
+    title 'Defra Forms - platform overview'
     autoLayout LeftRight 150 110
 
     // ungrouped: actors + third-party endpoints.

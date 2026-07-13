@@ -4,9 +4,11 @@
   links: null,
   _stage: 'layouted',
   sourcePath: 'forms.likec4',
-  description: null,
-  title: 'Defra Forms - platform overview',
-  id: 'index',
+  description: {
+    txt: 'The complete container-level reference - every service, datastore, queue and integration. See the architecture overview for a simpler introduction.',
+  },
+  title: 'Defra Forms - all containers',
+  id: 'platformAll',
   autoLayout: {
     direction: 'LR',
     nodeSep: 110,

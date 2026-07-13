@@ -167,8 +167,31 @@ views {
   // this is the default view (id `index`), so LikeC4 doesn't auto-generate
   // a separate redundant landscape view
   view index {
-    title 'Defra Forms - platform overview'
-    description 'Start here - the primary overview of the whole platform'
+    title 'Defra Forms - architecture overview'
+    description 'Start here - how the system works at a glance. The all-containers view has the full reference.'
+    autoLayout LeftRight 150 110
+
+    // Simplified primary view: core containers + the two user journeys + the key
+    // external systems. Datastores, messaging plumbing, audit, save-and-return,
+    // Cognito and analytics are deliberately left to the all-containers view and
+    // the focused flow views.
+    include worker, citizen
+    include aad, ordnanceSurvey, govukPay, cdpUploader, govNotify
+
+    group 'Defra Forms' {
+      include designer, runner, manager, entitlements, submissionApi
+    }
+
+    // hide secondary admin edges to keep the overview readable
+    exclude
+      designer -> submissionApi,
+      designer -> govukPay
+  }
+
+  // the full container-level reference - every service, store, queue, integration
+  view platformAll {
+    title 'Defra Forms - all containers'
+    description 'The complete container-level reference - every service, datastore, queue and integration. See the architecture overview for a simpler introduction.'
     autoLayout LeftRight 150 110
 
     // ungrouped: actors + third-party endpoints.

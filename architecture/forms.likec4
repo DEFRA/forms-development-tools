@@ -222,6 +222,42 @@ views {
       designer -> manager
   }
 
+  view submissionFlow {
+    title 'Form submission and delivery'
+    autoLayout LeftRight 150 110
+    // A citizen submits a form on the Runner. Two things happen:
+    //  - files are uploaded to the CDP uploader (virus-scanned), delivered to S3
+    //    and recorded by the submission API (present for most forms).
+    //  - a submission event is published to the owned Submissions topic, which
+    //    fans out to delivery channels: GOV.UK Notify (all forms) and, when
+    //    configured, Sharepoint (optional, shown dotted).
+    // External consumers instead each get their own topic - the dotted example
+    // pattern (topic -> queue -> listener -> external API).
+
+    include citizen, runner, submissions
+
+    group 'Files (most forms)' {
+      include cdpUploader, submissionApi, submissionMeta, submissionFiles
+    }
+    group 'Notify (all forms)' {
+      include notifyQueue, notifyListener, govNotify
+    }
+    group 'Sharepoint (optional)' {
+      include sharepointQueue, sharepointListener, sharepointApi
+    }
+    group 'External consumer (own topic)' {
+      include exTopic, exQueue, exListener, externalApi
+    }
+
+    // optional Sharepoint delivery is de-emphasised so the always-on Notify path
+    // and the file path read as primary. (The external pattern is already dotted
+    // via the global #example style.)
+    style sharepointQueue, sharepointListener, sharepointApi {
+      border dotted
+      opacity 40%
+    }
+  }
+
   // Style by ownership - applies across every generated view.
   style element.tag == #thirdparty {
     color gray

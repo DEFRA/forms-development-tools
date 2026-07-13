@@ -6,7 +6,7 @@
   sourcePath: 'forms.likec4',
   description: null,
   title: 'Defra Forms - internals',
-  id: 'platform',
+  id: 'index',
   autoLayout: {
     direction: 'LR',
     nodeSep: 110,

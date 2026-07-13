@@ -138,7 +138,9 @@ model {
 
 views {
 
-  view platform {
+  // this is the default view (id `index`), so LikeC4 doesn't auto-generate
+  // a separate redundant landscape view
+  view index {
     title 'Defra Forms - internals'
     autoLayout LeftRight 150 110
 
@@ -178,15 +180,6 @@ views {
     group 'Example' {
       include exTopic, exQueue, exListener, externalApi
     }
-  }
-
-  view submissionFlow {
-    title 'Submission to Notify / Sharepoint flow'
-    autoLayout LeftRight
-    include citizen, runner, submissions,
-            notifyQueue, notifyListener, govNotify,
-            sharepointQueue, sharepointListener,
-            cdpUploader, submissionApi, submissionMeta, submissionFiles
   }
 
   view auditFlow {

@@ -98,7 +98,11 @@ model {
   // app-to-app
   runner   -> manager       'Fetch form'
   designer -> manager       'Publish form'
-  designer -> aad           'Authentication'
+  designer      -> aad      'Authentication'
+  manager       -> aad      'Verify staff token (JWKS)'
+  entitlements  -> aad      'Verify staff token (JWKS)'
+  submissionApi -> aad      'Verify staff token (JWKS)'
+  auditApi      -> aad      'Verify staff token (JWKS)'
   designer -> entitlements  'Fetch user entitlements'
   designer -> entitlements  'Set user entitlements'
   designer -> submissionApi 'Retrieve files submitted by users'
@@ -182,10 +186,14 @@ views {
       include designer, runner, manager, entitlements, submissionApi
     }
 
-    // hide secondary admin edges to keep the overview readable
+    // hide secondary admin edges to keep the overview readable (the JWKS token-
+    // verification edges to Entra are shown in the Auth / Authentication view)
     exclude
       designer -> submissionApi,
-      designer -> govukPay
+      designer -> govukPay,
+      manager       -> aad,
+      entitlements  -> aad,
+      submissionApi -> aad
   }
 
   // the full container-level reference - every service, store, queue, integration
@@ -250,35 +258,60 @@ views {
       auditApi -> *       // audit API -> metadata
   }
 
-  view authFlow {
-    title 'Authentication and authorisation'
-    description 'Who authenticates against what, and where authorisation is stored and enforced - three trust contexts (staff, anonymous citizens, external data consumers).'
+  view authnFlow {
+    title 'Auth / Authentication'
+    description 'Who proves their identity, and how - Azure Entra (OIDC) for Defra staff, AWS Cognito (JWT) for external data consumers, and no login for citizens (an anonymous local session only).'
     autoLayout LeftRight
-    // Three trust contexts:
-    //  - Defra staff: authenticate via AAD (OIDC), session held in the designer
-    //    cache, authorisation stored in and enforced via the entitlements API.
-    //  - Citizens: anonymous - no login, only a temporary local session.
-    //  - External data consumers: machine clients whose access tokens the
-    //    submission API verifies against AWS Cognito (JWKS).
-    // Non-auth app-to-app links (publish/fetch/retrieve/persist) are excluded to focus.
+    // Identity only (who are you?). Three contexts:
+    //  - Defra staff: Designer logs in via Entra (OIDC); Manager verifies the
+    //    staff token against Entra JWKS. Session held in the Redis caches.
+    //  - Citizens: no login - only a temporary anonymous local session.
+    //  - External data consumers: machine clients whose tokens the submission
+    //    API verifies against AWS Cognito (JWKS).
+    // Non-auth app-to-app links are excluded to keep the view focused.
 
-    include worker, citizen, aad
+    include worker, citizen, aad, cognito
 
-    group 'Authenticated (Defra staff)' {
-      include designer, designerCache, manager, entitlements, entitlementsDb, entitlementsAudit
+    // Entra is the identity authority for staff: Designer logs users in (OIDC),
+    // and every internal API verifies the presented token against Entra JWKS.
+    group 'Defra staff and internal APIs (Azure Entra)' {
+      include designer, designerCache, manager, entitlements, auditApi
     }
-    group 'Anonymous (citizen)' {
+    group 'Citizen (anonymous - no login)' {
       include runner, runnerCache
     }
-    group 'External data consumers (Cognito)' {
-      include submissionApi, cognito
+    // Submission API is dual-issuer: Entra for internal callers, Cognito for
+    // external data consumers.
+    group 'External data consumers (AWS Cognito)' {
+      include submissionApi
     }
 
     exclude
       runner   -> manager,
       designer -> manager,
+      designer -> entitlements,
+      manager  -> entitlements,
       designer -> submissionApi,
       runner   -> submissionApi
+  }
+
+  view authzFlow {
+    title 'Auth / Authorisation'
+    description 'What an authenticated party may do. Staff permissions are held in and enforced via the entitlements API (Designer reads/writes them, Manager checks them); external data consumers are scoped by their Cognito client to specific retrieval keys; citizens are anonymous with no permissions beyond submitting.'
+    autoLayout LeftRight
+    // Permissions only (what may you do?). Staff authorisation lives in the
+    // entitlements API + its store; changes are audited. (External-consumer
+    // scoping is enforced inside the submission API by Cognito client id - it
+    // has no distinct container, so it is described rather than drawn.)
+
+    include worker, designer, manager
+
+    group 'Entitlements API' {
+      include entitlements, entitlementsDb, entitlementsAudit
+    }
+
+    exclude
+      designer -> manager
   }
 
   view submissionFlow {

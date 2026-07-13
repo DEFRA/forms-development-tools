@@ -14,7 +14,7 @@
     nodeSep: 110,
     rankSep: 150,
   },
-  hash: '5t4AiKABqXi4AzRwHlh9XcXFX-Wackdmy89vgSTWVOY',
+  hash: '4vkjIpZBxPeIKw6oLOkPkycW3vAny2rTmt931Ifx35A',
   bounds: {
     x: -4123,
     y: -1325,
@@ -270,40 +270,6 @@
       links: null,
     },
     {
-      id: 'aad',
-      parent: null,
-      level: 0,
-      children: [],
-      inEdges: [
-        '9jl563',
-      ],
-      outEdges: [],
-      title: 'Azure Entra (AAD)',
-      modelRef: 'aad',
-      shape: 'rectangle',
-      color: 'gray',
-      style: {
-        opacity: 15,
-        size: 'md',
-      },
-      tags: [
-        'thirdparty',
-      ],
-      kind: 'external',
-      x: -2617,
-      y: 2199,
-      width: 320,
-      height: 180,
-      labelBBox: {
-        x: 76,
-        y: 76,
-        width: 170,
-        height: 24,
-      },
-      navigateTo: null,
-      links: null,
-    },
-    {
       id: 'designerCache',
       parent: '@gr1',
       level: 1,
@@ -531,6 +497,7 @@
         '1jtk6sp',
       ],
       outEdges: [
+        'vvqi8t',
         '16oswv8',
         'bgzk5v',
         '1pdpahy',
@@ -706,6 +673,7 @@
         '1jtk6sp',
       ],
       outEdges: [
+        'vvqi8t',
         '16oswv8',
         '201t0s',
         '14pxzwn',
@@ -887,6 +855,41 @@
         x: 118,
         y: 72,
         width: 125,
+        height: 24,
+      },
+      navigateTo: null,
+      links: null,
+    },
+    {
+      id: 'aad',
+      parent: null,
+      level: 0,
+      children: [],
+      inEdges: [
+        '9jl563',
+        'vvqi8t',
+      ],
+      outEdges: [],
+      title: 'Azure Entra (AAD)',
+      modelRef: 'aad',
+      shape: 'rectangle',
+      color: 'gray',
+      style: {
+        opacity: 15,
+        size: 'md',
+      },
+      tags: [
+        'thirdparty',
+      ],
+      kind: 'external',
+      x: -2561,
+      y: 2174,
+      width: 320,
+      height: 180,
+      labelBBox: {
+        x: 75,
+        y: 76,
+        width: 170,
         height: 24,
       },
       navigateTo: null,
@@ -1839,8 +1842,8 @@
         ],
       ],
       labelBBox: {
-        x: -2453,
-        y: 797,
+        x: -2431,
+        y: 787,
         width: 93,
         height: 18,
       },
@@ -1853,16 +1856,16 @@
       head: 'normal',
       controlPoints: [
         {
-          x: -2461,
-          y: 516,
+          x: -2446,
+          y: 509,
         },
         {
-          x: -2461,
-          y: 1531,
+          x: -2422,
+          y: 1513,
         },
         {
-          x: -2459,
-          y: 1820,
+          x: -2413,
+          y: 1799,
         },
       ],
       isLabelCustomized: false,
@@ -1892,7 +1895,7 @@
       },
       parent: null,
       relations: [
-        'ks61pe',
+        'linqzn',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1934,7 +1937,7 @@
       },
       parent: null,
       relations: [
-        '1furrur',
+        'x0b682',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1979,7 +1982,7 @@
       labelBBox: null,
       parent: '@gr1',
       relations: [
-        'fooapz',
+        '12ydg2u',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2020,7 +2023,7 @@
       labelBBox: null,
       parent: '@gr1',
       relations: [
-        '12xgsnb',
+        'qvbajo',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2098,6 +2101,48 @@
       tags: null,
     },
     {
+      id: 'vvqi8t',
+      source: 'manager',
+      target: 'aad',
+      label: 'Verify staff token (JWKS)',
+      points: [
+        [
+          -1718,
+          874,
+        ],
+        [
+          -1948,
+          1316,
+        ],
+      ],
+      labelBBox: {
+        x: -1695,
+        y: 863,
+        width: 160,
+        height: 18,
+      },
+      parent: null,
+      relations: [
+        'opz4t6',
+      ],
+      color: 'gray',
+      line: 'dashed',
+      head: 'normal',
+      controlPoints: [
+        {
+          x: -1695,
+          y: 863,
+        },
+        {
+          x: -1914,
+          y: 1301,
+        },
+      ],
+      isLabelCustomized: false,
+      navigateTo: null,
+      tags: null,
+    },
+    {
       id: '16oswv8',
       source: 'manager',
       target: 'govNotify',
@@ -2120,7 +2165,7 @@
       },
       parent: null,
       relations: [
-        '1q6v7i8',
+        '1ce0jyb',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2165,7 +2210,7 @@
       labelBBox: null,
       parent: '@gr2',
       relations: [
-        '1i2fahb',
+        '1p0iw3y',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2206,7 +2251,7 @@
       labelBBox: null,
       parent: '@gr2',
       relations: [
-        'rv8291',
+        '585z2i',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2285,7 +2330,7 @@
       },
       parent: null,
       relations: [
-        '1cfoysx',
+        '11bfjg2',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2327,7 +2372,7 @@
       },
       parent: null,
       relations: [
-        'yxwlix',
+        'etei46',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2369,7 +2414,7 @@
       },
       parent: null,
       relations: [
-        'murnm0',
+        'bneduo',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2431,7 +2476,7 @@
       },
       parent: null,
       relations: [
-        'yvcv2z',
+        'quyz0a',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2546,7 +2591,7 @@
       labelBBox: null,
       parent: '@gr3',
       relations: [
-        '1nnystn',
+        '1qeah6',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2587,7 +2632,7 @@
       labelBBox: null,
       parent: '@gr3',
       relations: [
-        'si4bq8',
+        'e9b6kv',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2625,7 +2670,7 @@
       },
       parent: '@gr3',
       relations: [
-        '138dvct',
+        'npt95o',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2687,8 +2732,8 @@
       },
       parent: null,
       relations: [
-        'ncv36',
         '1059c4l',
+        'mfjqzo',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2738,7 +2783,7 @@
       },
       parent: null,
       relations: [
-        'c2fhw1',
+        '3urm5s',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2753,7 +2798,7 @@
           y: -514,
         },
       ],
-      isLabelCustomized: true,
+      isLabelCustomized: false,
       navigateTo: null,
       tags: null,
     },
@@ -2783,7 +2828,7 @@
       labelBBox: null,
       parent: '@gr4',
       relations: [
-        '1vhr6kg',
+        '1f613my',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2824,7 +2869,7 @@
       labelBBox: null,
       parent: '@gr4',
       relations: [
-        'u0qk3l',
+        '14j5c2o',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2870,7 +2915,7 @@
       },
       parent: null,
       relations: [
-        '1fo60s6',
+        's3ti3i',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2928,7 +2973,7 @@
       },
       parent: null,
       relations: [
-        '199wopq',
+        '1i0rv5p',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2974,8 +3019,8 @@
       },
       parent: null,
       relations: [
-        '1bcrey2',
-        '1yq5fpq',
+        '1ynqlaj',
+        '1dz03ft',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3017,7 +3062,7 @@
       },
       parent: null,
       relations: [
-        '1t9dz0g',
+        '108zny9',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3059,7 +3104,7 @@
       },
       parent: null,
       relations: [
-        'fyz6gb',
+        '18f0b70',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3104,7 +3149,7 @@
       labelBBox: null,
       parent: '@gr5',
       relations: [
-        'hapwx4',
+        'oghi17',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3145,7 +3190,7 @@
       labelBBox: null,
       parent: '@gr5',
       relations: [
-        'podbpf',
+        'xao9s2',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3186,18 +3231,18 @@
       labelBBox: null,
       parent: null,
       relations: [
-        'yl896k',
+        '1bynbsv',
       ],
       color: 'gray',
       line: 'dashed',
       head: 'normal',
-      isLabelCustomized: false,
       controlPoints: [
         {
           x: -251,
           y: 1642,
         },
       ],
+      isLabelCustomized: false,
       navigateTo: null,
       tags: null,
     },
@@ -3219,7 +3264,7 @@
       labelBBox: null,
       parent: '@gr5',
       relations: [
-        '1kxzq7j',
+        '13px5ke',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3264,7 +3309,7 @@
       labelBBox: null,
       parent: '@gr6',
       relations: [
-        'tx17ii',
+        '1af1ujx',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3329,7 +3374,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        '1lvxw37',
+        'dfwzjm',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3386,7 +3431,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        '1dss284',
+        't7kxif',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3439,7 +3484,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        'xz2kym',
+        '1dler33',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3480,7 +3525,7 @@
       labelBBox: null,
       parent: '@gr6',
       relations: [
-        'db61d9',
+        '1ciqywy',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3521,7 +3566,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        '1nbt3fw',
+        'lxwstp',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3562,7 +3607,7 @@
       labelBBox: null,
       parent: '@gr7',
       relations: [
-        '1jfowgb',
+        '1r351nx',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3603,7 +3648,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        '1l7wiqq',
+        'pdtoeb',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3656,7 +3701,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        'a2jcco',
+        'mw8ikr',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3701,7 +3746,7 @@
       labelBBox: null,
       parent: '@gr8',
       relations: [
-        'jbxkhb',
+        '1l7aytq',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3742,7 +3787,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        '9qf47',
+        'jcu7xc',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3783,7 +3828,7 @@
       labelBBox: null,
       parent: null,
       relations: [
-        'hoixig',
+        '1m5j5vt',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3824,7 +3869,7 @@
       labelBBox: null,
       parent: '@gr9',
       relations: [
-        'a98pi',
+        'hkpeqf',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3865,7 +3910,7 @@
       labelBBox: null,
       parent: '@gr9',
       relations: [
-        '1fm7kso',
+        'cjl8tn',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3906,7 +3951,7 @@
       labelBBox: null,
       parent: '@gr9',
       relations: [
-        '1o93nlu',
+        'y5l2g3',
       ],
       color: 'gray',
       line: 'dashed',

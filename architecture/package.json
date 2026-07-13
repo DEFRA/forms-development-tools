@@ -1,0 +1,16 @@
+{
+  "name": "forms-architecture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LikeC4 architecture model for Defra Forms",
+  "scripts": {
+    "start": "likec4 start .",
+    "build": "likec4 build -o dist .",
+    "validate": "likec4 validate .",
+    "export:png": "likec4 export png -o out .",
+    "export:json": "likec4 export json -o model.json ."
+  },
+  "devDependencies": {
+    "likec4": "1.58.0"
+  }
+}

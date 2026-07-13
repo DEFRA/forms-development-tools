@@ -1,0 +1,179 @@
+// Defra Forms - architecture model
+// Converted from forms-architecture.drawio (embedded mxGraphModel).
+// Model-first: elements + relationships are declared once; views are generated.
+
+specification {
+
+  // ---- element kinds ----------------------------------------------------
+  element actor    { style { shape person } }
+  element system
+  element app       { style { shape browser } }   // frontend
+  element service   { style { shape rectangle } } // backend API
+  element listener  { style { shape rectangle } }
+  // data stores (persistence layer) share one colour so they read as separate
+  // from the services; product is shown via icons (Mongo default; Dynamo/S3 per-element)
+  element db        { style { shape cylinder color amber icon tech:mongodb } }
+  element cache     { style { shape cylinder color amber icon tech:redis } }
+  element storage   { style { shape storage  color amber icon aws:simple-storage-service } }
+  // messaging layer - its own colour + SQS/SNS icons
+  element queue     { style { shape queue color green icon tech:aws-sqs } }
+  element topic     { style { shape queue color green icon tech:aws-sns } }
+  element external  { style { shape rectangle color secondary } }
+
+  // ---- ownership semantics (your legend) --------------------------------
+  tag thirdparty   // grey box: owned/operated by a third party
+  tag example      // dotted: illustrative, not a concrete component
+}
+
+model {
+
+  worker  = actor 'Defra worker'
+  citizen = actor 'Citizen'
+
+  // third-party / external systems
+  aad         = external 'Azure Entra (AAD)'          { #thirdparty }
+  govNotify   = external 'GOV.UK Notify'              { #thirdparty }
+  cdpUploader = external 'Defra file upload service'  {
+    #thirdparty
+    description 'CDP uploader - scans, delivers to S3, calls back'
+  }
+  externalApi = external '[ external API ]'           { #thirdparty #example }
+
+  // Defra Forms platform (everything inside the AWS boundary)
+  forms = system 'Defra Forms' {
+
+    // --- applications (C4 containers) ---
+    designer      = app 'Forms Designer'             { description 'frontend' }
+    manager       = service 'Forms Manager'          { description 'backend' }
+    runner        = app 'Forms Runner' {
+      description 'frontend'
+      // forms-engine-plugin is a library the runner hosts -> documented as technology,
+      // not a nested box (keeps Forms Runner first-class like the other services)
+      technology 'forms-engine-plugin'
+    }
+    entitlements  = service 'Forms entitlements API' { description 'backend' }
+    submissionApi = service 'Forms submission API'   { description 'backend' }
+    auditApi      = service 'Forms audit API'        { description 'backend' }
+
+    // --- data stores (C4 containers, peers of the apps) ---
+    designerCache     = cache 'Cache'
+    designerAudit     = db 'Audit records' { icon tech:aws-dynamodb }
+    managerDb         = db 'DB'
+    managerAudit      = db 'Audit records' { icon tech:aws-dynamodb }
+    runnerCache       = cache 'Cache'
+    entitlementsDb    = db 'DB'
+    entitlementsAudit = db 'Audit records' { icon tech:aws-dynamodb }
+    submissionMeta    = db 'Metadata'
+    submissionFiles   = storage 'Files'
+    auditMeta         = db 'Metadata'
+
+    // --- queues / topics / listeners ---
+    submissions = topic 'Submissions'
+    auditEvents = topic 'Audit events'
+
+    notifyQueue        = queue 'Notify queue w/ DLQ'
+    notifyListener     = listener 'Forms Notify Listener'
+    sharepointQueue    = queue 'Sharepoint queue w/ DLQ'
+    sharepointListener = listener 'Forms Sharepoint Listener'
+
+    // The dotted topic -> queue -> listener -> external API chain is a
+    // reusable *pattern* (drawn twice in the diagram as examples).
+    exTopic    = topic '[topic]'        { #example }
+    exQueue    = queue '[queue] w/ DLQ' { #example }
+    exListener = listener '[ listener ]' { #example }
+  }
+
+  // ---- relationships ----------------------------------------------------
+
+  // users
+  worker  -> designer
+  citizen -> runner
+
+  // app-to-app
+  runner   -> manager       'Fetch form'
+  designer -> manager       'Publish form'
+  designer -> aad           'Authentication'
+  designer -> entitlements  'Fetch user entitlements'
+  designer -> entitlements  'Set user entitlements'
+  designer -> submissionApi 'Retrieve files submitted by users'
+  manager  -> entitlements
+
+  // app-to-store (reads / writes)
+  designer      -> designerCache
+  designer      -> designerAudit
+  manager       -> managerDb
+  manager       -> managerAudit
+  runner        -> runnerCache
+  entitlements  -> entitlementsDb
+  entitlements  -> entitlementsAudit
+  submissionApi -> submissionMeta
+  submissionApi -> submissionFiles
+  auditApi      -> auditMeta
+
+  // submission / upload flow
+  runner      -> submissions
+  runner      -> cdpUploader   'Upload files'
+  runner      -> exTopic
+  cdpUploader -> submissionApi 'Scan, deliver to S3 and make a callback'
+
+  // audit records fan into the audit-events queue, consumed by the audit API
+  designerAudit     -> auditEvents
+  managerAudit      -> auditEvents
+  entitlementsAudit -> auditEvents
+  auditEvents       -> auditApi
+
+  // notify / sharepoint delivery
+  submissions        -> notifyQueue
+  notifyQueue        -> notifyListener
+  notifyListener     -> govNotify
+  submissions        -> sharepointQueue
+  sharepointQueue    -> sharepointListener
+  sharepointListener -> externalApi 'e.g. Sharepoint'
+
+  // example integration pattern
+  exTopic    -> exQueue
+  exQueue    -> exListener
+  exListener -> externalApi
+}
+
+views {
+
+  view index {
+    title 'Landscape - actors, platform, external systems'
+    autoLayout LeftRight 200 140
+    include *
+  }
+
+  view platform of forms {
+    title 'Defra Forms - internals'
+    autoLayout LeftRight 150 110
+    include *
+  }
+
+  view submissionFlow {
+    title 'Submission to Notify / Sharepoint flow'
+    autoLayout LeftRight
+    include citizen, runner, submissions,
+            notifyQueue, notifyListener, govNotify,
+            sharepointQueue, sharepointListener,
+            cdpUploader, submissionApi, submissionMeta, submissionFiles
+  }
+
+  view auditFlow {
+    title 'Audit event flow'
+    autoLayout LeftRight
+    include designer, manager, entitlements,
+            designerAudit, managerAudit, entitlementsAudit,
+            auditEvents, auditApi, auditMeta
+  }
+
+  // Style by ownership - applies across every generated view.
+  style element.tag == #thirdparty {
+    color gray
+  }
+  style element.tag == #example {
+    color muted
+    border dotted
+    opacity 40%
+  }
+}

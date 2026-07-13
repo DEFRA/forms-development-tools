@@ -5,14 +5,14 @@
   _stage: 'layouted',
   sourcePath: 'forms.likec4',
   description: null,
-  title: 'Defra Forms - internals',
+  title: 'Defra Forms - platform overview',
   id: 'index',
   autoLayout: {
     direction: 'LR',
     nodeSep: 110,
     rankSep: 150,
   },
-  hash: 'YrwaB59m7YSTFm1WpGxL54vXKqSnZb2clLzdRQomXCo',
+  hash: 'Yl5M8pDfPYnVOQJU-iKN2HMWqhRYoD1Tj5RtQwbfX-c',
   bounds: {
     x: -4123,
     y: -1019,
@@ -142,6 +142,7 @@
         'l8n5z0',
       ],
       outEdges: [
+        '1uxzj8y',
         'qeah3t',
         '1jtk6sp',
         '1x8k50q',
@@ -203,7 +204,7 @@
       width: 320,
       height: 180,
       labelBBox: {
-        x: 87,
+        x: 86,
         y: 65,
         width: 146,
         height: 47,
@@ -220,6 +221,7 @@
         'l8n5z0',
       ],
       outEdges: [
+        '1uxzj8y',
         'qeah3t',
         '1jtk6sp',
         'kjx1pi',
@@ -357,6 +359,40 @@
       links: null,
     },
     {
+      id: 'govukPay',
+      parent: null,
+      level: 0,
+      children: [],
+      inEdges: [
+        '1uxzj8y',
+      ],
+      outEdges: [],
+      title: 'GOV.UK Pay',
+      modelRef: 'govukPay',
+      shape: 'rectangle',
+      color: 'gray',
+      style: {
+        opacity: 15,
+        size: 'md',
+      },
+      tags: [
+        'thirdparty',
+      ],
+      kind: 'external',
+      x: 323,
+      y: 1059,
+      width: 320,
+      height: 180,
+      labelBBox: {
+        x: 99,
+        y: 76,
+        width: 122,
+        height: 24,
+      },
+      navigateTo: null,
+      links: null,
+    },
+    {
       id: 'cdpUploader',
       parent: null,
       level: 0,
@@ -387,7 +423,7 @@
       width: 324,
       height: 180,
       labelBBox: {
-        x: 18,
+        x: 17,
         y: 56,
         width: 288,
         height: 65,
@@ -460,9 +496,9 @@
       width: 320,
       height: 180,
       labelBBox: {
-        x: 116,
+        x: 115,
         y: 76,
-        width: 119,
+        width: 120,
         height: 24,
       },
       navigateTo: null,
@@ -496,7 +532,7 @@
       width: 320,
       height: 172,
       labelBBox: {
-        x: 88,
+        x: 87,
         y: 72,
         width: 185,
         height: 24,
@@ -648,7 +684,7 @@
       width: 951,
       height: 282,
       labelBBox: {
-        x: 5,
+        x: 6,
         y: 0,
         width: 44,
         height: 15,
@@ -723,7 +759,7 @@
       width: 320,
       height: 172,
       labelBBox: {
-        x: 118,
+        x: 117,
         y: 72,
         width: 125,
         height: 24,
@@ -978,9 +1014,9 @@
       width: 320,
       height: 172,
       labelBBox: {
-        x: 74,
+        x: 75,
         y: 72,
-        width: 211,
+        width: 210,
         height: 24,
       },
       navigateTo: null,
@@ -1011,9 +1047,9 @@
       width: 320,
       height: 180,
       labelBBox: {
-        x: 102,
+        x: 103,
         y: 76,
-        width: 146,
+        width: 145,
         height: 24,
       },
       navigateTo: null,
@@ -1360,7 +1396,7 @@
       width: 320,
       height: 180,
       labelBBox: {
-        x: 92,
+        x: 93,
         y: 76,
         width: 135,
         height: 24,
@@ -1472,7 +1508,7 @@
       width: 320,
       height: 180,
       labelBBox: {
-        x: 86,
+        x: 87,
         y: 65,
         width: 147,
         height: 47,
@@ -1522,7 +1558,7 @@
       target: 'designer',
       label: null,
       relations: [
-        'fvvc2g',
+        'os55ll',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1563,7 +1599,7 @@
       target: 'aad',
       label: 'Authentication',
       relations: [
-        'uttotq',
+        'xz6r2n',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1641,7 +1677,7 @@
       target: 'designerCache',
       label: null,
       relations: [
-        '1nyshk3',
+        '1csks5c',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1682,7 +1718,7 @@
       target: 'designerAudit',
       label: null,
       relations: [
-        '1cu5y3l',
+        'kbi68',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1723,7 +1759,7 @@
       target: 'manager',
       label: 'Publish form',
       relations: [
-        '4pgk2i',
+        '3s5agp',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1785,7 +1821,7 @@
       target: 'managerDb',
       label: null,
       relations: [
-        '1qc9l0r',
+        'wm625o',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1826,7 +1862,7 @@
       target: 'managerAudit',
       label: null,
       relations: [
-        'wgr0lj',
+        '11xpi06',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1867,7 +1903,7 @@
       target: 'runner',
       label: null,
       relations: [
-        '1x9xdzw',
+        'pvn83f',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1902,13 +1938,55 @@
       tags: null,
     },
     {
+      id: '1uxzj8y',
+      parent: null,
+      source: 'runner',
+      target: 'govukPay',
+      label: 'Take card payment (authorise + capture)',
+      relations: [
+        '1f8tr84',
+      ],
+      color: 'gray',
+      line: 'dashed',
+      head: 'normal',
+      points: [
+        [
+          629,
+          479,
+        ],
+        [
+          847,
+          725,
+        ],
+      ],
+      labelBBox: {
+        x: 265,
+        y: 413,
+        width: 257,
+        height: 18,
+      },
+      controlPoints: [
+        {
+          x: 265,
+          y: 413,
+        },
+        {
+          x: 330,
+          y: 632,
+        },
+      ],
+      isLabelCustomized: false,
+      navigateTo: null,
+      tags: null,
+    },
+    {
       id: 'qeah3t',
       parent: null,
       source: 'runner',
       target: 'cdpUploader',
       label: 'Upload files',
       relations: [
-        '16vmhml',
+        '1ivb0f2',
       ],
       color: 'gray',
       line: 'dashed',
@@ -1970,7 +2048,7 @@
       target: 'manager',
       label: 'Fetch form',
       relations: [
-        '1az8mcu',
+        '16dosv',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2040,7 +2118,7 @@
       target: 'runnerCache',
       label: null,
       relations: [
-        'ttizk7',
+        '1x0qfac',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2081,7 +2159,7 @@
       target: 'submissions',
       label: null,
       relations: [
-        'a14elj',
+        '14yhjc1',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2122,8 +2200,8 @@
       target: 'entitlements',
       label: '[...]',
       relations: [
-        '1hcydvl',
         '1jip53i',
+        '12klk9b',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2185,7 +2263,7 @@
       target: 'entitlements',
       label: 'Check entitlements',
       relations: [
-        '3b0u8n',
+        '1u4h0hi',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2235,7 +2313,7 @@
       target: 'entitlementsDb',
       label: null,
       relations: [
-        '1csvuum',
+        '178lw33',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2276,7 +2354,7 @@
       target: 'entitlementsAudit',
       label: null,
       relations: [
-        'bv4otg',
+        '1y4rrrf',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2317,7 +2395,7 @@
       target: 'submissionApi',
       label: 'Scan, deliver to S3 and make a callback',
       relations: [
-        'fiyeqh',
+        'pxbfh7',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2363,7 +2441,7 @@
       target: 'submissionApi',
       label: 'Retrieve files submitted by users',
       relations: [
-        '8i6lg5',
+        '23oddn',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2433,7 +2511,7 @@
       target: 'submissionApi',
       label: 'Persist files',
       relations: [
-        '108wazx',
+        '1figsmj',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2475,7 +2553,7 @@
       target: 'submissionMeta',
       label: null,
       relations: [
-        '1wfqr0j',
+        'rnl8pu',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2516,7 +2594,7 @@
       target: 'submissionFiles',
       label: null,
       relations: [
-        '1o9r6q2',
+        'blq3oi',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2557,7 +2635,7 @@
       target: 'auditMeta',
       label: null,
       relations: [
-        'kmika2',
+        '1xqp91n',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2598,7 +2676,7 @@
       target: 'auditEvents',
       label: null,
       relations: [
-        'jglsz7',
+        'd41r0d',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2667,7 +2745,7 @@
       target: 'auditEvents',
       label: null,
       relations: [
-        'valnno',
+        'ntk3ii',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2732,7 +2810,7 @@
       target: 'auditEvents',
       label: null,
       relations: [
-        '17qyymq',
+        'befos9',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2777,7 +2855,7 @@
       target: 'auditApi',
       label: null,
       relations: [
-        'c2y3s1',
+        '1a6yqi2',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2818,7 +2896,7 @@
       target: 'notifyQueue',
       label: null,
       relations: [
-        '1xpw37p',
+        '1cflghz',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2859,7 +2937,7 @@
       target: 'notifyListener',
       label: null,
       relations: [
-        'qu8oy',
+        '1b8wse8',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2900,7 +2978,7 @@
       target: 'govNotify',
       label: null,
       relations: [
-        '10ags32',
+        'a3cnag',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2941,7 +3019,7 @@
       target: 'sharepointQueue',
       label: null,
       relations: [
-        '9vx9xg',
+        'dgnhfm',
       ],
       color: 'gray',
       line: 'dashed',
@@ -2998,7 +3076,7 @@
       target: 'sharepointListener',
       label: null,
       relations: [
-        'pcqg13',
+        'itosmd',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3039,7 +3117,7 @@
       target: 'sharepointApi',
       label: null,
       relations: [
-        '1mha4sv',
+        '1qxs4r1',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3080,7 +3158,7 @@
       target: 'exTopic',
       label: null,
       relations: [
-        '1flhotj',
+        '1snki3p',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3121,7 +3199,7 @@
       target: 'exQueue',
       label: null,
       relations: [
-        '1qnc2ai',
+        '1a0t9uc',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3162,7 +3240,7 @@
       target: 'exListener',
       label: null,
       relations: [
-        'k6f7es',
+        'eefn9m',
       ],
       color: 'gray',
       line: 'dashed',
@@ -3203,7 +3281,7 @@
       target: 'externalApi',
       label: null,
       relations: [
-        'zppo1u',
+        '1nbllzf',
       ],
       color: 'gray',
       line: 'dashed',

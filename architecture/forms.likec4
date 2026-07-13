@@ -215,6 +215,7 @@ views {
 
   view auditFlow {
     title 'Audit event flow'
+    description 'How audit records from each service fan into the audit-events topic and are consumed by the audit API.'
     autoLayout LeftRight
     // Focused on the audit pipeline. Store->topic and the consumer side are
     // predicate-driven (self-updating). The service->store links are listed as
@@ -232,6 +233,7 @@ views {
 
   view authFlow {
     title 'Authentication and authorisation'
+    description 'Who authenticates against what, and where authorisation is stored and enforced - three trust contexts (staff, anonymous citizens, external data consumers).'
     autoLayout LeftRight
     // Three trust contexts:
     //  - Defra staff: authenticate via AAD (OIDC), session held in the designer
@@ -262,6 +264,7 @@ views {
 
   view submissionFlow {
     title 'Submission / Form submission and delivery'
+    description 'The structure of a form submission - files, card payment, and delivery fanned out to Notify, Sharepoint and external consumers.'
     autoLayout LeftRight 150 110
     // A citizen submits a form on the Runner. Two things happen:
     //  - files are uploaded to the CDP uploader (virus-scanned), delivered to S3
@@ -301,6 +304,7 @@ views {
 
   dynamic view submissionSequence {
     title 'Submission / Form submission sequence'
+    description 'The ordered submission sequence and its guarantees - files persisted and any payment captured before any topic write.'
     autoLayout LeftRight
     // Guarantees enforced by forms-runner (only these three orderings are real):
     //  - a card payment is authorised (pre-auth) before it is captured

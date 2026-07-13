@@ -73,10 +73,6 @@ const config = {
           { text: 'GitHub', href: 'https://github.com/DEFRA/forms-development-tools' },
         ],
       },
-      homepage: {
-        getStartedHref: '/architecture-diagrams',
-        description: 'Documentation and tooling for developers working on the Defra Forms application suite.',
-      },
     },
   },
 };

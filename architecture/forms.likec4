@@ -263,22 +263,23 @@ views {
     description 'Who proves their identity, and how - Azure Entra (OIDC) for Defra staff, AWS Cognito (JWT) for external data consumers, and no login for citizens (an anonymous local session only).'
     autoLayout LeftRight
     // Identity only (who are you?). Three contexts:
-    //  - Defra staff: Designer logs in via Entra (OIDC); Manager verifies the
-    //    staff token against Entra JWKS. Session held in the Redis caches.
-    //  - Citizens: no login - only a temporary anonymous local session.
+    //  - Defra staff: Designer logs in via Entra (OIDC); the backend APIs verify
+    //    the presented staff token against Entra JWKS.
+    //  - Citizens: no login - anonymous.
     //  - External data consumers: machine clients whose tokens the submission
     //    API verifies against AWS Cognito (JWKS).
-    // Non-auth app-to-app links are excluded to keep the view focused.
+    // Session storage (Redis) is out of scope here; non-auth app-to-app links
+    // are excluded to keep the view focused.
 
     include worker, citizen, aad, cognito
 
     // Entra is the identity authority for staff: Designer logs users in (OIDC),
     // and every internal API verifies the presented token against Entra JWKS.
     group 'Defra staff and internal APIs (Azure Entra)' {
-      include designer, designerCache, manager, entitlements, auditApi
+      include designer, manager, entitlements, auditApi
     }
     group 'Citizen (anonymous - no login)' {
-      include runner, runnerCache
+      include runner
     }
     // Submission API is dual-issuer: Entra for internal callers, Cognito for
     // external data consumers.

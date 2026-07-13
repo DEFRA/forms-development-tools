@@ -131,6 +131,7 @@ model {
   designer -> entitlements  'Fetch user entitlements'
   designer -> entitlements  'Set user entitlements'
   designer -> submissionApi 'Retrieve files submitted by users'
+  designer -> auditApi      'Retrieve audit events (display in UI)'
   manager  -> entitlements  'Check entitlements'
 
   // external service integrations (address/maps, analytics, payments, notify, auth)
@@ -211,15 +212,19 @@ views {
     description 'Start here - how the system works at a glance. See the full architecture diagram for the complete reference.'
     autoLayout LeftRight 150 110
 
-    // Simplified primary view: core containers + the two user journeys + the key
-    // external systems. Datastores, messaging plumbing, audit, save-and-return,
-    // Cognito and analytics are deliberately left to the all-containers view and
-    // the focused flow views.
+    // Simplified primary view: every platform microservice + the two user journeys
+    // + the key external systems. Kept services-only: datastores, queues/topics,
+    // save-and-return, Cognito and analytics are deliberately left to the
+    // all-containers view and the focused flow views. The delivery listeners are
+    // shown by their outbound edge (Notify / Sharepoint); the audit API connects
+    // via Designer reading audit events for the UI (its audit-events topic feed
+    // lives in the audit flow view).
     include worker, citizen
-    include aad, ordnanceSurvey, govukPay, cdpUploader, govNotify
+    include aad, ordnanceSurvey, govukPay, cdpUploader, govNotify, sharepointApi
 
     group 'Defra Forms' {
       include designer, runner, manager, entitlements, submissionApi
+      include auditApi, notifyListener, sharepointListener
     }
 
     // hide secondary admin edges to keep the overview readable (the JWKS token-

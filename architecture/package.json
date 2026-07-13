@@ -6,6 +6,7 @@
   "scripts": {
     "start": "likec4 start .",
     "build": "likec4 build -o dist .",
+    "build:pages": "likec4 build -o dist --base /forms-development-tools/architecture/ .",
     "validate": "likec4 validate .",
     "export:png": "likec4 export png -o out .",
     "export:json": "likec4 export json -o model.json .",

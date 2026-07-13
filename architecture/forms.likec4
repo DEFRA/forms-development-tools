@@ -185,9 +185,18 @@ views {
   view auditFlow {
     title 'Audit event flow'
     autoLayout LeftRight
-    include designer, manager, entitlements,
-            designerAudit, managerAudit, entitlementsAudit,
-            auditEvents, auditApi, auditMeta
+    // Focused on the audit pipeline. Store->topic and the consumer side are
+    // predicate-driven (self-updating). The service->store links are listed as
+    // edges (not bare services) because LikeC4 predicates are single-hop - this
+    // gives each store its owning service for context while keeping unrelated
+    // app-to-app relationships out of the view.
+    include
+      designer     -> designerAudit,
+      manager      -> managerAudit,
+      entitlements -> entitlementsAudit,
+      * -> auditEvents,   // audit-records stores -> topic (self-updating)
+      auditEvents -> *,   // topic -> audit API
+      auditApi -> *       // audit API -> metadata
   }
 
   // Style by ownership - applies across every generated view.

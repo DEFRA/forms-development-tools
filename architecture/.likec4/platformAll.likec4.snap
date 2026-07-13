@@ -5,9 +5,9 @@
   _stage: 'layouted',
   sourcePath: 'forms.likec4',
   description: {
-    txt: 'The complete container-level reference - every service, datastore, queue and integration. See the architecture overview for a simpler introduction.',
+    txt: 'The complete container-level reference - every service, datastore, queue and integration. See the simplified architecture diagram for an introduction.',
   },
-  title: 'Defra Forms - all containers',
+  title: 'Full architecture diagram',
   id: 'platformAll',
   autoLayout: {
     direction: 'LR',

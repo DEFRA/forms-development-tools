@@ -171,8 +171,8 @@ views {
   // this is the default view (id `index`), so LikeC4 doesn't auto-generate
   // a separate redundant landscape view
   view index {
-    title 'Defra Forms - architecture overview'
-    description 'Start here - how the system works at a glance. The all-containers view has the full reference.'
+    title 'Simplified architecture diagram'
+    description 'Start here - how the system works at a glance. See the full architecture diagram for the complete reference.'
     autoLayout LeftRight 150 110
 
     // Simplified primary view: core containers + the two user journeys + the key
@@ -198,8 +198,8 @@ views {
 
   // the full container-level reference - every service, store, queue, integration
   view platformAll {
-    title 'Defra Forms - all containers'
-    description 'The complete container-level reference - every service, datastore, queue and integration. See the architecture overview for a simpler introduction.'
+    title 'Full architecture diagram'
+    description 'The complete container-level reference - every service, datastore, queue and integration. See the simplified architecture diagram for an introduction.'
     autoLayout LeftRight 150 110
 
     // ungrouped: actors + third-party endpoints.

@@ -38,9 +38,10 @@ model {
     description 'CDP uploader - scans, delivers to S3, calls back'
   }
   externalApi = external '[ external API ]'           { #thirdparty #example }
+  sharepointApi = external 'Sharepoint API'           { #thirdparty }
 
-  // Defra Forms platform (everything inside the AWS boundary)
-  forms = system 'Defra Forms' {
+  // Defra Forms platform - elements are top-level (no enclosing system) so the
+  // platform view can group them visually instead of showing a system boundary.
 
     // --- applications (C4 containers) ---
     designer      = app 'Forms Designer'             { description 'frontend' }
@@ -81,7 +82,6 @@ model {
     exTopic    = topic '[topic]'        { #example }
     exQueue    = queue '[queue] w/ DLQ' { #example }
     exListener = listener '[ listener ]' { #example }
-  }
 
   // ---- relationships ----------------------------------------------------
 
@@ -128,7 +128,7 @@ model {
   notifyListener     -> govNotify
   submissions        -> sharepointQueue
   sharepointQueue    -> sharepointListener
-  sharepointListener -> externalApi 'e.g. Sharepoint'
+  sharepointListener -> sharepointApi
 
   // example integration pattern
   exTopic    -> exQueue
@@ -138,16 +138,46 @@ model {
 
 views {
 
-  view index {
-    title 'Landscape - actors, platform, external systems'
-    autoLayout LeftRight 200 140
-    include *
-  }
-
-  view platform of forms {
+  view platform {
     title 'Defra Forms - internals'
     autoLayout LeftRight 150 110
-    include *
+
+    // ungrouped: actors + third-party endpoints.
+    // (do NOT use `include *` - it claims every node at top level and the
+    //  groups below end up empty; groups only hold what is included inside them)
+    include worker, citizen
+    include aad, govNotify, cdpUploader, sharepointApi
+
+    // each service grouped with the resources it owns
+    group 'Designer' {
+      include designer, designerCache, designerAudit
+    }
+    group 'Manager' {
+      include manager, managerDb, managerAudit
+    }
+    group 'Runner' {
+      include runner, runnerCache, submissions
+    }
+    group 'Entitlements' {
+      include entitlements, entitlementsDb, entitlementsAudit
+    }
+    group 'Submission' {
+      include submissionApi, submissionMeta, submissionFiles
+    }
+    group 'Audit' {
+      include auditApi, auditMeta, auditEvents
+    }
+
+    // messaging pipelines + the example integration pattern
+    group 'Notify' {
+      include notifyQueue, notifyListener
+    }
+    group 'Sharepoint' {
+      include sharepointQueue, sharepointListener
+    }
+    group 'Example' {
+      include exTopic, exQueue, exListener, externalApi
+    }
   }
 
   view submissionFlow {

@@ -96,7 +96,7 @@ model {
   designer -> entitlements  'Fetch user entitlements'
   designer -> entitlements  'Set user entitlements'
   designer -> submissionApi 'Retrieve files submitted by users'
-  manager  -> entitlements
+  manager  -> entitlements  'Check entitlements'
 
   // app-to-store (reads / writes)
   designer      -> designerCache
@@ -197,6 +197,29 @@ views {
       * -> auditEvents,   // audit-records stores -> topic (self-updating)
       auditEvents -> *,   // topic -> audit API
       auditApi -> *       // audit API -> metadata
+  }
+
+  view authFlow {
+    title 'Authentication and authorisation'
+    autoLayout LeftRight
+    // Two contrasting trust contexts:
+    //  - Defra staff: authenticate via AAD (OIDC), session held in the designer
+    //    cache, authorisation stored in and enforced via the entitlements API.
+    //  - Citizens: anonymous - no login, only a temporary local session.
+    // Non-auth app-to-app links (publish/fetch form) are excluded to keep focus.
+
+    include worker, citizen, aad
+
+    group 'Authenticated (Defra staff)' {
+      include designer, designerCache, manager, entitlements, entitlementsDb, entitlementsAudit
+    }
+    group 'Anonymous (citizen)' {
+      include runner, runnerCache
+    }
+
+    exclude
+      runner   -> manager,
+      designer -> manager
   }
 
   // Style by ownership - applies across every generated view.

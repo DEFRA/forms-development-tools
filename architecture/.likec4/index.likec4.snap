@@ -12,12 +12,12 @@
     nodeSep: 110,
     rankSep: 150,
   },
-  hash: 'cxXux-LTPa7tr6vTdqLuMF5W00RS2i093EnhYbMhYHk',
+  hash: 'O_SXK2Akz1RH-srnrF8gVZ61ruekMibnZBwYjEPh1ks',
   bounds: {
     x: -4123,
-    y: -1878,
+    y: -1019,
     width: 6948,
-    height: 5987,
+    height: 5128,
   },
   nodes: [
     {
@@ -71,8 +71,8 @@
       },
       tags: [],
       kind: 'actor',
-      x: -29,
-      y: -1858,
+      x: -47,
+      y: -992,
       width: 320,
       height: 180,
       labelBBox: {
@@ -1890,8 +1890,8 @@
       isLabelCustomized: false,
       controlPoints: [
         {
-          x: 121,
-          y: -958,
+          x: 111,
+          y: -513,
         },
       ],
       navigateTo: null,

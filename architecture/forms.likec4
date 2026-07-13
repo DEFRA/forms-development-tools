@@ -34,6 +34,9 @@ model {
   aad         = external 'Azure Entra (AAD)'          { #thirdparty }
   govNotify   = external 'GOV.UK Notify'              { #thirdparty }
   govukPay    = external 'GOV.UK Pay'                 { #thirdparty }
+  ordnanceSurvey  = external 'Ordnance Survey API'    { #thirdparty }
+  googleAnalytics = external 'Google Analytics'       { #thirdparty }
+  cognito     = external 'AWS Cognito'                { #thirdparty }
   cdpUploader = external 'Defra file upload service'  {
     #thirdparty
     description 'CDP uploader - scans, delivers to S3, calls back'
@@ -71,12 +74,14 @@ model {
 
     // --- queues / topics / listeners ---
     submissions = topic 'Submissions'
+    saveTopic   = topic 'Save and return'
     auditEvents = topic 'Audit events'
 
     notifyQueue        = queue 'Notify queue w/ DLQ'
     notifyListener     = listener 'Forms Notify Listener'
     sharepointQueue    = queue 'Sharepoint queue w/ DLQ'
     sharepointListener = listener 'Forms Sharepoint Listener'
+    saveQueue          = queue 'Save and return queue'
 
     // The dotted topic -> queue -> listener -> external API chain is a
     // reusable *pattern* (drawn twice in the diagram as examples).
@@ -99,6 +104,16 @@ model {
   designer -> submissionApi 'Retrieve files submitted by users'
   manager  -> entitlements  'Check entitlements'
 
+  // external service integrations (address/maps, analytics, payments, notify, auth)
+  runner        -> ordnanceSurvey  'Address lookup and maps'
+  designer      -> ordnanceSurvey  'Maps (geospatial)'
+  runner        -> googleAnalytics 'Analytics'
+  designer      -> googleAnalytics 'Analytics'
+  designer      -> govukPay        'Validate API key'
+  manager       -> govNotify       'Email form team (form offline)'
+  submissionApi -> govNotify       'Emails (download links, save and return)'
+  submissionApi -> cognito         'Verify external consumer tokens'
+
   // app-to-store (reads / writes)
   designer      -> designerCache
   designer      -> designerAudit
@@ -120,6 +135,13 @@ model {
   runner      -> submissions
   runner      -> exTopic
   cdpUploader -> submissionApi 'Scan, deliver to S3 and make a callback'
+
+  // save and return (magic link): runner publishes a save event to its own owned
+  // topic, consumed into the submission API, which emails a resume link via Notify
+  runner    -> saveTopic     'Save progress'
+  saveTopic -> saveQueue
+  saveQueue -> submissionApi
+  runner    -> submissionApi 'Save / resume via magic link'
 
   // audit records fan into the audit-events queue, consumed by the audit API
   designerAudit     -> auditEvents
@@ -153,7 +175,7 @@ views {
     // (do NOT use `include *` - it claims every node at top level and the
     //  groups below end up empty; groups only hold what is included inside them)
     include worker, citizen
-    include aad, govNotify, govukPay, cdpUploader, sharepointApi
+    include aad, govNotify, govukPay, ordnanceSurvey, googleAnalytics, cognito, cdpUploader, sharepointApi
 
     // each service grouped with the resources it owns
     group 'Designer' {
@@ -163,7 +185,7 @@ views {
       include manager, managerDb, managerAudit
     }
     group 'Runner' {
-      include runner, runnerCache, submissions
+      include runner, runnerCache, submissions, saveTopic
     }
     group 'Entitlements' {
       include entitlements, entitlementsDb, entitlementsAudit
@@ -181,6 +203,9 @@ views {
     }
     group 'Sharepoint' {
       include sharepointQueue, sharepointListener
+    }
+    group 'Save and return' {
+      include saveQueue
     }
     group 'Example' {
       include exTopic, exQueue, exListener, externalApi
@@ -207,11 +232,13 @@ views {
   view authFlow {
     title 'Authentication and authorisation'
     autoLayout LeftRight
-    // Two contrasting trust contexts:
+    // Three trust contexts:
     //  - Defra staff: authenticate via AAD (OIDC), session held in the designer
     //    cache, authorisation stored in and enforced via the entitlements API.
     //  - Citizens: anonymous - no login, only a temporary local session.
-    // Non-auth app-to-app links (publish/fetch form) are excluded to keep focus.
+    //  - External data consumers: machine clients whose access tokens the
+    //    submission API verifies against AWS Cognito (JWKS).
+    // Non-auth app-to-app links (publish/fetch/retrieve/persist) are excluded to focus.
 
     include worker, citizen, aad
 
@@ -221,10 +248,15 @@ views {
     group 'Anonymous (citizen)' {
       include runner, runnerCache
     }
+    group 'External data consumers (Cognito)' {
+      include submissionApi, cognito
+    }
 
     exclude
       runner   -> manager,
-      designer -> manager
+      designer -> manager,
+      designer -> submissionApi,
+      runner   -> submissionApi
   }
 
   view submissionFlow {

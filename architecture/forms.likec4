@@ -169,6 +169,7 @@ views {
   // a separate redundant landscape view
   view index {
     title 'Defra Forms - platform overview'
+    description 'Start here - the primary overview of the whole platform'
     autoLayout LeftRight 150 110
 
     // ungrouped: actors + third-party endpoints.

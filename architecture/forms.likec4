@@ -33,6 +33,7 @@ model {
   // third-party / external systems
   aad         = external 'Azure Entra (AAD)'          { #thirdparty }
   govNotify   = external 'GOV.UK Notify'              { #thirdparty }
+  govukPay    = external 'GOV.UK Pay'                 { #thirdparty }
   cdpUploader = external 'Defra file upload service'  {
     #thirdparty
     description 'CDP uploader - scans, delivers to S3, calls back'
@@ -114,6 +115,7 @@ model {
   // ordering (enforced in forms-runner, shown in the submissionSequence view):
   // upload temporary file -> persist -> publish owned topic -> publish extra topics
   runner      -> cdpUploader   'Upload files'
+  runner      -> govukPay      'Take card payment (authorise + capture)'
   runner      -> submissionApi 'Persist files'
   runner      -> submissions
   runner      -> exTopic
@@ -151,7 +153,7 @@ views {
     // (do NOT use `include *` - it claims every node at top level and the
     //  groups below end up empty; groups only hold what is included inside them)
     include worker, citizen
-    include aad, govNotify, cdpUploader, sharepointApi
+    include aad, govNotify, govukPay, cdpUploader, sharepointApi
 
     // each service grouped with the resources it owns
     group 'Designer' {
@@ -242,6 +244,9 @@ views {
     group 'Files (most forms)' {
       include cdpUploader, submissionApi, submissionMeta, submissionFiles
     }
+    group 'Payment (optional)' {
+      include govukPay
+    }
     group 'Notify (all forms)' {
       include notifyQueue, notifyListener, govNotify
     }
@@ -252,10 +257,10 @@ views {
       include exTopic, exQueue, exListener, externalApi
     }
 
-    // optional Sharepoint delivery is de-emphasised so the always-on Notify path
-    // and the file path read as primary. (The external pattern is already dotted
-    // via the global #example style.)
-    style sharepointQueue, sharepointListener, sharepointApi {
+    // optional paths (Sharepoint delivery, card payment) are de-emphasised so the
+    // always-on Notify path and the file path read as primary. (The external
+    // pattern is already dotted via the global #example style.)
+    style sharepointQueue, sharepointListener, sharepointApi, govukPay {
       border dotted
       opacity 40%
     }
@@ -264,17 +269,26 @@ views {
   dynamic view submissionSequence {
     title 'Submission / Form submission sequence'
     autoLayout LeftRight
-    // The order matters and is guaranteed by forms-runner: a user's file is only
-    // held temporarily until it is persisted in forms-submission-api. Nothing is
-    // published to any topic until persistence has completed - so downstream
-    // consumers never see an event whose files are not yet handled. The owned
-    // submission topic is written first, then any additional per-form topics.
+    // Guarantees enforced by forms-runner (only these three orderings are real):
+    //  - a card payment is authorised (pre-auth) before it is captured
+    //  - files are persisted AND any payment captured before ANY topic write, so
+    //    downstream consumers never see an event whose external state is unhandled
+    //  - the owned submission topic is written before any additional per-form topics
+    // The filling-phase steps (upload, authorise) are typical; their exact order is
+    // form-dependent. Payment steps apply only to forms configured with a payment.
 
-    runner        -> cdpUploader     'Upload file (held as temporary)'
-    runner        -> submissionApi   'Persist files'
-    submissionApi -> submissionFiles 'Store - files now guaranteed handled'
-    runner        -> submissions     'Publish (owned submission topic)'
-    runner        -> exTopic         'Publish (additional topic, if configured per form)'
+    runner -> cdpUploader 'Upload file (held as temporary)'
+    runner -> govukPay    'Authorise payment - pre-auth, user pays on GOV.UK Pay (if payment configured)'
+
+    // on submit: finalise external state before any topic write. Persist and capture
+    // are peers (order between them is not significant) - shown as parallel steps.
+    parallel {
+      runner -> submissionApi 'Persist files'
+      runner -> govukPay      'Capture payment - money taken now (if payment configured)'
+    }
+
+    runner -> submissions 'Publish (owned submission topic)'
+    runner -> exTopic     'Publish (additional topic, if configured per form)'
   }
 
   // Style by ownership - applies across every generated view.

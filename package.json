@@ -1,0 +1,37 @@
+{
+  "name": "forms-development-tools-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Forms development microsite (Docusaurus + LikeC4 architecture diagrams)",
+  "scripts": {
+    "docs:dev": "docusaurus start",
+    "docs:build": "docusaurus build",
+    "docs:build:likec4": "cd architecture && npm run build:pages",
+    "docs:build:all": "npm run docs:build && npm run docs:build:likec4 && mkdir -p build/architecture && cp -r architecture/dist/. build/architecture/",
+    "docs:serve": "docusaurus serve",
+    "docs:clear": "docusaurus clear"
+  },
+  "dependencies": {
+    "@defra/docusaurus-theme-govuk": "^0.0.22-alpha",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/plugin-content-docs": "^3.10.1",
+    "@docusaurus/theme-common": "^3.10.1",
+    "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "@mdx-js/react": "^3.1.1",
+    "accessible-autocomplete": "^3.0.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 5 safari version"
+    ]
+  }
+}

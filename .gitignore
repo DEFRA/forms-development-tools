@@ -5,3 +5,9 @@ tmp.env
 .DS_Store
 logs.txt
 image-versions.txt
+
+# Docusaurus microsite
+node_modules/
+build/
+.docusaurus/
+dist/

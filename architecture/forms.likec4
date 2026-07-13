@@ -44,6 +44,17 @@ model {
   externalApi = external '[ external API ]'           { #thirdparty #example }
   sharepointApi = external 'Sharepoint API'           { #thirdparty }
 
+  // L1 proxy: a single 'Defra Forms' box for the system-context view only. The
+  // platform's containers are declared top-level (below), NOT nested inside this box:
+  // nesting them under a system makes LikeC4 draw the boundary in the container views
+  // too, which absorbs the per-service view-groups and empties them (breaks platformAll
+  // and the Auth flows). So the context edges are authored on this proxy and shown only
+  // in systemContext (formsPlatform appears in no other view). Keep these edges in step
+  // with the container-level integrations below.
+  formsPlatform = system 'Defra Forms' {
+    description 'Create, publish and run digital forms for Defra'
+  }
+
   // Defra Forms platform - elements are top-level (no enclosing system) so the
   // platform view can group them visually instead of showing a system boundary.
 
@@ -90,6 +101,20 @@ model {
     exListener = listener '[ listener ]' { #example }
 
   // ---- relationships ----------------------------------------------------
+
+  // system context (L1): authored on the formsPlatform proxy, rendered only in the
+  // systemContext view. Curated summaries of the container-level integrations below.
+  worker  -> formsPlatform 'Designs and manages forms'
+  citizen -> formsPlatform 'Completes and submits forms'
+  formsPlatform -> aad             'Authentication and token verification'
+  formsPlatform -> govNotify       'Emails (notifications, download links)'
+  formsPlatform -> govukPay        'Card payments'
+  formsPlatform -> ordnanceSurvey  'Address lookup and maps'
+  formsPlatform -> googleAnalytics 'Analytics'
+  formsPlatform -> cognito         'Verify external consumer tokens'
+  formsPlatform -> cdpUploader     'Upload files'
+  cdpUploader   -> formsPlatform   'Scan, deliver to S3 and callback'
+  formsPlatform -> sharepointApi   'Deliver submissions'
 
   // users
   worker  -> designer
@@ -167,6 +192,17 @@ model {
 }
 
 views {
+
+  view systemContext {
+    title 'System context'
+    description 'Who uses Defra Forms and which external systems it depends on - the single-box starting point above the container diagrams.'
+    autoLayout LeftRight 150 110
+
+    // C4 Level 1: the whole platform as one box, users and third parties around it.
+    include worker, citizen
+    include formsPlatform
+    include aad, govNotify, govukPay, ordnanceSurvey, googleAnalytics, cognito, cdpUploader, sharepointApi
+  }
 
   // this is the default view (id `index`), so LikeC4 doesn't auto-generate
   // a separate redundant landscape view

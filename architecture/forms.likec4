@@ -241,7 +241,7 @@ views {
   }
 
   view auditFlow {
-    title 'Audit event flow'
+    title 'Misc / Audit event flow'
     description 'How audit records from each service fan into the audit-events topic and are consumed by the audit API.'
     autoLayout LeftRight
     // Focused on the audit pipeline. Store->topic and the consumer side are

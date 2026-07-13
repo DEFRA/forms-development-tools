@@ -226,7 +226,7 @@ views {
   }
 
   view submissionFlow {
-    title 'Form submission and delivery'
+    title 'Submission / Form submission and delivery'
     autoLayout LeftRight 150 110
     // A citizen submits a form on the Runner. Two things happen:
     //  - files are uploaded to the CDP uploader (virus-scanned), delivered to S3
@@ -262,7 +262,7 @@ views {
   }
 
   dynamic view submissionSequence {
-    title 'Form submission sequence'
+    title 'Submission / Form submission sequence'
     autoLayout LeftRight
     // The order matters and is guaranteed by forms-runner: a user's file is only
     // held temporarily until it is persisted in forms-submission-api. Nothing is

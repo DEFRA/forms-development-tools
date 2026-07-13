@@ -3,7 +3,9 @@
 Interactive C4 architecture diagrams for the Defra Forms application suite,
 generated from the LikeC4 model in this repository.
 
-<a href="/forms-development-tools/architecture/" target="_blank" rel="noopener noreferrer" class="govuk-button">Open architecture diagrams</a>
+<div class="app-no-prose">
+  <a href="/forms-development-tools/architecture/" target="_blank" rel="noopener noreferrer" class="govuk-button">Open architecture diagrams</a>
+</div>
 
 The diagrams open in a new tab.
 

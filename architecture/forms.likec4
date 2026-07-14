@@ -165,12 +165,17 @@ model {
   runner      -> exTopic
   cdpUploader -> submissionApi 'Scan, deliver to S3 and make a callback'
 
-  // save and return (magic link): runner publishes a save event to its own owned
-  // topic, consumed into the submission API, which emails a resume link via Notify
+  // save and return (magic link): on "Save and exit" the runner publishes a save
+  // event to its own owned SNS topic (it does NOT call the submission API to save);
+  // the topic fans into an SQS queue the submission API consumes, persisting the
+  // record (form state + hashed security answer) and emailing a resume link via Notify.
+  // The runner->submissionApi HTTP edge is the RETURN (resume) journey only - hence
+  // its label is resume-only. The precise per-step labels live in the two
+  // 'Save and exit' journey views. (NB: this label change re-pins platformAll.)
   runner    -> saveTopic     'Save progress'
   saveTopic -> saveQueue
   saveQueue -> submissionApi
-  runner    -> submissionApi 'Save / resume via magic link'
+  runner    -> submissionApi 'Resume (magic link)'
 
   // per-service audit-records topics fan into the audit-events topic, consumed by the audit API
   designerAudit     -> auditEvents
@@ -420,6 +425,46 @@ views {
 
     runner -> submissions 'Publish (owned submission topic)'
     runner -> exTopic     'Publish (additional topic, if configured per form)'
+  }
+
+  // --- Save and exit folder (two journeys) --------------------------------
+  // "Save and exit" lets a citizen pause a form and resume later via a magic
+  // link. The engine plugin only renders the button + caches answers, then
+  // delegates to the runner's host handler - so the two journeys are authored
+  // against the runner/submission-API/messaging containers. The 'Save and exit /'
+  // title prefix groups both views into one folder (same convention as Auth /,
+  // Submission /). Steps mirror the real code: publish-then-clear on save;
+  // GET question -> answer -> POST validate -> restore session on return.
+
+  dynamic view saveAndExitJourney {
+    title 'Save and exit / Save and exit journey'
+    description 'Saving progress and leaving: the runner publishes a save-and-exit event to its own SNS topic (it does not call the submission API), which fans into an SQS queue the submission API consumes, persisting the form state plus a hashed security answer and emailing the citizen a magic resume link via GOV.UK Notify.'
+    autoLayout LeftRight
+
+    citizen       -> runner        'Choose "Save and exit"; give email + security question & answer'
+    runner        -> saveTopic     'Publish save-and-exit event (SNS)'
+    runner        -> runnerCache   'Clear in-progress state from session (Redis)'
+    saveTopic     -> saveQueue     'Fan out to the save-and-return SQS queue'
+    saveQueue     -> submissionApi 'Consume event (queue polling)'
+    submissionApi -> submissionMeta 'Persist save-and-exit record: form state + argon2-hashed answer'
+    submissionApi -> govNotify     'Send resume-link email (template)'
+    govNotify     -> citizen       'Deliver email: /resume-form/{formId}/{magicLinkId} (valid for N days)'
+  }
+
+  dynamic view returnJourney {
+    title 'Save and exit / Return journey'
+    description 'Resuming via the magic link: the runner asks the submission API for the security question, the citizen answers, the runner posts the answer for argon2 verification, receives the saved form state back and restores it into the session cache - no messaging on this path, just synchronous HTTP plus a Redis write.'
+    autoLayout LeftRight
+
+    citizen       -> runner         'Open resume link /resume-form/{formId}/{magicLinkId}'
+    runner        -> submissionApi  'GET /save-and-exit/{link}: fetch security question'
+    citizen       -> runner         'Enter security answer'
+    runner        -> submissionApi  'POST /save-and-exit/{link}: submit answer'
+    submissionApi -> submissionMeta 'Verify argon2 answer; load saved record'
+    submissionApi -> runner         'Return saved form state'
+    runner        -> runnerCache    'Restore saved state into session (Redis)'
+    runner        -> manager        'Fetch form definition to render the next page'
+    runner        -> citizen        'Resume the form from where they left off'
   }
 
   // Style by ownership - applies across every generated view.

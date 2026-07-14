@@ -11,7 +11,7 @@ specification {
   element service   { style { shape rectangle } } // backend API
   element listener  { style { shape rectangle } }
   // data stores (persistence layer) share one colour so they read as separate
-  // from the services; product is shown via icons (Mongo default; Dynamo/S3 per-element)
+  // from the services; product is shown via icons (Mongo default; S3 per-element)
   element db        { style { shape cylinder color amber icon tech:mongodb } }
   element cache     { style { shape cylinder color amber icon tech:redis } }
   element storage   { style { shape storage  color amber icon aws:simple-storage-service } }
@@ -73,12 +73,12 @@ model {
 
     // --- data stores (C4 containers, peers of the apps) ---
     designerCache     = cache 'Cache'
-    designerAudit     = db 'Audit records' { icon tech:aws-dynamodb }
+    designerAudit     = topic 'Audit records'
     managerDb         = db 'DB'
-    managerAudit      = db 'Audit records' { icon tech:aws-dynamodb }
+    managerAudit      = topic 'Audit records'
     runnerCache       = cache 'Cache'
     entitlementsDb    = db 'DB'
-    entitlementsAudit = db 'Audit records' { icon tech:aws-dynamodb }
+    entitlementsAudit = topic 'Audit records'
     submissionMeta    = db 'Metadata'
     submissionFiles   = storage 'Files'
     auditMeta         = db 'Metadata'
@@ -172,7 +172,7 @@ model {
   saveQueue -> submissionApi
   runner    -> submissionApi 'Save / resume via magic link'
 
-  // audit records fan into the audit-events queue, consumed by the audit API
+  // per-service audit-records topics fan into the audit-events topic, consumed by the audit API
   designerAudit     -> auditEvents
   managerAudit      -> auditEvents
   entitlementsAudit -> auditEvents
@@ -276,7 +276,7 @@ views {
     group 'Sharepoint' {
       include sharepointQueue, sharepointListener
     }
-    group 'Example' {
+    group 'Example form submission consumer' {
       include exTopic, exQueue, exListener, externalApi
     }
   }
@@ -285,16 +285,16 @@ views {
     title 'Misc / Audit event flow'
     description 'How audit records from each service fan into the audit-events topic and are consumed by the audit API.'
     autoLayout LeftRight
-    // Focused on the audit pipeline. Store->topic and the consumer side are
-    // predicate-driven (self-updating). The service->store links are listed as
+    // Focused on the audit pipeline. Topic->topic and the consumer side are
+    // predicate-driven (self-updating). The service->topic links are listed as
     // edges (not bare services) because LikeC4 predicates are single-hop - this
-    // gives each store its owning service for context while keeping unrelated
-    // app-to-app relationships out of the view.
+    // gives each audit-records topic its owning service for context while keeping
+    // unrelated app-to-app relationships out of the view.
     include
       designer     -> designerAudit,
       manager      -> managerAudit,
       entitlements -> entitlementsAudit,
-      * -> auditEvents,   // audit-records stores -> topic (self-updating)
+      * -> auditEvents,   // per-service audit-records topics -> audit-events topic (self-updating)
       auditEvents -> *,   // topic -> audit API
       auditApi -> *       // audit API -> metadata
   }
@@ -383,7 +383,7 @@ views {
     group 'Sharepoint (optional)' {
       include sharepointQueue, sharepointListener, sharepointApi
     }
-    group 'External consumer (own topic)' {
+    group 'Example form submission consumer' {
       include exTopic, exQueue, exListener, externalApi
     }
 
@@ -426,9 +426,12 @@ views {
   style element.tag == #thirdparty {
     color gray
   }
+  // example/illustrative nodes read as grey placeholders. NB: in LikeC4 `opacity`
+  // has no visible effect on these shapes and `border dotted` only renders on
+  // rectangles (not the queue/cylinder topic+queue) - so colour is the only
+  // reliable differentiator here, hence `color muted`.
   style element.tag == #example {
     color muted
     border dotted
-    opacity 40%
   }
 }

@@ -17,7 +17,8 @@
       "regenerate-metrics",
       "forms-inspect",
       "forms-report",
-      "forms-feedback-all-forms"
+      "forms-feedback-all-forms",
+      "submission-read"
     ],
     "email": "superadmin@internal.test",
     "displayName": "Test account (Superadmin)"
@@ -35,7 +36,8 @@
       "user-edit",
       "forms-feedback",
       "forms-report",
-      "forms-feedback-all-forms"
+      "forms-feedback-all-forms",
+      "submission-read"
     ],
     "email": "admin@internal.test",
     "displayName": "Test account (Admin)"
@@ -55,7 +57,8 @@
       "form-edit",
       "form-read",
       "form-publish",
-      "forms-feedback"
+      "forms-feedback",
+      "submission-read"
     ],
     "email": "form-publisher@internal.test",
     "displayName": "Test account (Form publisher)"

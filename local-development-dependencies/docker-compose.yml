@@ -37,9 +37,6 @@ services:
     image: defradigital/cdp-uploader:${CDP_UPLOADER_VERSION:-latest}
     ports:
       - '127.0.0.1:7337:7337'
-    links:
-      - 'localstack:localstack'
-      - 'redis:redis'
     depends_on:
       localstack:
         condition: service_healthy
@@ -71,6 +68,10 @@ services:
 
   proxy:
     image: nginxproxy/nginx-proxy:1.4
+    # Turns off SELinux label separation for this container so it can read the
+    # docker.sock mount under Podman; no-op on Docker
+    security_opt:
+      - label=disable
     ports:
       - '7300:80'
     environment:

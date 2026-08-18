@@ -171,6 +171,12 @@ services:
       USE_MAPS_FEATURE: true
       FEEDBACK_VIA_EMAIL: defraforms@defra.gov.uk
       PAYMENT_PROVIDER_URL: https://card.payments.service.gov.uk
+      USE_SIGN_IN_FEATURE: ${USE_SIGN_IN_FEATURE:-true}
+      OIDC_ISSUER: http://identity.127.0.0.1.sslip.io:3011
+      OIDC_CLIENT_ID: runner
+      OIDC_REDIRECT_URI: http://localhost:3009/auth/callback
+      # Private key that authenticates forms-runner against forms-identity-ui. forms-identity-ui has the public key.
+      OIDC_CLIENT_PRIVATE_JWK: '{"kty":"EC","x":"klReRdDGt-ndqOFv9rrf8wZtv-4NbigRuHUrPHqNhKc","y":"BaRIF7TCtcMyQtDJL5dUD8u6KaiKdcTIuHFaQgKXUiA","crv":"P-256","d":"bnHH6WEEL1UumPbFhtP5P6keyHGBDsRAyOfFge3vPK4","use":"sig","alg":"ES256","kid":"runner-es256-52accdf020bd"}'
     ports:
       - '3009:3009'
     networks:
@@ -179,6 +185,7 @@ services:
       - 'host.docker.internal:host-gateway'
       - 'cdp.127.0.0.1.sslip.io:host-gateway'
       - 'uploader.127.0.0.1.sslip.io:host-gateway'
+      - 'identity.127.0.0.1.sslip.io:host-gateway'
     depends_on:
       - forms-submission-api
       - forms-entitlement-api
@@ -447,4 +454,86 @@ services:
       localstack:
         condition: service_healthy
 
-# No volumes or infra services here; provided by local-development-mock-auth/docker-compose.yml
+  forms-identity-api:
+    image: defradigital/forms-identity-api:${FORMS_IDENTITY_API_TAG:-latest}
+    platform: linux/amd64
+    profiles:
+      - forms-identity-api
+    environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
+      NODE_ENV: production
+      PORT: 3010
+      SERVICE_VERSION: local-dev
+      # Mongo
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      MONGO_DATABASE: forms-identity-api
+      NOTIFY_API_KEY: ${NOTIFY_API_KEY}
+      NOTIFY_OTP_TEMPLATE_ID: '59cd00ac-835b-4f83-a2da-b410aa2e326c'
+      NOTIFY_REPLY_TO_ID: '63618327-0b4e-4b42-9763-c5b95c4257d7'
+      OTP_TTL_SECONDS: 900
+      OTP_MAX_ATTEMPTS: 5
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
+      LOG_LEVEL: info
+      ENABLE_SECURE_CONTEXT: false
+    networks:
+      - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '3010:3010'
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  forms-identity-ui:
+    image: defradigital/forms-identity-ui:${FORMS_IDENTITY_UI_TAG:-latest}
+    platform: linux/amd64
+    profiles:
+      - forms-identity-ui
+    environment:
+      HOST: 0.0.0.0
+      ENVIRONMENT: local
+      NODE_ENV: development
+      PORT: 3011
+      OIDC_ISSUER: http://identity.127.0.0.1.sslip.io:3011
+      # Signing key pair for tokens
+      OIDC_JWKS: '{"keys":[{"kty":"EC","x":"9oS-GM_rmPwUvvJdZ8axfg7akh4JNr7uGx1QQCxiQBs","y":"eskAZo-jgjc2AF5mkUDBidqycEFOE3hzW3hxqTKbsis","crv":"P-256","d":"ahFupnItmjD03e5wVDBx85pPyyOQRGIixVulxnIcZjU","use":"sig","alg":"ES256","kid":"sig-es256-7c7243e26e78"}]}'
+      OIDC_COOKIE_KEYS: '99fbf557d53ab0ddaed987474cff5b2ec2d7fb9faf143abbb5c732614130812f'
+      OIDC_COOKIE_SECURE: false
+      # Client key for runner - public key. Matching private pair is in forms-runner's env vars.
+      OIDC_RUNNER_JWKS: '{"keys":[{"kty":"EC","x":"klReRdDGt-ndqOFv9rrf8wZtv-4NbigRuHUrPHqNhKc","y":"BaRIF7TCtcMyQtDJL5dUD8u6KaiKdcTIuHFaQgKXUiA","crv":"P-256","use":"sig","alg":"ES256","kid":"runner-es256-52accdf020bd"}]}'
+      OIDC_RUNNER_REDIRECT_URIS: http://localhost:3009/auth/callback
+      OIDC_TTL_AUTHORIZATION_CODE: 60
+      OIDC_TTL_ID_TOKEN: 300
+      OIDC_TTL_ACCESS_TOKEN: 300
+      OIDC_TTL_INTERACTION: 3600
+      OIDC_TTL_SESSION: 86400
+      OIDC_TTL_GRANT: 86400
+      IDENTITY_API_URL: http://forms-identity-api:3010
+      SESSION_CACHE_ENGINE: redis
+      SESSION_CACHE_TTL: 14400000
+      SESSION_COOKIE_TTL: 14400000
+      SESSION_COOKIE_PASSWORD: 'bd38a7a7967127eab14fe195adeb6975294b46906f5d63e5'
+      SESSION_COOKIE_SECURE: false
+      REDIS_TLS: false
+      REDIS_HOST: host.docker.internal
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_KEY_PREFIX: forms-identity-ui
+      USE_SINGLE_INSTANCE_CACHE: true
+      TRACING_HEADER: x-trace-id
+      LOG_ENABLED: true
+      LOG_FORMAT: pino-pretty
+      LOG_LEVEL: info
+      ENABLE_SECURE_CONTEXT: false
+    networks:
+      - cdpuploader
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '3011:3011'
+    depends_on:
+      - forms-identity-api

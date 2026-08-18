@@ -1,6 +1,6 @@
 # Test Harness
 
-Spins up the full Defra Forms stack — all forms microservices (designer, manager, runner, submission, entitlement, audit) plus their runtime dependencies — via a single `run-harness.sh` script. Use this if you want everything running without starting services individually.
+Spins up the full Defra Forms stack — all forms microservices (designer, manager, runner, submission, entitlement, audit, identity) plus their runtime dependencies — via a single `run-harness.sh` script. Use this if you want everything running without starting services individually.
 
 If you only need the backing infrastructure (MongoDB, Redis, S3, CDP uploader) and plan to run the microservices yourself, see [`local-development-dependencies`](../local-development-dependencies/README.md) instead.
 
@@ -29,6 +29,8 @@ The following development tools and infrastructure services are available when r
 | forms-submission-api  | Forms submission service                       |                       | Yes                |
 | forms-entitlement-api | Entitlement (authorization) service            |                       | Yes                |
 | forms-audit-api       | Audit service                                  |                       | Yes                |
+| forms-identity-api    | Citizen accounts and one-time security codes   |                       | Yes                |
+| forms-identity-ui     | Citizen sign in, and the OIDC provider forms-runner authenticates against | http://identity.127.0.0.1.sslip.io:3011 | Yes |
 
 If using AAD/Entra authentication (as opposed to the mocked OIDC authentication), you will need to create a `.env` file with the following typical contents:
 ```
@@ -48,6 +50,51 @@ OIDC_VERIFY_ISS="https://login.microsoftonline.com/<tenant>/v2.0"
 # forms-runner
 RUNNER_SESSION_COOKIE_PASSWORD="53409gjhfcdiklgjidfglkgjdflkelrku634"
 ```
+
+## Citizen sign in
+
+`forms-identity-ui` is an OIDC provider and `forms-runner` is a client.
+The runner proves itself by signing a short-lived assertion (`private_key_jwt`)
+rather than with a shared secret, so the two hold halves of one keypair: the
+private half sits on forms-runner and the public half on forms-identity-ui.
+
+Both halves, the provider's own signing key and the cookie secrets are test
+values written into `docker-compose.yml`, so sign in works on a fresh clone with
+nothing to generate. They are local-only and must never reach a deployment.
+
+Sign in is on by default. To run forms-runner without it, set
+`USE_SIGN_IN_FEATURE=false` in `.env` and optionally omit the forms-identity*
+services when running this harness.
+
+### Replacing the keys
+
+Check out the `forms-identity-ui` repo locally and execute:
+
+#### Main signing keys
+
+```sh
+node scripts/generate-jwks.mjs            # OIDC_JWKS
+```
+
+This script outptus the full key pair, which can be copied into `OIDC_JWKS`.
+
+#### forms-runner's client key pair
+
+The runner's keypair comes a second script, which prints both halves.
+
+```sh
+node scripts/generate-client-keypair.mjs > runner-keypair.txt
+
+# public half -> OIDC_RUNNER_JWKS on forms-identity-ui, a JWKS set
+grep '^OIDC_RUNNER_JWKS=' runner-keypair.txt
+
+# private half -> OIDC_CLIENT_PRIVATE_JWK on forms-runner. It is printed as the
+# JWKS set EXAMPLE_RP_PRIVATE_JWKS, but forms-runner only needs a single JWK, so
+# extract the first item:
+sed -n 's/^EXAMPLE_RP_PRIVATE_JWKS=//p' runner-keypair.txt | jq -c '.keys[0]'
+```
+
+## Starting the harness
 
 To start all dependencies, run:
 
@@ -89,5 +136,5 @@ If you encounter an issue with uploading files using JavaScript, it will likely 
 On Mac, you can do this by running this command:
 
 ```bash
-sudo sh -c 'echo "127.0.0.1 uploader.127.0.0.1.sslip.io cdp.127.0.0.1.sslip.io" >> /etc/hosts'
+sudo sh -c 'echo "127.0.0.1 uploader.127.0.0.1.sslip.io cdp.127.0.0.1.sslip.io identity.127.0.0.1.sslip.io" >> /etc/hosts'
 ```

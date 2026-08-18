@@ -224,6 +224,23 @@ services:
       retries: 18
       start_period: 10s
 
+  aws-sts-stub:
+    # A stub of the AWS STS GetWebIdentityToken API, so services that
+    # authenticate to each other with AWS Web Identity tokens can run their
+    # real signing and verification code locally, with no AWS account needed.
+    image: ghcr.io/defra/aws-sts-stub:${AWS_STS_STUB_VERSION:-latest}
+    ports:
+      - '127.0.0.1:4571:4571'
+    environment:
+      AWS_ACCOUNT_ID: '000000000000'
+    networks:
+      - cdpuploader
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '-', 'http://localhost:4571/health']
+      interval: 5s
+      start_period: 2s
+      retries: 5
+
 networks:
   cdpuploader:
     driver: bridge

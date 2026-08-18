@@ -22,6 +22,7 @@ The following development tools and infrastructure services are available when r
 | mongo-express         | Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis                 | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader          | File upload infrastructure                     |                       | Yes                |
+| aws-sts-stub          | AWS STS Web Identity token issuer for service-to-service auth | http://localhost:4571 | No |
 | oidc                  | Mock OIDC authentication server                |                       | No                 |
 | forms-designer        | Forms UI editor                                | http://localhost:3000 | Yes                |
 | forms-manager         | Forms file management                          |                       | Yes                |
@@ -50,6 +51,17 @@ OIDC_VERIFY_ISS="https://login.microsoftonline.com/<tenant>/v2.0"
 # forms-runner
 RUNNER_SESSION_COOKIE_PASSWORD="53409gjhfcdiklgjidfglkgjdflkelrku634"
 ```
+
+## aws-sts-stub
+
+Stands in for the AWS STS `GetWebIdentityToken` API, which LocalStack does not
+implement. forms-identity-ui mints a caller token from it and
+forms-identity-api verifies that token against its key set, so both services
+run the same authentication code here as in a deployed environment.
+
+Runs on `http://localhost:4571`. Its issuer is the fixed constant
+`https://local.tokens.sts.global.api.aws`, which must match
+`CDP_JWT_ISSUER` on forms-identity-api exactly.
 
 ## Citizen sign in
 

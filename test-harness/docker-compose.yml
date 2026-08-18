@@ -478,6 +478,14 @@ services:
       LOG_FORMAT: pino-pretty
       LOG_LEVEL: info
       ENABLE_SECURE_CONTEXT: false
+      # Service-to-service auth. The issuer is a fixed label that must match
+      # the stub byte for byte; the JWKS URL is how the keys are actually
+      # reached, which is why only that one names a host.
+      CDP_JWT_ISSUER: https://local.tokens.sts.global.api.aws
+      CDP_JWT_JWKS_URI: http://aws-sts-stub:4571/.well-known/jwks.json
+      AWS_ACCOUNT: '000000000000'
+      SERVICE_AUTH_AUDIENCE: forms-identity-api
+      SERVICE_AUTH_ALLOWED_CALLER: forms-identity-ui
     networks:
       - cdpuploader
     extra_hosts:
@@ -486,6 +494,8 @@ services:
       - '3010:3010'
     depends_on:
       mongo:
+        condition: service_healthy
+      aws-sts-stub:
         condition: service_healthy
 
   forms-identity-ui:
@@ -529,6 +539,15 @@ services:
       LOG_FORMAT: pino-pretty
       LOG_LEVEL: info
       ENABLE_SECURE_CONTEXT: false
+      # Service-to-service auth. In a deployed environment the SDK uses
+      # container credentials and no endpoint override; here it is redirected
+      # at the stub, and the access key id is the identity this service
+      # presents to forms-identity-api.
+      AWS_ENDPOINT_URL_STS: http://aws-sts-stub:4571
+      AWS_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: forms-identity-ui
+      AWS_SECRET_ACCESS_KEY: stub
+      SERVICE_AUTH_AUDIENCE: forms-identity-api
     networks:
       - cdpuploader
     extra_hosts:
@@ -537,3 +556,4 @@ services:
       - '3011:3011'
     depends_on:
       - forms-identity-api
+      - aws-sts-stub

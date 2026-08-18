@@ -22,7 +22,7 @@ The following development tools and infrastructure services are available when r
 | mongo-express         | Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis                 | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader          | File upload infrastructure                     |                       | Yes                |
-| aws-sts-stub          | AWS STS Web Identity token issuer for service-to-service auth | http://localhost:4571 | No |
+| aws-sts-stub          | AWS STS token stub for service-to-service auth | http://localhost:4571 | No                 |
 | oidc                  | Mock OIDC authentication server                |                       | No                 |
 | forms-designer        | Forms UI editor                                | http://localhost:3000 | Yes                |
 | forms-manager         | Forms file management                          |                       | Yes                |
@@ -62,6 +62,22 @@ run the same authentication code here as in a deployed environment.
 Runs on `http://localhost:4571`. Its issuer is the fixed constant
 `https://local.tokens.sts.global.api.aws`, which must match
 `CDP_JWT_ISSUER` on forms-identity-api exactly.
+
+`run-harness.sh` pulls images with `--pull always`, so if the stub has not
+yet been published to `ghcr.io`, build it locally under the tag the compose
+file expects, from `test-harness`:
+
+```bash
+docker build -t ghcr.io/defra/aws-sts-stub:latest ../../aws-sts-stub
+```
+
+The same applies to `forms-identity-api` and `forms-identity-ui` while their
+service-to-service auth code is still unmerged: a harness started from their
+published images comes up looking healthy but runs with no
+service-to-service auth at all, since those images predate the code that
+enforces it. Nothing in the running system flags this, so rebuild both
+images from the branch that has the auth code before trusting a harness run
+to prove anything about it.
 
 ## Citizen sign in
 

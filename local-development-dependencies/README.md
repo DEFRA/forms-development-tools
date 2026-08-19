@@ -23,6 +23,16 @@ The following development tools and infrastructure services are available when r
 | cdp-uploader | File upload infrastructure                     |                       | Yes                |
 | aws-sts-stub | AWS STS token stub for service-to-service auth | http://localhost:4571 | No                 |
 
+### aws-sts-stub
+
+If `ghcr.io/defra/aws-sts-stub` has not been published yet, `docker compose up`
+fails trying to pull it. Build it locally under the tag this compose file
+expects, from this directory:
+
+```bash
+docker build -t ghcr.io/defra/aws-sts-stub:latest ../../aws-sts-stub
+```
+
 To start all dependencies using Docker Compose (if requiring AAD authentication), run:
 
 ```sh

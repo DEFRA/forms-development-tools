@@ -483,9 +483,10 @@ services:
       # reached, which is why only that one names a host.
       CDP_JWT_ISSUER: https://local.tokens.sts.global.api.aws
       CDP_JWT_JWKS_URI: http://aws-sts-stub:4571/.well-known/jwks.json
-      AWS_ACCOUNT: '000000000000'
       SERVICE_AUTH_AUDIENCE: forms-identity-api
-      SERVICE_AUTH_ALLOWED_CALLER: forms-identity-ui
+      # Complete expected `sub`, matching what the stub mints for the
+      # AWS_ACCESS_KEY_ID/AWS_ACCOUNT_ID it is given below.
+      SERVICE_AUTH_ALLOWED_SUBJECT: arn:aws:iam::000000000000:role/forms-identity-ui
     networks:
       - cdpuploader
     extra_hosts:

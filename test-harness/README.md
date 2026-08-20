@@ -79,6 +79,11 @@ enforces it. Nothing in the running system flags this, so rebuild both
 images from the branch that has the auth code before trusting a harness run
 to prove anything about it.
 
+On an Apple Silicon host, build all three with `--platform linux/amd64`. Both
+services pin `platform: linux/amd64` in the compose file, so an arm64 local
+build is passed over and Compose falls back to the published amd64 image — the
+same silent success as above, reached a different way.
+
 ## Citizen sign in
 
 `forms-identity-ui` is an OIDC provider and `forms-runner` is a client.

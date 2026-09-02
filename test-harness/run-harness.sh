@@ -94,12 +94,23 @@ echo "[harness] Using env file: $ENV_FILE (if present)"
 # 2) Start a single merged Docker Compose project (infra + apps)
 #    The first -f points at local-development-dependencies so its relative volume paths (e.g. ./compose/start-localstack.sh) resolve correctly.
 echo "[harness] Starting infra and application stack (merged compose files)..."
+# Pull as a separate step with --ignore-pull-failures rather than
+# `up --pull always`, so every published image is refreshed on each run while
+# a tag that only exists locally (e.g. FORMS_IDENTITY_UI_TAG=local) starts
+# from the local build instead of aborting the whole stack.
 COMPOSE_PROJECT_NAME="forms-harness" docker compose \
   ${ENV_FILE:+--env-file "$ENV_FILE"} \
   -f "$ROOT_DIR/local-development-dependencies/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
   $PROFILE_PARAM_LIST \
-  up -d --pull always
+  pull --ignore-pull-failures
+
+COMPOSE_PROJECT_NAME="forms-harness" docker compose \
+  ${ENV_FILE:+--env-file "$ENV_FILE"} \
+  -f "$ROOT_DIR/local-development-dependencies/docker-compose.yml" \
+  -f "$SCRIPT_DIR/docker-compose.yml" \
+  $PROFILE_PARAM_LIST \
+  up -d
 
 ./utils/list-versions.sh | tee image-versions.txt
 

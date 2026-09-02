@@ -61,28 +61,37 @@ run the same authentication code here as in a deployed environment.
 
 Runs on `http://localhost:4571`. Its issuer is the fixed constant
 `https://local.tokens.sts.global.api.aws`, which must match
-`CDP_JWT_ISSUER` on forms-identity-api exactly.
+`CDP_JWT_ISSUER` on forms-identity-api exactly. The image is pulled from
+Docker Hub as
+[`defradigital/aws-sts-stub`](https://hub.docker.com/r/defradigital/aws-sts-stub).
 
-`run-harness.sh` pulls images with `--pull always`, so if the stub has not
-yet been published to `ghcr.io`, build it locally under the tag the compose
-file expects, from `test-harness`:
+### Running unpublished service code
+
+While the service-to-service auth code in `forms-identity-api` and
+`forms-identity-ui` is still unmerged, a harness started from their published
+images comes up looking healthy but runs with no service-to-service auth at
+all, since those images predate the code that enforces it. Nothing in the
+running system flags this, so run both services from a local build of the
+branch that has the auth code before trusting a harness run to prove
+anything about it.
+
+`run-harness.sh` refreshes every image from its registry on each run, so a
+local build under the published `latest` tag is overwritten by the pull.
+Build under a tag that does not exist on Docker Hub instead — the pull of
+that tag fails, the script carries on, and the service starts from the
+local image:
 
 ```bash
-docker build -t ghcr.io/defra/aws-sts-stub:latest ../../aws-sts-stub
+docker build --platform linux/amd64 -t defradigital/forms-identity-api:local ../../forms-identity-api
+docker build --platform linux/amd64 -t defradigital/forms-identity-ui:local ../../forms-identity-ui
+
+FORMS_IDENTITY_API_TAG=local FORMS_IDENTITY_UI_TAG=local ./run-harness.sh
 ```
 
-The same applies to `forms-identity-api` and `forms-identity-ui` while their
-service-to-service auth code is still unmerged: a harness started from their
-published images comes up looking healthy but runs with no
-service-to-service auth at all, since those images predate the code that
-enforces it. Nothing in the running system flags this, so rebuild both
-images from the branch that has the auth code before trusting a harness run
-to prove anything about it.
-
-On an Apple Silicon host, build all three with `--platform linux/amd64`. Both
-services pin `platform: linux/amd64` in the compose file, so an arm64 local
-build is passed over and Compose falls back to the published amd64 image — the
-same silent success as above, reached a different way.
+`--platform linux/amd64` matters on an Apple Silicon host: both services pin
+`platform: linux/amd64` in the compose file, so an arm64 local build is
+passed over and Compose falls back to the published amd64 image — the same
+silent success as above, reached a different way.
 
 ## Citizen sign in
 

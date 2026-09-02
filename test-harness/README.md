@@ -22,6 +22,7 @@ The following development tools and infrastructure services are available when r
 | mongo-express         | Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis                 | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader          | File upload infrastructure                     |                       | Yes                |
+| aws-sts-stub          | AWS STS token stub for service-to-service auth | http://localhost:4571 | No                 |
 | oidc                  | Mock OIDC authentication server                |                       | No                 |
 | forms-designer        | Forms UI editor                                | http://localhost:3000 | Yes                |
 | forms-manager         | Forms file management                          |                       | Yes                |
@@ -50,6 +51,47 @@ OIDC_VERIFY_ISS="https://login.microsoftonline.com/<tenant>/v2.0"
 # forms-runner
 RUNNER_SESSION_COOKIE_PASSWORD="53409gjhfcdiklgjidfglkgjdflkelrku634"
 ```
+
+## aws-sts-stub
+
+Stands in for the AWS STS `GetWebIdentityToken` API, which LocalStack does not
+implement. forms-identity-ui mints a caller token from it and
+forms-identity-api verifies that token against its key set, so both services
+run the same authentication code here as in a deployed environment.
+
+Runs on `http://localhost:4571`. Its issuer is the fixed constant
+`https://local.tokens.sts.global.api.aws`, which must match
+`CDP_JWT_ISSUER` on forms-identity-api exactly. The image is pulled from
+Docker Hub as
+[`defradigital/aws-sts-stub`](https://hub.docker.com/r/defradigital/aws-sts-stub).
+
+### Running unpublished service code
+
+While the service-to-service auth code in `forms-identity-api` and
+`forms-identity-ui` is still unmerged, a harness started from their published
+images comes up looking healthy but runs with no service-to-service auth at
+all, since those images predate the code that enforces it. Nothing in the
+running system flags this, so run both services from a local build of the
+branch that has the auth code before trusting a harness run to prove
+anything about it.
+
+`run-harness.sh` refreshes every image from its registry on each run, so a
+local build under the published `latest` tag is overwritten by the pull.
+Build under a tag that does not exist on Docker Hub instead — the pull of
+that tag fails, the script carries on, and the service starts from the
+local image:
+
+```bash
+docker build --platform linux/amd64 -t defradigital/forms-identity-api:local ../../forms-identity-api
+docker build --platform linux/amd64 -t defradigital/forms-identity-ui:local ../../forms-identity-ui
+
+FORMS_IDENTITY_API_TAG=local FORMS_IDENTITY_UI_TAG=local ./run-harness.sh
+```
+
+`--platform linux/amd64` matters on an Apple Silicon host: both services pin
+`platform: linux/amd64` in the compose file, so an arm64 local build is
+passed over and Compose falls back to the published amd64 image — the same
+silent success as above, reached a different way.
 
 ## Citizen sign in
 

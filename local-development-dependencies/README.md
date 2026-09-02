@@ -25,13 +25,8 @@ The following development tools and infrastructure services are available when r
 
 ### aws-sts-stub
 
-If `ghcr.io/defra/aws-sts-stub` has not been published yet, `docker compose up`
-fails trying to pull it. Build it locally under the tag this compose file
-expects, from this directory:
-
-```bash
-docker build -t ghcr.io/defra/aws-sts-stub:latest ../../aws-sts-stub
-```
+Pulled from Docker Hub as
+[`defradigital/aws-sts-stub`](https://hub.docker.com/r/defradigital/aws-sts-stub).
 
 To start all dependencies using Docker Compose (if requiring AAD authentication), run:
 

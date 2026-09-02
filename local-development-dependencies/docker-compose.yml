@@ -228,7 +228,7 @@ services:
     # A stub of the AWS STS GetWebIdentityToken API, so services that
     # authenticate to each other with AWS Web Identity tokens can run their
     # real signing and verification code locally, with no AWS account needed.
-    image: ghcr.io/defra/aws-sts-stub:${AWS_STS_STUB_VERSION:-latest}
+    image: defradigital/aws-sts-stub:${AWS_STS_STUB_VERSION:-latest}
     ports:
       - '127.0.0.1:4571:4571'
     environment:

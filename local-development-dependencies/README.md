@@ -21,6 +21,12 @@ The following development tools and infrastructure services are available when r
 | mongo-express| Web-based MongoDB admin interface              | http://localhost:8081 | No                 |
 | redis        | Redis cache/message broker for frontends       |                       | Yes                |
 | cdp-uploader | File upload infrastructure                     |                       | Yes                |
+| aws-sts-stub | AWS STS token stub for service-to-service auth | http://localhost:4571 | No                 |
+
+### aws-sts-stub
+
+Pulled from Docker Hub as
+[`defradigital/aws-sts-stub`](https://hub.docker.com/r/defradigital/aws-sts-stub).
 
 To start all dependencies using Docker Compose (if requiring AAD authentication), run:
 

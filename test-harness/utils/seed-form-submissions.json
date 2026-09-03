@@ -1,0 +1,190 @@
+{
+  "_id": { "$oid": "6a760ac05856d0dad906fbc9" },
+  "meta": {
+    "schemaVersion": 1,
+    "timestamp": "2026-08-07T16:41:32.941Z",
+    "referenceNumber": "34E-FJR-84A",
+    "formName": "Components",
+    "formId": "6a61e01bb001f0de83297a2f",
+    "formSlug": "components",
+    "status": "draft",
+    "isPreview": true,
+    "notificationEmail": "enrique.chase@defra.gov.uk",
+    "versionMetadata": {
+      "versionNumber": 36,
+      "createdAt": "2026-08-07T16:41:24.905Z"
+    }
+  },
+  "data": {
+    "main": {
+      "textField": "Enrique Chase",
+      "multilineTextField": "sdasdas",
+      "numberField": 3,
+      "datePartsField": {
+        "day": 1,
+        "month": 1,
+        "year": 2001
+      },
+      "yesNoField": true,
+      "emailAddressField": "enrique.chase@defra.gov.uk",
+      "telephoneNumberField": "+447930696000",
+      "addressField": {
+        "addressLine1": "LINE 1",
+        "addressLine2": "LINE 2",
+        "town": "TOWN",
+        "county": "COUNTY",
+        "postcode": "PO8 1DE"
+      },
+      "radiosField": "soleTrader",
+      "selectField": 910400014,
+      "checkboxesField": ["Arabian", "Shire", "Race"],
+      "monthYearField": {
+        "month": 1,
+        "year": 2001
+      },
+      "autocompleteField": "pr",
+      "eastingNorthingField": {
+        "easting": 337408,
+        "northing": 552984
+      },
+      "latLongField": {
+        "latitude": 54.7854247,
+        "longitude": -1.6803979
+      },
+      "osGridRefField": "SE 27437 71709",
+      "nationalGridFieldNumberField": "NG 1234 5678",
+      "geospatialField": [
+        {
+          "type": "Feature",
+          "properties": {
+            "description": "P1",
+            "coordinateGridReference": "SE 33905 70499",
+            "centroidGridReference": "SE 33905 70499"
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [-1.4826439, 54.1292343]
+          },
+          "id": "8d67d27a-cba2-4243-8be5-678237b12c3f"
+        }
+      ],
+      "SBdibf": "Yo"
+    },
+    "repeaters": {
+      "bRpVOv": [
+        {
+          "PULqgd": "Dad Chase",
+          "TKqbTU": {
+            "day": 1,
+            "month": 1,
+            "year": 2001
+          },
+          "WffjBp": [
+            {
+              "type": "Feature",
+              "properties": {
+                "description": "P1",
+                "coordinateGridReference": "SD 88725 90402",
+                "centroidGridReference": "SD 88725 90402"
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [-2.1747826, 54.3090936]
+              },
+              "id": "e910f771-b969-468d-b75d-fad788e70d58"
+            }
+          ],
+          "MwZpks": {
+            "easting": 354877,
+            "northing": 464863
+          }
+        },
+        {
+          "PULqgd": "Mum Chase",
+          "TKqbTU": {
+            "day": 1,
+            "month": 1,
+            "year": 2001
+          },
+          "WffjBp": [
+            {
+              "id": "3ff17b92-685d-4d19-8cca-85e2caa43605",
+              "type": "Feature",
+              "properties": {
+                "description": "S1",
+                "coordinateGridReference": "NY 39817 22062",
+                "centroidGridReference": "NY 57581 23506"
+              },
+              "geometry": {
+                "coordinates": [
+                  [
+                    [-2.9328393, 54.590149],
+                    [-2.5263451, 54.5264421],
+                    [-2.5153588, 54.6982224],
+                    [-2.9328393, 54.590149]
+                  ]
+                ],
+                "type": "Polygon"
+              }
+            }
+          ],
+          "MwZpks": {
+            "easting": 462894,
+            "northing": 450700
+          }
+        },
+        {
+          "PULqgd": "Child Chase",
+          "TKqbTU": {
+            "day": 1,
+            "month": 1,
+            "year": 2001
+          },
+          "WffjBp": [
+            {
+              "id": "ee31fd68-80d8-42d2-836e-3e958a08fceb",
+              "type": "Feature",
+              "properties": {
+                "description": "L1",
+                "coordinateGridReference": "NY 51390 41715",
+                "centroidGridReference": "NY 78139 55041"
+              },
+              "geometry": {
+                "coordinates": [
+                  [-2.757058, 54.7679993],
+                  [-2.2187279, 54.7743366],
+                  [-1.9770287, 54.9703038],
+                  [-2.4164818, 55.0459065]
+                ],
+                "type": "LineString"
+              }
+            }
+          ],
+          "MwZpks": {
+            "easting": 507437,
+            "northing": 426982
+          }
+        }
+      ]
+    },
+    "files": {
+      "fileUploadField": [
+        {
+          "fileId": "e5bd49c4-68c3-49b9-be03-88fe184e70e1",
+          "fileName": "image (2).png",
+          "userDownloadLink": "http://localhost:3000/file-download/e5bd49c4-68c3-49b9-be03-88fe184e70e1"
+        }
+      ]
+    }
+  },
+  "result": {
+    "files": {
+      "main": "03ebfe72-2a88-49bc-b515-bab4b09af35c",
+      "repeaters": {
+        "bRpVOv": "f391dd05-9bc3-4596-9f52-b9b91b45a589"
+      }
+    }
+  },
+  "recordCreatedAt": "2026-08-07T16:41:36.010Z",
+  "expireAt": "2027-05-07T16:41:36.010Z"
+}

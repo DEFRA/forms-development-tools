@@ -1,28 +1,28 @@
 {
-  "_id": { "$oid" : "6a61e01bb001f0de83297a2f" },
+  "_id": { "$oid": "6a61e01bb001f0de83297a2f" },
   "title": "Components",
   "organisation": "Defra",
   "teamName": "TEAM1",
   "teamEmail": "enrique.chase@defra.gov.uk",
   "slug": "components",
   "draft": {
-    "createdAt": "2026-07-23T09:34:19.923Z",
+    "createdAt": { "$date": "2026-07-23T09:34:19.923Z" },
     "createdBy": {
       "id": "a346065b-3717-413b-b95b-39336e5afa52",
       "displayName": "Super admin"
     },
-    "updatedAt": "2026-08-12T17:08:12.203Z",
+    "updatedAt": { "$date": "2026-08-12T17:08:12.203Z" },
     "updatedBy": {
       "id": "a346065b-3717-413b-b95b-39336e5afa52",
       "displayName": "Super admin"
     }
   },
-  "createdAt": "2026-07-23T09:34:19.923Z",
+  "createdAt": { "$date": "2026-07-23T09:34:19.923Z" },
   "createdBy": {
     "id": "a346065b-3717-413b-b95b-39336e5afa52",
     "displayName": "Super admin"
   },
-  "updatedAt": "2026-08-12T17:08:12.203Z",
+  "updatedAt": { "$date": "2026-08-12T17:08:12.203Z" },
   "updatedBy": {
     "id": "a346065b-3717-413b-b95b-39336e5afa52",
     "displayName": "Super admin"

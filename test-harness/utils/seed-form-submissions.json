@@ -2,7 +2,7 @@
   "_id": { "$oid": "6a760ac05856d0dad906fbc9" },
   "meta": {
     "schemaVersion": 1,
-    "timestamp": "2026-08-07T16:41:32.941Z",
+    "timestamp": { "$date": "2026-08-07T16:41:32.941Z" },
     "referenceNumber": "34E-FJR-84A",
     "formName": "Components",
     "formId": "6a61e01bb001f0de83297a2f",
@@ -12,7 +12,7 @@
     "notificationEmail": "enrique.chase@defra.gov.uk",
     "versionMetadata": {
       "versionNumber": 36,
-      "createdAt": "2026-08-07T16:41:24.905Z"
+      "createdAt": { "$date": "2026-08-07T16:41:24.905Z" }
     }
   },
   "data": {
@@ -185,6 +185,6 @@
       }
     }
   },
-  "recordCreatedAt": "2026-08-07T16:41:36.010Z",
-  "expireAt": "2027-05-07T16:41:36.010Z"
+  "recordCreatedAt": { "$date": "2026-08-07T16:41:36.010Z" },
+  "expireAt": { "$date": "2027-05-07T16:41:36.010Z" }
 }

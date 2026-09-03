@@ -132,6 +132,13 @@ docker run --rm \
 
 docker run --rm \
   --network forms-harness_cdpuploader \
+  -v "$SCRIPT_DIR/utils/seed-form-versions.json:/seed-form-versions.json" \
+  mongo \
+  mongoimport --uri "mongodb://mongo:27017/forms-manager?replicaSet=rs0&directConnection=true" \
+  --collection form-versions --file /seed-form-versions.json --mode=upsert
+
+docker run --rm \
+  --network forms-harness_cdpuploader \
   -v "$SCRIPT_DIR/utils/seed-form-submissions.json:/seed-form-submissions.json" \
   mongo \
   mongoimport --uri "mongodb://mongo:27017/forms-submission-api?replicaSet=rs0&directConnection=true" \

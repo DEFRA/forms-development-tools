@@ -74,7 +74,6 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn "arn:aws:sns:
 #
 # topics
 aws --endpoint-url=http://localhost:4566 sns create-topic --name forms_runner_submission_events
-aws --endpoint-url=http://localhost:4566 sns create-topic --name forms_notify_email_events
 
 # queues
 aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name forms_notify_listener_events

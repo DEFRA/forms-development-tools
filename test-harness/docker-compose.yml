@@ -17,6 +17,7 @@ services:
       ENTITLEMENT_URL: http://host.docker.internal:3004
       NOTIFY_URL: http://host.docker.internal:3006
       SHAREPOINT_URL: http://host.docker.internal:3007
+      NEWLS_CWT_LISTENER_URL: http://host.docker.internal:3008
       FILE_DOWNLOAD_PASSWORD_TTL: 1233455
       SESSION_COOKIE_TTL: 86400000
       IS_SECURE_OVERRIDE: false
@@ -366,7 +367,6 @@ services:
       EVENTS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_notify_listener_events
       EVENTS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_notify_listener_events-deadletter'
       EMAILS_SQS_QUEUE_URL: http://${LOCALSTACK_HOST:-host.docker.internal}:4566/000000000000/forms_notify_email_events
-      EMAILS_SNS_TOPIC_ARN: 'arn:aws:sns:eu-west-2:000000000000:forms_notify_email_events'
       EMAILS_SQS_DLQ_ARN: 'arn:aws:sqs:eu-west-2:000000000000:forms_notify_email_events-deadletter'
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test

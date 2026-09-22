@@ -178,7 +178,7 @@ services:
       OIDC_CLIENT_ID: runner
       OIDC_REDIRECT_URI: http://localhost:3009/auth/callback
       # Private key that authenticates forms-runner against forms-identity-ui. forms-identity-ui has the public key.
-      OIDC_CLIENT_PRIVATE_JWK: '{"kty":"EC","x":"klReRdDGt-ndqOFv9rrf8wZtv-4NbigRuHUrPHqNhKc","y":"BaRIF7TCtcMyQtDJL5dUD8u6KaiKdcTIuHFaQgKXUiA","crv":"P-256","d":"bnHH6WEEL1UumPbFhtP5P6keyHGBDsRAyOfFge3vPK4","use":"sig","alg":"ES256","kid":"runner-es256-52accdf020bd"}'
+      OIDC_CLIENT_PRIVATE_JWK: '{"kty":"RSA","n":"0qeZNdIeJIng2p5QG1CqYho3hrS97jY7IvjJKXdLvhPoizZPOxxJoDSxZ-F_kRvhKLYy9cbAPptIx7NTzX2NYMvmijnh5w828Gd5ns6O7FPXN92hPCPa61HwyS-UEA2AC4IwTcElYwVkSCoSGP1fkYPprxazWA-t44Tdv2-UtimfLrJYPS4hQVphnKvcoZswILe31DlOH60sMYjeRBRylcok9qGVN0O-Wl0kFOObOs2OIqvLeF-S0f4QOtvsMyfI-B7daj4aspSqWkAa57FNPfinFuD2H0JHPckTjO5EUe8Lxy60ULyw88sm6qE816xXFjNEfUrwMi4k02UOTc8s7Q","e":"AQAB","d":"EkUe8KAMpTagHdXlNLlGTcPgVPqQDnz9nAbfy4zhMNchMBHBxWqqqA5p5IyWN8unN5S1zsMyITvukANpnUTqYh7NG-fxQ8z6Ate2oKNhmfWbkOjT9xdVAVvV-lz6BnplRJpB_jxmNbReAjRD5Y70HvbF6b2aSGTzu-vmH5hZ2YKSVwCouPpC__8vfa62Y8KU5OKZXresVdSfSDlZyOHq4S0jDn4IvZL2csKDX-9ihy9IQ0ZPZhw3ZWZ8ahHOzEYAVYZUBEJd843yV2VAE-9XOql-EOXsqS2ItfCGRLWqy53824zzVSAqnpDYQEN4bTBJ3SyUM58s95Il5pveGWoHMQ","p":"6sTDfsALHaUEB5NNqsKe-HBqmCyItQavC-09Sq60AOtjMSBRQ9tn3d7RrlcuXZApO-OOg93j3B2sIIQSD7HEXVn3rGIWvFt3cy1epiCfHFKY49UF30KvMTSl3tuJKYjGuPC_p0xt2BPkBn5EM8q_Co5HKFNbU3jyrJzSZY03VKc","q":"5bSP65xZa_-vMOwVaLT3JMvjRW2iDFQ4cjL4y4LVjivAqLqzcAC2w5SLAOP0553zEuWkRoDrKWPi4RixUjuh6CBI_cBYRWRzPoBPjfInfKylz2ZtfCYota0z82vbqzZLyu5-O_GYLoFYf1Ch0stRgfiW1bbYWIBX3iWPBjHnoEs","dp":"iSu2XhSvaf7Ev_hdZOyaHebxIUDED6F8HafcLAqvuenO5yFO2isUIRrTwN3HhXt53Dg1SO8Y97-OluET_H-NkE3E3L_jMOLwhCd6Ke7diJrqIhSRfcVkv4dXc0MqfU4hbmWcVY_ejmXw0aptByXrQaun__PUZI1CnYBznkpIjfk","dq":"LBQaCfxWrILD-39SHGWdh1IYqpn_Hp6Ktl9RnrvcfwumTLqG9FcuuxkmE2Wq-Uc1_cpTW7QhbC_euZMjc8Q9rW2ElCz0w1wjQTseCP8O1L3Mk5_0In6wESzLa0qnPJOOt8JMNvSFX2cytDuk0e5yFZ6-UwRjP5hhRB-w8l9hM0E","qi":"op78ue1QCvWPCeXYfgfxhfWZnESHhj93ZhpbnejzMK8qVUxZ8OxbvS24_4jCCnYiu2fA6eLe1aWsSoOMqQIUStQSX8sxuKhbbE9GDYvP2TT4BEM2MSQCfEiIuLuWpc7N188y3YJnVmC1eGLA6ZMJzyvreNgs8FOoGVNcv0LZu-g","use":"sig","alg":"RS256","kid":"runner-rs256-706ea7b7f565"}'
     ports:
       - '3009:3009'
     networks:
@@ -239,6 +239,10 @@ services:
       COGNITO_JWKS_URI: ${OIDC_JWKS_URI}
       COGNITO_CLIENT_IDS: '{}'
       COGNITO_VERIFY_ISS: dummy
+      # Citizen access tokens issued by forms-identity-ui
+      CITIZEN_JWKS_URI: http://forms-identity-ui:3011/jwks
+      CITIZEN_VERIFY_AUD: urn:defra:forms:forms-submission-api
+      CITIZEN_VERIFY_ISS: http://identity.127.0.0.1.sslip.io:3011
       LOADED_PREFIX: prefix
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
       SQS_MAX_NUMBER_OF_MESSAGES: 10
@@ -517,16 +521,20 @@ services:
       PORT: 3011
       OIDC_ISSUER: http://identity.127.0.0.1.sslip.io:3011
       # Signing key pair for tokens
-      OIDC_JWKS: '{"keys":[{"kty":"EC","x":"9oS-GM_rmPwUvvJdZ8axfg7akh4JNr7uGx1QQCxiQBs","y":"eskAZo-jgjc2AF5mkUDBidqycEFOE3hzW3hxqTKbsis","crv":"P-256","d":"ahFupnItmjD03e5wVDBx85pPyyOQRGIixVulxnIcZjU","use":"sig","alg":"ES256","kid":"sig-es256-7c7243e26e78"}]}'
+      OIDC_JWKS: '{"keys":[{"kty":"RSA","n":"rVjoBAtlm6AEYR0S8Hmph4xg6_scatT-JsbjHrpewzLm5gVrK9Qallvprjpbke1NWhurSU0qa5Y-r_FXyY4Gkh2AKj6WQTlBNmReEK5iQ1XLOhFGTKPnliFSwTdH6YioPfMrj-vvLtPZK13Nb2CwtUtw3Jw9AesI-WBAlZ6bVXnt0TjuiZQYp6_wb5zemm8Rxq5qLi8i3VDcenSmN2SADnPt3ps7B734Q6fXaurp5U0yAy17znTbRG09A1yp7g_k7t3_TbqSskhEtV2i7NVlaJPF7dKbXoP8u398ILydF9FwSPaz9ezg0lFi1o-EMviJhTyobLf5xrOpBOK_mhBLaw","e":"AQAB","d":"Uu7-rfSv65lOjxHEXmWunImmUzBEA76cS3wK7EgZD0Wan4EHKaRkBfy6W59S8Ql54Prs43h2K5vpqO6L5AO9lAlmKI_h_hmA4B97u3pay8FPphveqMsgAL03pPYoQwwdBeqBtG0Z9Srosy1BHKDDWjFaMUnUjEbg98I7k_macnVF40r4Dvf085TqG95srmebccEuwd-GZnIrTY5RNhiwR238XvGGLjDPemaZAQ3kp71E2NqgFb-D6bqFb0NxJFx1lC4FuZ36sRcBZb6fJl5JAyr3VTLaUCPk9WE6YdGACPKafh9DURhCs4cfA0dFm0_xHqPVmpZf8U_Cr06d3m2c8Q","p":"3bA6im3BFOxc61lNx17Qht5VhhfzaXx58vvosbNE-jEXaGTGrhDjlxvzf1iJqeG5e58sqyNmZxbY_7a6Dsz72WZ74cCOayzYbLtzPniL-x0thr4qjovEutSCAJW35rnzy8LQ-aQpF-18HeMi5q4sLOdjaWN_lvQ5vj4KJJqvy_E","q":"yC1MkK4m3_UyXyyR2Vd_2DZLaCiV0cAJBE0f80m7714xr9r3buyyPIS0LnejqPU0I9Aan8ynQ1KU_kxYqcUmsZbczp9HtSyRDsinW2VFvfiHJHMTLdInSYBbwAMGKrjhcJMEVa64H4XmRqyolPUWQ91ZlL7dUiHLa9TbvUCPWRs","dp":"2H1Are6An-4yz6JmUkxFV2_IFStOibUFYkSe-OoYcjt-oHPJkjLsDqU9JR9RUJUejZrkBDyNxB6Lyyymhc2oJKXwVIW2jvM8ZvKnmFogWRolW3BaHtpfRBRC4E9VR_xQGKwnZ6LofnVsv8MQUjXE7hUI_-Iqtz_JI_9x6E0nYAE","dq":"jU5k6RD2wku9Zi_5ORqqVb9mFb3onKtZ8h5beotHTl8I5iHFXxlZbJ0k8FRmRGPrjYhe8wUt4blPEgBk6lsQyHY9ouIPZZZzQ6NjeIIR7FufUpylIkhikWE5415_IPNnuOcfPTjcIuyLtMI3Mweb0wZTMUxWwZ63kYQuJfeH-Zc","qi":"oibwhEbUhhoKQtp1V23XnYO4KVXNM8YhuLk3ZdV5-KUdKLhMZoyzYVUFyINgtCCMIkOUyWLCMIIjNjhonkD5n0jLt1QZUEsAyZgZCKuPJFmrlIKephP0C9Vln5SihLAUgtDqkB6V_M4e5AWJFFLRz0uwkyGXizXOj0737MIPY7I","use":"sig","alg":"RS256","kid":"sig-rs256-2dca64060d3d"}]}'
       OIDC_COOKIE_KEYS: '99fbf557d53ab0ddaed987474cff5b2ec2d7fb9faf143abbb5c732614130812f'
       OIDC_COOKIE_SECURE: false
       # Client key for runner - public key. Matching private pair is in forms-runner's env vars.
-      OIDC_RUNNER_JWKS: '{"keys":[{"kty":"EC","x":"klReRdDGt-ndqOFv9rrf8wZtv-4NbigRuHUrPHqNhKc","y":"BaRIF7TCtcMyQtDJL5dUD8u6KaiKdcTIuHFaQgKXUiA","crv":"P-256","use":"sig","alg":"ES256","kid":"runner-es256-52accdf020bd"}]}'
+      OIDC_RUNNER_JWKS: '{"keys":[{"kty":"RSA","n":"0qeZNdIeJIng2p5QG1CqYho3hrS97jY7IvjJKXdLvhPoizZPOxxJoDSxZ-F_kRvhKLYy9cbAPptIx7NTzX2NYMvmijnh5w828Gd5ns6O7FPXN92hPCPa61HwyS-UEA2AC4IwTcElYwVkSCoSGP1fkYPprxazWA-t44Tdv2-UtimfLrJYPS4hQVphnKvcoZswILe31DlOH60sMYjeRBRylcok9qGVN0O-Wl0kFOObOs2OIqvLeF-S0f4QOtvsMyfI-B7daj4aspSqWkAa57FNPfinFuD2H0JHPckTjO5EUe8Lxy60ULyw88sm6qE816xXFjNEfUrwMi4k02UOTc8s7Q","e":"AQAB","use":"sig","alg":"RS256","kid":"runner-rs256-706ea7b7f565"}]}'
       OIDC_RUNNER_REDIRECT_URIS: http://localhost:3009/auth/callback
       OIDC_RUNNER_POST_LOGOUT_REDIRECT_URIS: http://localhost:3009/auth/signed-out
+      # APIs that can get an access token. Each name becomes the token audience.
+      OIDC_RESOURCE_SERVERS: urn:defra:forms:forms-submission-api
       OIDC_TTL_AUTHORIZATION_CODE: 60
       OIDC_TTL_ID_TOKEN: 300
       OIDC_TTL_ACCESS_TOKEN: 300
+      # Must be no longer than forms-runner's SESSION_TIMEOUT (86400000 ms)
+      OIDC_TTL_REFRESH_TOKEN: 86400
       OIDC_TTL_INTERACTION: 3600
       OIDC_TTL_SESSION: 86400
       OIDC_TTL_GRANT: 86400

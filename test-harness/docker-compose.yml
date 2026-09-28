@@ -240,7 +240,7 @@ services:
       COGNITO_CLIENT_IDS: '{}'
       COGNITO_VERIFY_ISS: dummy
       # Citizen access tokens issued by forms-identity-ui
-      CITIZEN_JWKS_URI: http://forms-identity-ui:3011/jwks
+      CITIZEN_JWKS_URI: http://host.docker.internal:3011/jwks
       CITIZEN_VERIFY_AUD: urn:defra:forms:forms-submission-api
       CITIZEN_VERIFY_ISS: http://identity.127.0.0.1.sslip.io:3011
       LOADED_PREFIX: prefix

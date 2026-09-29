@@ -43,6 +43,10 @@ model {
   }
   externalApi = external '[ external API ]'           { #thirdparty #example }
   sharepointApi = external 'Sharepoint API'           { #thirdparty }
+  awsSts      = external 'AWS STS (CDP)'              {
+    #thirdparty
+    description 'Issues short-lived web identity tokens that one service presents to another, and publishes their JWKS'
+  }
 
   // L1 proxy: a single 'Defra Forms' box for the system-context view only. The
   // platform's containers are declared top-level (below), NOT nested inside this box:
@@ -70,6 +74,15 @@ model {
     entitlements  = service 'Forms entitlements API' { description 'backend' }
     submissionApi = service 'Forms submission API'   { description 'backend' }
     auditApi      = service 'Forms audit API'        { description 'backend' }
+    // citizen identity: identity UI IS the OIDC provider (node-oidc-provider in-process,
+    // plus the GOV.UK sign-in pages). Identity API is its only store: it holds accounts,
+    // one-time codes and every provider artefact (sessions, grants, tokens) through the
+    // provider's HTTP adapter, and accepts calls from identity UI alone.
+    identityUi    = app 'Forms identity UI' {
+      description 'frontend - citizen sign-in (OIDC provider)'
+      technology 'oidc-provider'
+    }
+    identityApi   = service 'Forms identity API'     { description 'backend - accounts, sign-in codes, OIDC store' }
 
     // --- data stores (C4 containers, peers of the apps) ---
     designerCache     = cache 'Cache'
@@ -82,6 +95,8 @@ model {
     submissionMeta    = db 'Metadata'
     submissionFiles   = storage 'Files'
     auditMeta         = db 'Metadata'
+    identityUiCache   = cache 'Cache'
+    identityDb        = db 'DB'
 
     // --- queues / topics / listeners ---
     submissions = topic 'Submissions'
@@ -105,9 +120,9 @@ model {
   // system context (L1): authored on the formsPlatform proxy, rendered only in the
   // systemContext view. Curated summaries of the container-level integrations below.
   worker  -> formsPlatform 'Designs and manages forms'
-  citizen -> formsPlatform 'Completes and submits forms'
+  citizen -> formsPlatform 'Signs in, completes and submits forms'
   formsPlatform -> aad             'Authentication and token verification'
-  formsPlatform -> govNotify       'Emails (notifications, download links)'
+  formsPlatform -> govNotify       'Emails and texts (sign-in codes, notifications, download links)'
   formsPlatform -> govukPay        'Card payments'
   formsPlatform -> ordnanceSurvey  'Address lookup and maps'
   formsPlatform -> googleAnalytics 'Analytics'
@@ -119,6 +134,18 @@ model {
   // users
   worker  -> designer
   citizen -> runner
+  citizen -> identityUi 'Sign in (email + one-time code), manage account'
+
+  // citizen identity (runner sign-in is behind USE_SIGN_IN_FEATURE, default off).
+  // The runner is the only OIDC client and talks to identity UI alone; identity API
+  // sends the sign-in codes. The precise per-step labels live in the
+  // 'Auth / Members of the public' views.
+  runner        -> identityUi      'Sign in, refresh, sign out, revoke tokens (OIDC, private_key_jwt)'
+  identityUi    -> identityApi     'Sign-in codes, accounts, OIDC sessions and tokens'
+  identityUi    -> awsSts          'Get service token'
+  identityApi   -> awsSts          'Verify service token (JWKS)'
+  identityApi   -> govNotify       'Email and text one-time codes'
+  submissionApi -> identityUi      'Verify citizen access token (JWKS)'
 
   // app-to-app
   runner   -> manager       'Fetch form'
@@ -154,6 +181,8 @@ model {
   submissionApi -> submissionMeta
   submissionApi -> submissionFiles
   auditApi      -> auditMeta
+  identityUi    -> identityUiCache
+  identityApi   -> identityDb
 
   // submission / upload flow
   // ordering (enforced in forms-runner, shown in the submissionSequence view):
@@ -165,17 +194,19 @@ model {
   runner      -> exTopic
   cdpUploader -> submissionApi 'Scan, deliver to S3 and make a callback'
 
-  // save and return (magic link): on "Save and exit" the runner publishes a save
-  // event to its own owned SNS topic (it does NOT call the submission API to save);
-  // the topic fans into an SQS queue the submission API consumes, persisting the
-  // record (form state + hashed security answer) and emailing a resume link via Notify.
-  // The runner->submissionApi HTTP edge is the RETURN (resume) journey only - hence
-  // its label is resume-only. The precise per-step labels live in the two
-  // 'Save and exit' journey views. (NB: this label change re-pins platformAll.)
+  // save and return: on "Save and exit" the runner publishes a save event to its own
+  // owned SNS topic (it does NOT call the submission API to save); the topic fans into
+  // an SQS queue the submission API consumes, persisting the record and emailing the
+  // citizen via Notify. Two versions share the topic: memorable word (V1: hashed
+  // security answer, magic resume link) and signed in (V2: record owned by the
+  // citizen's sub + iss, email links to the saved-forms page). The runner->submissionApi
+  // HTTP edges are the RETURN journeys only; the precise per-step labels live in the
+  // 'Save and exit' journey views.
   runner    -> saveTopic     'Save progress'
   saveTopic -> saveQueue
   saveQueue -> submissionApi
   runner    -> submissionApi 'Resume (magic link)'
+  runner    -> submissionApi 'Saved forms (citizen access token)'
 
   // per-service audit-records topics fan into the audit-events topic, consumed by the audit API
   designerAudit     -> auditEvents
@@ -230,16 +261,19 @@ views {
     group 'Defra Forms' {
       include designer, runner, manager, entitlements, submissionApi
       include auditApi, notifyListener, sharepointListener
+      include identityUi, identityApi
     }
 
     // hide secondary admin edges to keep the overview readable (the JWKS token-
-    // verification edges to Entra are shown in the Auth / Authentication view)
+    // verification edges to Entra and the citizen identity provider are shown in
+    // the Auth / Authentication view)
     exclude
       designer -> submissionApi,
       designer -> govukPay,
       manager       -> aad,
       entitlements  -> aad,
-      submissionApi -> aad
+      submissionApi -> aad,
+      submissionApi -> identityUi
   }
 
   // the full container-level reference - every service, store, queue, integration
@@ -272,6 +306,12 @@ views {
     }
     group 'Audit' {
       include auditApi, auditMeta, auditEvents
+    }
+    group 'Identity UI' {
+      include identityUi, identityUiCache
+    }
+    group 'Identity API' {
+      include identityApi, identityDb
     }
 
     // messaging pipelines + the example integration pattern
@@ -306,30 +346,34 @@ views {
 
   view authnFlow {
     title 'Auth / Authentication'
-    description 'Who proves their identity, and how - Azure Entra (OIDC) for Defra staff, AWS Cognito (JWT) for external data consumers, and no login for citizens (an anonymous local session only).'
+    description 'Who proves their identity, and how - Azure Entra (OIDC) for Defra staff, Forms identity (OIDC, email one-time code) for citizens, AWS Cognito (JWT) for external data consumers, and AWS STS web identity tokens between the two identity services.'
     autoLayout LeftRight
-    // Identity only (who are you?). Three contexts:
+    // Identity only (who are you?). Four contexts:
     //  - Defra staff: Designer logs in via Entra (OIDC); the backend APIs verify
     //    the presented staff token against Entra JWKS.
-    //  - Citizens: no login - anonymous.
+    //  - Citizens: Runner signs them in through Forms identity UI (the OIDC
+    //    provider) with an email one-time code; the submission API verifies the
+    //    citizen access token against the identity UI JWKS. Sign-in is behind
+    //    USE_SIGN_IN_FEATURE; form pages stay open to anonymous citizens.
     //  - External data consumers: machine clients whose tokens the submission
     //    API verifies against AWS Cognito (JWKS).
-    // Session storage (Redis) is out of scope here; non-auth app-to-app links
-    // are excluded to keep the view focused.
+    //  - Service to service: identity UI presents an AWS STS web identity token
+    //    that identity API verifies against the STS JWKS.
+    // Stores and non-auth app-to-app links are excluded to keep the view focused.
 
-    include worker, citizen, aad, cognito
+    include worker, citizen, aad, cognito, awsSts, govNotify
 
     // Entra is the identity authority for staff: Designer logs users in (OIDC),
     // and every internal API verifies the presented token against Entra JWKS.
     group 'Defra staff and internal APIs (Azure Entra)' {
       include designer, manager, entitlements, auditApi
     }
-    group 'Citizen (anonymous - no login)' {
-      include runner
+    group 'Citizens (Forms identity - OIDC, email one-time code)' {
+      include runner, identityUi, identityApi
     }
-    // Submission API is dual-issuer: Entra for internal callers, Cognito for
-    // external data consumers.
-    group 'External data consumers (AWS Cognito)' {
+    // Submission API accepts three issuers: Entra for internal callers, Forms
+    // identity for citizens, Cognito for external data consumers.
+    group 'Submission API (Entra, Forms identity and AWS Cognito)' {
       include submissionApi
     }
 
@@ -339,12 +383,320 @@ views {
       designer -> entitlements,
       manager  -> entitlements,
       designer -> submissionApi,
-      runner   -> submissionApi
+      runner   -> submissionApi,
+      manager  -> govNotify,
+      submissionApi -> govNotify
+  }
+
+  dynamic view apiConsumerFileRetrieval {
+    title 'Auth / API consumers / File retrieval'
+    description 'How an external data consumer gets a submitted file. Authentication: an AWS Cognito access token from the OAuth client credentials grant, verified against the Cognito JWKS; the client_id must be listed in COGNITO_CLIENT_IDS (Cognito access tokens carry no audience, so aud is not checked). Authorisation: the retrievalKey, which is the form notification email, must be one of the keys COGNITO_CLIENT_IDS permits for that client_id, and must match the argon2 hash stored with the file. The same route also accepts Entra staff tokens.'
+    variant sequence
+    autoLayout LeftRight
+
+    runner        -> cdpUploader    'Start a file upload: metadata.retrievalKey = the form notification email'
+    cdpUploader   -> submissionApi  'Callback: file status with the retrievalKey'
+    submissionApi -> submissionMeta 'Store the file record; the retrievalKey is kept as an argon2 hash'
+    exQueue       -> exListener     'Submission event with the file ids'
+    exListener    -> cognito        'Get an access token: OAuth client credentials grant'
+    cognito       -> exListener     'Access token (JWT: client_id, token_use = access)'
+    exListener    -> submissionApi  'POST /file/link { fileId, retrievalKey }: Bearer Cognito access token'
+    submissionApi -> cognito        'Fetch JWKS (COGNITO_JWKS_URI, cached)'
+    submissionApi -> submissionApi  'Authenticate: signature, iss, exp, nbf; token_use = access; client_id in COGNITO_CLIENT_IDS'
+    submissionApi -> submissionApi  'Authorise: retrievalKey is one of the notification emails permitted for this client_id, else 403'
+    submissionApi -> submissionMeta 'Find the file; argon2-verify the retrievalKey against the stored hash'
+    submissionApi -> exListener     '{ url }: S3 presigned GET URL, valid for 1 hour'
+    exListener    -> submissionFiles 'GET the file with the presigned URL'
+    exListener    -> externalApi    'Deliver the submission and its files'
+  }
+
+  // --- citizen identity (Auth folder) -------------------------------------
+  // The OIDC views name every HTTP call, including the ones identity UI makes to
+  // identity API through the oidc-provider adapter (/oidc/{model}/{hash}, where
+  // {hash} is the SHA-256 of the id so that credentials stay out of logs). Each of
+  // those calls carries the AWS STS service token (see Service-to-service tokens).
+
+  view citizenIdentity {
+    title 'Auth / Members of the public / Citizen identity containers'
+    description 'The containers behind citizen sign-in: Forms runner is the only OIDC client, Forms identity UI is the OIDC provider and sign-in pages, and Forms identity API stores accounts, one-time codes and every provider session, grant and refresh token.'
+    autoLayout LeftRight 150 110
+
+    include citizen, runner, runnerCache, submissionApi, submissionMeta
+    include identityUi, identityUiCache, identityApi, identityDb
+    include awsSts, govNotify
+  }
+
+  // Sign-in is one overview plus four phase views, in the 'Auth / Members of the
+  // public / OIDC sign-in' folder. Each overview step opens its
+  // phase (navigateTo), and the last step of each phase opens the next one, so
+  // that a reader can follow the whole flow while each diagram stays short. The
+  // numbers in the titles keep the sidebar in flow order.
+
+  dynamic view citizenSignIn {
+    title 'Auth / Members of the public / OIDC sign-in / 0. Overview'
+    description 'Authorization code flow with PKCE. The runner sends the citizen to Forms identity UI, which signs them in with an email one-time code and grants consent without a page; the runner then swaps the code for tokens at /token, authenticating with a private_key_jwt assertion. Select a step to open its phase. Sign-in is behind USE_SIGN_IN_FEATURE.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> runner      'Open a page that needs sign-in (saved forms, resume link, save and exit)'
+    runner      -> citizen     'Redirect to /auth: code flow, PKCE, state, nonce, scope, prompt, resource' {
+      navigateTo signInAuthorizationRequest
+    }
+    citizen     -> identityUi  'GET /auth: the provider starts a login interaction' {
+      navigateTo signInAuthorizationRequest
+    }
+    citizen     -> identityUi  'Prove the email address with a one-time code (and give a mobile number the first time)' {
+      navigateTo signInLogin
+    }
+    identityUi  -> identityApi 'Check the code; find or create the account' {
+      navigateTo signInLogin
+    }
+    identityUi  -> identityApi 'Grant consent without a page; issue an authorization code' {
+      navigateTo signInConsent
+    }
+    identityUi  -> citizen     'Redirect to runner /auth/callback with code and state' {
+      navigateTo signInConsent
+    }
+    citizen     -> runner      'GET /auth/callback'
+    runner      -> identityUi  'POST /token: code, code_verifier, client assertion' {
+      navigateTo signInCodeExchange
+    }
+    identityUi  -> runner      'ID token, access token, refresh token' {
+      navigateTo signInCodeExchange
+    }
+    runner      -> runnerCache 'Save the identity and tokens in session'
+    runner      -> citizen     'Redirect to returnUrl'
+  }
+
+  dynamic view signInAuthorizationRequest {
+    title 'Auth / Members of the public / OIDC sign-in / 1. Authorization request'
+    description 'The runner makes a new state, nonce and PKCE code_verifier for this sign-in, saves them in its session, and redirects the citizen to the provider /auth. The provider stores a login interaction and sends the citizen to the email page.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> runner      'GET /auth/sign-in?returnUrl (a page that needs sign-in redirects here)'
+    runner      -> identityUi  'GET /.well-known/openid-configuration (first sign-in after start-up, then cached)'
+    runner      -> runnerCache 'Save sign-in transaction: state, nonce, PKCE code_verifier, returnUrl'
+    runner      -> citizen     '302 to /auth: response_type=code, client_id=runner, redirect_uri, scope=openid email offline_access, prompt=login consent'
+    runner      -> citizen     '... resource=urn:defra:forms:forms-submission-api, state, nonce, code_challenge=SHA256(code_verifier), code_challenge_method=S256'
+    citizen     -> identityUi  'GET /auth'
+    identityUi  -> awsSts      'GetWebIdentityToken for identity API (when the cached token is near expiry)'
+    identityUi  -> identityApi 'PUT /oidc/interaction/{hash}: login prompt'
+    identityUi  -> citizen     '303 to /interaction/{uid} (sets the _interaction cookie), then 302 to /interaction/{uid}/email'
+    citizen     -> identityUi  'GET /interaction/{uid}/email: next, the login interaction' {
+      navigateTo signInLogin
+    }
+  }
+
+  dynamic view signInLogin {
+    title 'Auth / Members of the public / OIDC sign-in / 2. Login interaction (email one-time code)'
+    description 'The login interaction in Forms identity UI: the citizen proves they hold the email address with a 6-digit code that identity API sends through GOV.UK Notify. A new address also gives a mobile number, and identity API creates the account. Identity UI then finishes the interaction with the accountId.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> identityUi  'GET /interaction/{uid}/email'
+    identityUi  -> identityApi 'GET /oidc/interaction/{hash} (every interaction page checks it)'
+    citizen     -> identityUi  'POST /interaction/{uid}/email: email address'
+    identityUi  -> identityApi 'POST /otp/request: purpose SIGNIN_VERIFY_EMAIL, transport EMAIL, target'
+    identityApi -> identityDb  'Check otp-lockouts; upsert otps: argon2 hash, 15 min, 5 attempts'
+    identityApi -> govNotify   'POST /v2/notifications/email: 6-digit code'
+    identityApi -> identityUi  '{ status: otp-issued } (or locked-out)' {
+      navigateTo signInCodeLockout
+    }
+    govNotify   -> citizen     'Email with the code'
+    citizen     -> identityUi  'GET /interaction/{uid}/code'
+    identityUi  -> identityApi 'GET /otp/{hash}/SIGNIN_VERIFY_EMAIL: the address to show'
+    citizen     -> identityUi  'POST /interaction/{uid}/code: 6-digit code'
+    identityUi  -> identityApi 'POST /otp/verify'
+    identityApi -> identityDb  'Check the argon2 hash; find the account by email; consume the code; clear the lockout count (SignIn audited)'
+    identityApi -> identityUi  'signed-in + accountId (a new email gets phone-required)'
+    citizen     -> identityUi  'New email only: POST /interaction/{uid}/phone: mobile number'
+    identityUi  -> identityApi 'New email only: POST /accounts: create the account (Registration audited)'
+    identityUi  -> identityApi 'Finish login: PUT /oidc/interaction/{hash} with the accountId'
+    identityUi  -> citizen     '303 to /auth/{uid}: next, consent' {
+      navigateTo signInConsent
+    }
+  }
+
+  dynamic view signInConsent {
+    title 'Auth / Members of the public / OIDC sign-in / 3. Consent and authorization code'
+    description 'The provider resumes /auth after login. prompt=consent starts a consent interaction, which identity UI grants without a page (the provider and the runner are both Defra Forms). The provider then stores a 60-second authorization code and redirects the citizen back to the runner.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> identityUi  'GET /auth/{uid}: resume'
+    identityUi  -> identityApi 'GET + DELETE /oidc/interaction/{hash}; PUT /oidc/session/{hash} (accountId)'
+    identityUi  -> identityApi 'PUT /oidc/interaction/{hash}: consent prompt'
+    identityUi  -> citizen     '303 to /interaction/{uid}'
+    citizen     -> identityUi  'GET /interaction/{uid}: consent is granted without a page'
+    identityUi  -> identityApi 'PUT /oidc/grant/{hash}: openid, email, offline_access, resource'
+    identityUi  -> identityApi 'PUT /oidc/interaction/{hash}: consent result'
+    identityUi  -> citizen     '303 to /auth/{uid}'
+    citizen     -> identityUi  'GET /auth/{uid}: resume'
+    identityUi  -> identityApi 'GET + DELETE /oidc/interaction/{hash}; GET /oidc/grant/{hash}'
+    identityUi  -> identityApi 'PUT /oidc/authorization_code/{hash} (60 s, holds the code_challenge); PUT /oidc/session/{hash}'
+    identityUi  -> citizen     '303 to runner /auth/callback?code&state&iss: next, the code exchange' {
+      navigateTo signInCodeExchange
+    }
+  }
+
+  dynamic view signInCodeExchange {
+    title 'Auth / Members of the public / OIDC sign-in / 4. Code exchange'
+    description 'The runner checks state, then swaps the code at /token. It proves who it is with a private_key_jwt assertion and proves it started this sign-in with the PKCE code_verifier. The provider uses up the code, stores a 7-day refresh token and returns the tokens; the runner checks the ID token claims and saves everything in its session.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> runner      'GET /auth/callback?code&state'
+    runner      -> runnerCache 'Read the sign-in transaction; state must match, else 403'
+    runner      -> identityUi  'POST /token: grant_type=authorization_code, code, redirect_uri, code_verifier, resource'
+    runner      -> identityUi  '... client_assertion_type=jwt-bearer, client_assertion (RS256, iss = sub = runner, jti, short exp)'
+    identityUi  -> identityApi 'Assertion replay check: GET + PUT /oidc/replay_detection/{hash}'
+    identityUi  -> identityApi 'GET /oidc/authorization_code/{hash}; GET /oidc/grant/{hash}'
+    identityUi  -> identityApi 'SHA256(code_verifier) matches code_challenge: POST /oidc/authorization_code/{hash}/consume'
+    identityUi  -> identityApi 'GET /accounts/{id}: sub and email claims'
+    identityUi  -> identityApi 'PUT /oidc/refresh_token/{hash}: 7 days from sign-in'
+    identityUi  -> runner      'access_token (JWT, RS256, aud = submission API, 5 min, not stored), id_token (sub, email, nonce, 5 min), refresh_token, expires_in'
+    runner      -> runnerCache 'Check ID token claims (iss, aud, nonce, exp); clear the transaction; save the identity (iss, sub, email) and the tokens'
+    runner      -> citizen     '302 to returnUrl'
+  }
+
+  dynamic view citizenTokenRefresh {
+    title 'Auth / Members of the public / OIDC token refresh'
+    description 'On each signed-in request the runner renews its 24-hour idle session and, when the access token has 30 seconds or less left, uses the refresh token at /token. The refresh token is not rotated, so it expires 7 days after sign-in; after that, or after revocation, the provider answers invalid_grant and the runner clears the identity, so pages that need sign-in send the citizen to sign in again. The submission API verifies each access token against the identity UI JWKS.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen       -> runner         'Any request (session cookie)'
+    runner        -> runnerCache    'Load the session and touch it (24-hour sliding idle timeout)'
+    runner        -> identityUi     'Access token has 30 s or less left: POST /token: grant_type=refresh_token, refresh_token, resource, client_assertion (private_key_jwt)'
+    identityUi    -> identityApi    'Assertion replay check: GET + PUT /oidc/replay_detection/{hash}'
+    identityUi    -> identityApi    'GET /oidc/refresh_token/{hash}; GET /oidc/grant/{hash}'
+    identityUi    -> identityApi    'GET /accounts/{id}: claims'
+    identityUi    -> runner         'New access_token and id_token; the same refresh_token'
+    runner        -> runnerCache    'Check the new ID token has the same sub; save the tokens'
+    runner        -> submissionApi  'GET /save-and-exit/records: Authorization: Bearer access token'
+    submissionApi -> identityUi     'GET /jwks (cached)'
+    submissionApi -> submissionMeta 'Verify RS256 signature, iss and aud; find the records owned by sub + iss'
+    submissionApi -> runner         'Records'
+    runner        -> citizen        'Page'
+  }
+
+  dynamic view citizenSignOut {
+    title 'Auth / Members of the public / OIDC sign-out and token revocation'
+    description 'RP-initiated logout, then revocation. The identity UI end-session page ends the provider session but keeps the offline_access grant, so the runner revokes its refresh token at /token/revocation (RFC 7009) when the citizen comes back; that deletes the refresh token, the grant and every stored token under it. Access tokens are JWTs that are not stored, so one issued before sign-out works until it expires (5 min at most). Cancel on the sign-out page returns with cancelled=true and keeps the citizen signed in, with the same tokens.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> runner      'GET /auth/sign-out?slug&returnUrl'
+    runner      -> runnerCache 'Read the ID token'
+    runner      -> citizen     '302 to /session/end: id_token_hint, client_id=runner, post_logout_redirect_uri=/auth/signed-out, state={slug, previewMode, returnUrl}'
+    citizen     -> identityUi  'GET /session/end'
+    identityUi  -> identityApi 'GET /oidc/session/{hash}; PUT /oidc/session/{hash}: logout state and xsrf secret'
+    identityUi  -> citizen     'Sign-out page: auto-submits when the ID token sub matches the session account; Cancel links back with cancelled=true'
+    citizen     -> identityUi  'POST /session/end/confirm: xsrf, logout=yes'
+    identityUi  -> identityApi 'GET /oidc/session/{hash}; DELETE /oidc/session/{hash} (SignOut audited); the offline_access grant stays'
+    identityUi  -> citizen     '303 to runner /auth/signed-out?state (clears the _session cookie)'
+    citizen     -> runner      'GET /auth/signed-out?state'
+    runner      -> runnerCache 'Read the refresh token'
+    runner      -> identityUi  'POST /token/revocation: token=refresh token, token_type_hint=refresh_token, client_assertion (private_key_jwt)'
+    identityUi  -> identityApi 'Assertion replay check: GET + PUT /oidc/replay_detection/{hash}'
+    identityUi  -> identityApi 'GET + DELETE /oidc/refresh_token/{hash}'
+    identityUi  -> identityApi 'DELETE /oidc/grants/{grantId}: delete the stored tokens and codes of the grant'
+    identityUi  -> identityApi 'DELETE /oidc/grant/{hash}: delete the grant'
+    identityUi  -> runner      '200 (also for an unknown token, per RFC 7009)'
+    runner      -> runnerCache 'Clear the identity and tokens (also when revocation fails: the error is logged)'
+    runner      -> citizen     'Signed-out page'
+  }
+
+  dynamic view signInCodeLockout {
+    title 'Auth / Members of the public / Sign-in code lockout'
+    description 'An email address that asks for too many sign-in codes is locked out: the 6th request within 2 hours locks the address for 2 hours. The count is per address, so a new sign-in attempt does not reset it; a successful sign-in clears it.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> identityUi  'Enter email address, or ask for a new code'
+    identityUi  -> identityApi 'POST /otp/request'
+    identityApi -> identityDb  'Count the requests for this address in otp-lockouts: the 6th in 2 hours sets lockedUntil'
+    identityApi -> identityUi  '{ status: locked-out, lockedUntil }: no code sent (OtpLockedOut audited)'
+    identityUi  -> citizen     '"Too many security codes requested - try again in N hours"'
+  }
+
+  dynamic view serviceToService {
+    title 'Auth / Members of the public / Service-to-service tokens'
+    description 'How Forms identity API knows a caller is Forms identity UI: the UI gets a short-lived AWS STS web identity token and sends it as a Bearer token; the API verifies it against the STS JWKS and accepts only the identity UI role. Every route except /health needs it.'
+    variant sequence
+    autoLayout LeftRight
+
+    identityUi  -> awsSts      'GetWebIdentityToken: audience forms-identity-api, RS256, 5 min (cached in memory)'
+    identityUi  -> identityApi 'Call with Bearer service token'
+    identityApi -> awsSts      'Fetch JWKS (cached)'
+    identityApi -> identityDb  'Verified iss, aud and sub = identity UI role: handle the request'
+    identityApi -> identityUi  'Response'
+  }
+
+  // --- citizen account folder ---------------------------------------------
+
+  dynamic view savedForms {
+    title 'Citizen account / Saved forms'
+    description 'The signed-in saved-forms page for one form: the runner lists the citizen saved records from the submission API with the citizen access token, and resumes one by restoring its state into the session.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen       -> runner         'GET /homepage/{slug} (sign-in required)'
+    runner        -> manager        'Fetch form'
+    runner        -> submissionApi  'GET /save-and-exit/records?formId (Bearer citizen access token)'
+    submissionApi -> submissionMeta 'Find records owned by sub + iss'
+    runner        -> citizen        'List of saved forms'
+    citizen       -> runner         'Resume: /resume-form/{formId}/{magicLinkId}'
+    runner        -> submissionApi  'GET /save-and-exit/records/{magicLinkId} (Bearer citizen access token)'
+    runner        -> runnerCache    'Restore saved state into session'
+    runner        -> citizen        'Resume the form from where they left off'
+  }
+
+  dynamic view deleteSavedForm {
+    title 'Citizen account / Delete a saved form'
+    description 'A citizen deletes an in-progress saved form from the saved-forms page. The submission API marks the record as deleted.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen       -> runner         'Select "Delete": GET /delete-form/{formId}/{magicLinkId}'
+    runner        -> submissionApi  'GET /save-and-exit/records/{magicLinkId} (Bearer citizen access token)'
+    runner        -> citizen        'Confirm page (yes / no)'
+    citizen       -> runner         'POST /delete-form/{formId}/{magicLinkId}: yes'
+    runner        -> submissionApi  'DELETE /save-and-exit/records/{magicLinkId} (Bearer citizen access token)'
+    submissionApi -> submissionMeta 'Set isDeleted on the record owned by sub + iss'
+    runner        -> citizen        'Saved-forms page with a success banner'
+  }
+
+  dynamic view changeEmail {
+    title 'Citizen account / Change email address'
+    description 'From the saved-forms page the citizen follows a link to the identity UI account pages, proves they hold the phone on the account (SMS code) and the new address (email code), and identity API then changes the account email.'
+    variant sequence
+    autoLayout LeftRight
+
+    citizen     -> runner      'Saved-forms page: select the "Security" tab'
+    runner      -> citizen     'Link to identity UI /account?returnUrl'
+    citizen     -> identityUi  'GET /account: signed in by the provider session cookie'
+    identityUi  -> identityApi 'GET /oidc/session/{hash}; GET /accounts/{id}'
+    citizen     -> identityUi  'Change email: send a code to my phone'
+    identityUi  -> identityApi 'POST /otp/request: purpose ACCOUNT_VERIFY_PHONE, transport SMS'
+    identityApi -> govNotify   'POST /v2/notifications/sms: code to the phone on the account'
+    govNotify   -> citizen     'Text message with the code'
+    citizen     -> identityUi  'Enter SMS code'
+    identityUi  -> identityApi 'POST /otp/verify: valid'
+    citizen     -> identityUi  'Enter new email address'
+    identityUi  -> identityApi 'POST /otp/request: purpose ACCOUNT_VERIFY_EMAIL, transport EMAIL'
+    identityApi -> govNotify   'POST /v2/notifications/email: code to the new address'
+    govNotify   -> citizen     'Email with the code'
+    citizen     -> identityUi  'Enter email code'
+    identityUi  -> identityApi 'POST /otp/verify: valid; then PATCH /accounts/{uid}/{id}/email'
+    identityApi -> identityDb  'Check both codes are verified; update the account email (EmailChanged audited)'
+    identityUi  -> citizen     'Account page with a success message and a link back to the runner'
   }
 
   view authzFlow {
-    title 'Auth / Authorisation'
-    description 'What an authenticated party may do. Staff permissions are held in and enforced via the entitlements API (Designer reads/writes them, Manager checks them); external data consumers are scoped by their Cognito client to specific retrieval keys; citizens are anonymous with no permissions beyond submitting.'
+    title 'Auth / Internal users / Authorisation'
+    description 'What an authenticated party may do. Staff permissions are held in and enforced via the entitlements API (Designer reads/writes them, Manager checks them); external data consumers are scoped by their Cognito client to specific retrieval keys; signed-in citizens reach only the saved-form records owned by their sub + iss (enforced in the submission API); anonymous citizens may only fill in and submit forms.'
     autoLayout LeftRight
     // Permissions only (what may you do?). Staff authorisation lives in the
     // entitlements API + its store; changes are audited. (External-consumer
@@ -427,9 +779,11 @@ views {
     runner -> exTopic     'Publish (additional topic, if configured per form)'
   }
 
-  // --- Save and exit folder (two journeys) --------------------------------
-  // "Save and exit" lets a citizen pause a form and resume later via a magic
-  // link. The engine plugin only renders the button + caches answers, then
+  // --- Save and exit folder (three journeys) ------------------------------
+  // "Save and exit" lets a citizen pause a form and resume later. With sign-in off
+  // (USE_SIGN_IN_FEATURE, the default) the citizen sets a memorable word and gets a
+  // magic resume link (V1); with sign-in on, the saved record belongs to the signed-in
+  // citizen and they resume from the saved-forms page (V2, see Citizen account /). The engine plugin only renders the button + caches answers, then
   // delegates to the runner's host handler - so the two journeys are authored
   // against the runner/submission-API/messaging containers. The 'Save and exit /'
   // title prefix groups both views into one folder (same convention as Auth /,
@@ -437,7 +791,7 @@ views {
   // GET question -> answer -> POST validate -> restore session on return.
 
   dynamic view saveAndExitJourney {
-    title 'Save and exit / Save and exit journey'
+    title 'Save and exit / Save and exit journey (memorable word)'
     description 'Saving progress and leaving: the runner publishes a save-and-exit event to its own SNS topic (it does not call the submission API), which fans into an SQS queue the submission API consumes, persisting the form state plus a hashed security answer and emailing the citizen a magic resume link via GOV.UK Notify.'
     autoLayout LeftRight
 
@@ -452,7 +806,7 @@ views {
   }
 
   dynamic view returnJourney {
-    title 'Save and exit / Return journey'
+    title 'Save and exit / Return journey (memorable word)'
     description 'Resuming via the magic link: the runner asks the submission API for the security question, the citizen answers, the runner posts the answer for argon2 verification, receives the saved form state back and restores it into the session cache - no messaging on this path, just synchronous HTTP plus a Redis write.'
     autoLayout LeftRight
 
@@ -465,6 +819,22 @@ views {
     runner        -> runnerCache    'Restore saved state into session (Redis)'
     runner        -> manager        'Fetch form definition to render the next page'
     runner        -> citizen        'Resume the form from where they left off'
+  }
+
+  dynamic view saveAndExitSignedIn {
+    title 'Save and exit / Save and exit journey (signed in)'
+    description 'Saving progress when sign-in is on: the record belongs to the signed-in citizen. The runner publishes a V2 event carrying the citizen sub + iss to the same SNS topic; the submission API stores the record against that identity and emails a link to the saved-forms page, where the citizen signs in to continue.'
+    autoLayout LeftRight
+
+    citizen       -> runner         'Choose "Save and exit" (sign-in required)'
+    runner        -> saveTopic      'Publish RUNNER_SAVE_AND_EXIT_V2: form state + sub, iss, email'
+    runner        -> runnerCache    'Clear in-progress state from session (Redis)'
+    runner        -> citizen        'Progress saved page'
+    saveTopic     -> saveQueue      'Fan out to the save-and-return SQS queue'
+    saveQueue     -> submissionApi  'Consume event (queue polling)'
+    submissionApi -> submissionMeta 'Persist save-and-exit record owned by sub + iss (authType citizenSignIn)'
+    submissionApi -> govNotify      'Send "progress saved" email (template)'
+    govNotify     -> citizen        'Deliver email: sign in at /homepage/{slug} to continue'
   }
 
   // Style by ownership - applies across every generated view.

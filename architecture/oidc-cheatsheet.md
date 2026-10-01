@@ -39,7 +39,7 @@ The step-by-step sequence diagrams are in the LikeC4 model, in the **Auth** fold
 | **forms-identity-api** | Store for the provider (not an OIDC party) | Holds accounts, one-time codes, and every provider session, grant, code and refresh token. Only identity UI can call it. |
 | **forms-submission-api** | Resource server | Accepts the citizen access token, and returns only the records owned by that citizen. |
 
-The runner is the only registered client. Sign-in is behind `USE_SIGN_IN_FEATURE` in forms-runner. It is `false` by default and `true` in dev.
+The runner is the only registered client. Sign-in is on only where `USE_SIGN_IN_FEATURE` is set in forms-runner.
 
 ## The flow in one paragraph
 
@@ -68,7 +68,7 @@ The runner's `/auth/sign-in` route (`forms-runner` `src/server/routes/auth.js`) 
 | `redirect_uri` | `{runner}/auth/callback` | Must match a URI in `OIDC_RUNNER_REDIRECT_URIS` exactly. The runner builds it from config, not from the request, so a proxy cannot change it. |
 | `scope` | `openid email offline_access` | `openid` gives an ID token with `sub`. `email` adds the `email` claim. `offline_access` asks for a refresh token (see [Scopes and claims](#scopes-and-claims)). |
 | `prompt` | `login consent` | `login` means a code is asked for on every sign-in: the provider does not sign the citizen in again from its own session. This is so that every new runner session starts with proof of the email address, even while an earlier provider session is still open. `consent` is required for the provider to accept `offline_access` (OIDC Core §11). |
-| `resource` | `urn:defra:forms:forms-submission-api` | Resource indicator (RFC 8707). It makes the access token a JWT with that audience (see [Resource indicator](#resource-indicator-and-the-access-token)). |
+| `resource` | The submission API's resource indicator (`OIDC_SUBMISSION_API_RESOURCE`) | Resource indicator (RFC 8707). It makes the access token a JWT with that audience (see [Resource indicator](#resource-indicator-and-the-access-token)). |
 | `state` | Random, one per sign-in | Stops login CSRF (see the next table). |
 | `nonce` | Random, one per sign-in | Binds the ID token to this sign-in. |
 | `code_challenge` | `BASE64URL(SHA256(code_verifier))` | PKCE. |
@@ -219,7 +219,7 @@ Details:
 
 | Where | Cookie / store | Holds |
 |---|---|---|
-| Identity UI | `_interaction`, `_session` (signed with `OIDC_COOKIE_KEYS`, `SameSite=Lax`, `Secure` when deployed). `Lax` rather than `Strict`, so that the cookies go with the top-level redirects from the runner, while other sites cannot send them on a cross-site `POST`. | Pointers to the interaction and the provider session. The data lives in identity API. |
+| Identity UI | `_interaction`, `_session` (signed with `OIDC_COOKIE_KEYS`, `SameSite=Lax`, `Secure` when `OIDC_COOKIE_SECURE` is set). `Lax` rather than `Strict`, so that the cookies go with the top-level redirects from the runner, while other sites cannot send them on a cross-site `POST`. | Pointers to the interaction and the provider session. The data lives in identity API. |
 | Identity UI | yar session in Redis (`SESSION_CACHE_TTL`) | Flash messages only. |
 | Runner | yar session in Redis, server-side only (`maxCookieSize: 0`) | Sign-in transaction, identity (`iss`, `sub`, `email`), and the tokens. The browser holds only the session id. |
 
@@ -247,40 +247,42 @@ Every call carries an **AWS STS web identity token**. The UI reuses the token un
 Strategy `citizen-access-token` (`@hapi/jwt`):
 
 - **Keys:** from `CITIZEN_JWKS_URI`, the identity UI `/jwks`.
-- **Checks:** the signature, `aud` = `CITIZEN_VERIFY_AUD` (`urn:defra:forms:forms-submission-api`), `iss` = `CITIZEN_VERIFY_ISS` (the identity UI public origin), `exp`, `nbf`, and a present `sub`.
+- **Checks:** the signature, `aud` = `CITIZEN_VERIFY_AUD` (the resource indicator the runner asks for), `iss` = `CITIZEN_VERIFY_ISS` (the identity UI public origin), `exp`, `nbf`, and a present `sub`.
 - **Access:** saved-form records are read and changed only where `auth.sub` and `auth.issuer` match the token. Both are checked because a `sub` is unique only within its provider.
 
 ## Configuration reference
 
+Values differ between environments, so this lists what each variable does, not its value.
+
 **forms-identity-ui**
 
-| Variable | Value (deployed) | Meaning |
-|---|---|---|
-| `OIDC_ISSUER` | `https://forms-identity-ui.{env}…` | The issuer and public origin. |
-| `OIDC_JWKS` | secret | Provider private signing keys. |
-| `OIDC_COOKIE_KEYS` | secret | Keys that sign the provider cookies. |
-| `OIDC_COOKIE_SECURE` | `true` | Secure cookies. |
-| `OIDC_RUNNER_JWKS` | runner public key | Verifies the runner's client assertions. |
-| `OIDC_RUNNER_REDIRECT_URIS` | `{runner}/auth/callback` | Allowed redirect URIs. |
-| `OIDC_RUNNER_POST_LOGOUT_REDIRECT_URIS` | `{runner}/auth/signed-out` | Allowed sign-out return URIs. |
-| `OIDC_RESOURCE_SERVERS` | `urn:defra:forms:forms-submission-api` | Allowed `resource` values. |
-| `OIDC_TTL_*` | see [Tokens and lifetimes](#tokens-and-lifetimes) | |
-| `IDENTITY_API_URL`, `SERVICE_AUTH_AUDIENCE` | | Identity API address, and the audience of the STS token. |
+| Variable | Meaning |
+|---|---|
+| `OIDC_ISSUER` | The issuer and public origin. |
+| `OIDC_JWKS` | Provider private signing keys (secret). |
+| `OIDC_COOKIE_KEYS` | Keys that sign the provider cookies (secret). |
+| `OIDC_COOKIE_SECURE` | Marks the provider cookies `Secure`. |
+| `OIDC_RUNNER_JWKS` | The runner's public key, to verify its client assertions. |
+| `OIDC_RUNNER_REDIRECT_URIS` | Allowed redirect URIs: the runner's `/auth/callback`. |
+| `OIDC_RUNNER_POST_LOGOUT_REDIRECT_URIS` | Allowed sign-out return URIs: the runner's `/auth/signed-out`. |
+| `OIDC_RESOURCE_SERVERS` | Allowed `resource` values. Must include the runner's `OIDC_SUBMISSION_API_RESOURCE`. |
+| `OIDC_TTL_*` | Lifetimes; see [Tokens and lifetimes](#tokens-and-lifetimes). |
+| `IDENTITY_API_URL`, `SERVICE_AUTH_AUDIENCE` | Identity API address, and the audience of the STS token. |
 
 **forms-runner**
 
-| Variable | Value (deployed) | Meaning |
-|---|---|---|
-| `USE_SIGN_IN_FEATURE` | `false` by default, `true` in dev | Turns sign-in on. |
-| `OIDC_ISSUER` | the identity UI origin | Discovery starts here. |
-| `OIDC_CLIENT_ID` | `runner` | |
-| `OIDC_REDIRECT_URI` | `{runner}/auth/callback` | |
-| `OIDC_CLIENT_PRIVATE_JWK` | secret, RSA | Signs the client assertions. |
-| `OIDC_SUBMISSION_API_RESOURCE` | `urn:defra:forms:forms-submission-api` | The `resource` sent. |
-| `OIDC_ACCESS_TOKEN_EXPIRY_GRACE_SECONDS` | | Refresh this long before expiry. |
-| `SESSION_TIMEOUT` | | Rolling idle timeout, in ms. |
+| Variable | Meaning |
+|---|---|
+| `USE_SIGN_IN_FEATURE` | Turns sign-in on. |
+| `OIDC_ISSUER` | The identity UI origin; discovery starts here. |
+| `OIDC_CLIENT_ID` | The client id. Must match the client registered in identity UI (`runner`). |
+| `OIDC_REDIRECT_URI` | The runner's `/auth/callback`. Must be in `OIDC_RUNNER_REDIRECT_URIS`. |
+| `OIDC_CLIENT_PRIVATE_JWK` | RSA private key that signs the client assertions (secret). Its public half is `OIDC_RUNNER_JWKS`. |
+| `OIDC_SUBMISSION_API_RESOURCE` | The `resource` sent. Must equal the submission API's `CITIZEN_VERIFY_AUD`. |
+| `OIDC_ACCESS_TOKEN_EXPIRY_GRACE_SECONDS` | Refresh this long before expiry. |
+| `SESSION_TIMEOUT` | Rolling idle timeout, in ms. |
 
-**forms-submission-api:** `CITIZEN_JWKS_URI`, `CITIZEN_VERIFY_AUD`, `CITIZEN_VERIFY_ISS`.
+**forms-submission-api:** `CITIZEN_JWKS_URI` (the identity UI `/jwks`), `CITIZEN_VERIFY_AUD`, `CITIZEN_VERIFY_ISS` (must equal the identity UI `OIDC_ISSUER`).
 
 **forms-identity-api:** `CDP_JWT_ISSUER`, `CDP_JWT_JWKS_URI`, `SERVICE`, `SERVICE_AUTH_ALLOWED_SUBJECT`, `OTP_TTL_SECONDS`, `OTP_MAX_ATTEMPTS`, `OTP_LOCKOUT_MAX_REQUESTS`, `OTP_LOCKOUT_WINDOW_SECONDS`, `OTP_LOCKOUT_DURATION_SECONDS`.
 

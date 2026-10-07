@@ -33,24 +33,65 @@ The following development tools and infrastructure services are available when r
 | forms-identity-api    | Citizen accounts and one-time security codes   |                       | Yes                |
 | forms-identity-ui     | Citizen sign in, and the OIDC provider forms-runner authenticates against | http://identity.127.0.0.1.sslip.io:3011 | Yes |
 
-If using AAD/Entra authentication (as opposed to the mocked OIDC authentication), you will need to create a `.env` file with the following typical contents:
+## Settings
+
+The harness reads its settings from up to three files in this directory. Docker Compose reads them in the order below, and a value in a later file overrides the same setting in an earlier file.
+
+| Order | File          | Checked in | Required | Purpose                                                                                      |
+| ----- | ------------- | ---------- | -------- | -------------------------------------------------------------------------------------------- |
+| 1     | `base.env`    | Yes        | Yes      | Non-sensitive defaults. Sensitive settings are listed with an empty value.                   |
+| 2     | `.env`        | No         | No       | Your local overrides and all sensitive settings, such as API keys.                           |
+| 3     | `secrets.env` | No         | No       | Legacy location for sensitive settings. No longer needed and may be removed in future.       |
+
+Only `base.env` is required, so the harness starts on a fresh clone without any extra files.
+
+`run-harness.sh` passes these files directly to Docker Compose and prints the files it used. There is no generated `tmp.env` file any more. If you have one left over from an earlier version, it is not read and can be deleted.
+
+A variable exported in the shell overrides all three files. For example, `FORMS_RUNNER_TAG=1.2.3 ./run-harness.sh` runs a specific forms-runner image for that run only.
+
+### Sensitive settings
+
+Put every sensitive setting in `.env`. The file is ignored by Git and must never be checked in. `base.env` lists each sensitive setting with an empty value and a comment marked `SENSITIVE`, so you can see what is available. Create `.env` with the ones you need:
+
 ```
+NOTIFY_API_KEY=<GOV.UK Notify API key>
+ORDNANCE_SURVEY_API_KEY=<Ordnance Survey API key>
+ORDNANCE_SURVEY_API_SECRET=<Ordnance Survey API secret>
+```
+
+The harness still starts without these values, but email cannot be sent and the Ordnance Survey map and location features do not work.
+
+`secrets.env` is no longer required. If you already have one, move its contents into `.env` and delete it. While `secrets.env` exists, its values override the same settings in `.env`.
+
+### Changing other settings
+
+- To change a setting for yourself only, add it to `.env`. Do not edit `base.env` for a local change.
+- To change a default for everyone, edit `base.env` and commit it. Keep the comments in that file up to date.
+- `docker-compose.yml` has further optional settings with built-in defaults, such as the image tags (`FORMS_DESIGNER_TAG`), feature flags (`FEATURE_FLAG_ALLOW_PAYMENTS`) and the SharePoint settings. These are written as `${NAME:-default}` in that file and can be set in `.env` in the same way.
+
+The Docker network settings in `application.properties` are separate. The script exports them as shell variables, so they cannot be overridden from the env files.
+
+### Using Entra authentication
+
+By default the harness uses the mock OIDC server, and `base.env` holds the settings that point the services at it. To use AAD/Entra authentication instead, override these six settings in `.env`:
+
+```
+# forms-designer, forms-entitlement-api
+AZURE_CLIENT_ID=<client-id>
+AZURE_CLIENT_SECRET=<client-secret>
+
 # forms-designer
-AZURE_CLIENT_ID="<client-id>"
-AZURE_CLIENT_SECRET="<client-secret>"
-OIDC_WELL_KNOWN_CONFIGURATION_URL="https://login.microsoftonline.com/<tenant>>/v2.0/.well-known/openid-configuration"
+OIDC_WELL_KNOWN_CONFIGURATION_URL=https://login.microsoftonline.com/<tenant>/v2.0/.well-known/openid-configuration
 
-REDIS_USERNAME=default
-REDIS_PASSWORD=my-password
-
-# forms-manager, submission-api, entitlement-api
-OIDC_JWKS_URI="https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys"
-OIDC_VERIFY_AUD="<guid-audience>"
-OIDC_VERIFY_ISS="https://login.microsoftonline.com/<tenant>/v2.0"
-
-# forms-runner
-RUNNER_SESSION_COOKIE_PASSWORD="53409gjhfcdiklgjidfglkgjdflkelrku634"
+# back-end services
+OIDC_JWKS_URI=https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys
+OIDC_VERIFY_AUD=<guid-audience>
+OIDC_VERIFY_ISS=https://login.microsoftonline.com/<tenant>/v2.0
 ```
+
+Then start the harness with `auth=Entra`, which leaves out the mock OIDC server.
+
+These overrides apply whichever `auth` mode is selected. To go back to mock authentication, remove them from `.env` or comment them out so that the `base.env` defaults apply again.
 
 ## aws-sts-stub
 
@@ -154,7 +195,7 @@ Some command-line parameters are allowed:
 
 * auth=MODE
   * set the authentication, where MODE can be either AAD or Entra (to denote AAD authentication), or either mock or OIDC (to denote mocked OIDC authentication). Default is mocked OIDC.
-     If AAD authentication is specified, you need to create a .env file with the necessary AAD config.
+     If AAD authentication is specified, the mock OIDC server is not started and you need to add the AAD config to your `.env` file (see [Using Entra authentication](#using-entra-authentication)).
 
 Examples:
   To start only forms-manager and forms-entitlement-api with AAD auth:

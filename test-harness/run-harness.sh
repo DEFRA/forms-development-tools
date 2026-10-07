@@ -79,23 +79,35 @@ fi
 
 source "$PROPS_FILE"
 
-cat "$SCRIPT_DIR/.env" > "$SCRIPT_DIR/tmp.env"
+echo "[harness] Sourced variables from application.properties"
 
-if [[ "$AUTH_MODE" == "mock" ]]; then
-  cat "$SCRIPT_DIR/oidc-auth.env" >> "$SCRIPT_DIR/tmp.env"
+# 2) Build the list of env files to pass to Docker Compose.
+#    Compose reads them in the order given and a later file overrides an earlier one:
+#      base.env    - checked-in, non-sensitive defaults (required)
+#      .env        - local overrides and secrets (optional, never checked in)
+#      secrets.env - legacy location for secrets (optional, never checked in)
+BASE_ENV_FILE="$SCRIPT_DIR/base.env"
+if [[ ! -f "$BASE_ENV_FILE" ]]; then
+  echo "[harness] base.env not found at $BASE_ENV_FILE" >&2
+  exit 1
 fi
 
-cat "$SCRIPT_DIR/secrets.env" >> "$SCRIPT_DIR/tmp.env"
-ENV_FILE="$SCRIPT_DIR/tmp.env"
+ENV_FILE_ARGS=(--env-file "$BASE_ENV_FILE")
+ENV_FILE_NAMES="base.env"
+for override_file in ".env" "secrets.env"; do
+  if [[ -f "$SCRIPT_DIR/$override_file" ]]; then
+    ENV_FILE_ARGS+=(--env-file "$SCRIPT_DIR/$override_file")
+    ENV_FILE_NAMES="$ENV_FILE_NAMES, $override_file"
+  fi
+done
 
-echo "[harness] Sourced variables from application.properties"
-echo "[harness] Using env file: $ENV_FILE (if present)"
+echo "[harness] Using env files (a later file overrides an earlier one): $ENV_FILE_NAMES"
 
-# 2) Start a single merged Docker Compose project (infra + apps)
+# 3) Start a single merged Docker Compose project (infra + apps)
 #    The first -f points at local-development-dependencies so its relative volume paths (e.g. ./compose/start-localstack.sh) resolve correctly.
 echo "[harness] Starting infra and application stack (merged compose files)..."
 COMPOSE_PROJECT_NAME="forms-harness" docker compose \
-  ${ENV_FILE:+--env-file "$ENV_FILE"} \
+  "${ENV_FILE_ARGS[@]}" \
   -f "$ROOT_DIR/local-development-dependencies/docker-compose.yml" \
   -f "$SCRIPT_DIR/docker-compose.yml" \
   $PROFILE_PARAM_LIST \

@@ -484,6 +484,9 @@ services:
       NOTIFY_OTP_SMS_TEMPLATE_ID: 'efd635d3-9ef5-4369-9c82-6aae5aed55bf'
       OTP_TTL_SECONDS: 900
       OTP_MAX_ATTEMPTS: 5
+      # Shared with forms-smoke-test and forms-perf-test for a local run, so
+      # that they can read the sign-in code for a test address
+      OTP_TEST_READ_SECRET: local-test-read-secret
       TRACING_HEADER: x-trace-id
       LOG_ENABLED: true
       LOG_FORMAT: pino-pretty

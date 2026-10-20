@@ -534,6 +534,7 @@ services:
       OIDC_RUNNER_JWKS: '{"keys":[{"kty":"RSA","n":"0qeZNdIeJIng2p5QG1CqYho3hrS97jY7IvjJKXdLvhPoizZPOxxJoDSxZ-F_kRvhKLYy9cbAPptIx7NTzX2NYMvmijnh5w828Gd5ns6O7FPXN92hPCPa61HwyS-UEA2AC4IwTcElYwVkSCoSGP1fkYPprxazWA-t44Tdv2-UtimfLrJYPS4hQVphnKvcoZswILe31DlOH60sMYjeRBRylcok9qGVN0O-Wl0kFOObOs2OIqvLeF-S0f4QOtvsMyfI-B7daj4aspSqWkAa57FNPfinFuD2H0JHPckTjO5EUe8Lxy60ULyw88sm6qE816xXFjNEfUrwMi4k02UOTc8s7Q","e":"AQAB","use":"sig","alg":"RS256","kid":"runner-rs256-706ea7b7f565"}]}'
       OIDC_RUNNER_REDIRECT_URIS: http://localhost:3009/auth/callback
       OIDC_RUNNER_POST_LOGOUT_REDIRECT_URIS: http://localhost:3009/auth/signed-out
+      OIDC_RUNNER_INITIATE_LOGIN_URI: http://localhost:3009/auth/initiate
       # APIs that can get an access token. Each name becomes the token audience.
       OIDC_RESOURCE_SERVERS: urn:defra:forms:forms-submission-api
       OIDC_TTL_AUTHORIZATION_CODE: 60

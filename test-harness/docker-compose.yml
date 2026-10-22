@@ -535,6 +535,7 @@ services:
       OIDC_RUNNER_REDIRECT_URIS: http://localhost:3009/auth/callback
       OIDC_RUNNER_POST_LOGOUT_REDIRECT_URIS: http://localhost:3009/auth/signed-out
       OIDC_RUNNER_INITIATE_LOGIN_URI: http://localhost:3009/auth/initiate
+      OIDC_RUNNER_BACKCHANNEL_LOGOUT_URI: http://localhost:3009/auth/backchannel-logout
       # APIs that can get an access token. Each name becomes the token audience.
       OIDC_RESOURCE_SERVERS: urn:defra:forms:forms-submission-api
       OIDC_TTL_AUTHORIZATION_CODE: 60

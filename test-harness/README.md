@@ -156,10 +156,15 @@ Check out the `forms-identity-ui` repo locally and execute:
 #### Main signing keys
 
 ```sh
-node scripts/generate-jwks.mjs            # OIDC_JWKS
+node scripts/generate-jwks.mjs            # OIDC_JWKS_KEY_1
 ```
 
-This script outptus the full key pair, which can be copied into `OIDC_JWKS`.
+This script outputs one private signing key, which can be copied into `OIDC_JWKS_KEY_1`.
+
+The signing keys and the cookie keys are numbered (`OIDC_JWKS_KEY_<n>` and
+`OIDC_COOKIE_KEY_<n>`). `OIDC_JWKS_SIGNING_KEY` and `OIDC_COOKIE_SIGNING_KEY`
+hold the number of the key that signs. The harness has one key of each, so both
+are set to `1`.
 
 #### forms-runner's client key pair
 

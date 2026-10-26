@@ -1,3 +1,10 @@
+# The services call each other through host.docker.internal, which resolves to
+# an IPv4 and an IPv6 address. The IPv6 address is not reachable from the
+# containers. By default Node gives the IPv4 connection 250ms before it tries
+# IPv6, so a slow connection through the host gateway fails with ETIMEDOUT and
+# the request returns an error. A longer attempt timeout prevents this.
+x-node-options: &node-options --network-family-autoselection-attempt-timeout=5000
+
 services:
   forms-designer:
     image: defradigital/forms-designer:${FORMS_DESIGNER_TAG:-latest}
@@ -5,6 +12,7 @@ services:
     profiles:
       - forms-designer
     environment:
+      NODE_OPTIONS: *node-options
       ENVIRONMENT: local
       NODE_ENV: production
       PORT: 3000
@@ -64,6 +72,7 @@ services:
     profiles:
       - forms-manager
     environment:
+      NODE_OPTIONS: *node-options
       NODE_ENV: production
       PORT: 3001
       HOST: '0.0.0.0'
@@ -116,6 +125,7 @@ services:
     profiles:
       - forms-runner
     environment:
+      NODE_OPTIONS: *node-options
       HOST: '0.0.0.0'
       ENVIRONMENT: local
       ENFORCE_CSRF: true
@@ -200,6 +210,7 @@ services:
     profiles:
       - forms-submission-api
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: development
@@ -272,6 +283,7 @@ services:
     profiles:
       - forms-entitlement-api
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: production
@@ -318,6 +330,7 @@ services:
     profiles:
       - forms-audit-api
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: development
@@ -369,6 +382,7 @@ services:
     profiles:
       - forms-notify-listener
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: development
@@ -414,6 +428,7 @@ services:
     profiles:
       - forms-sharepoint-listener
     environment:
+      NODE_OPTIONS: *node-options
       NODE_ENV: development
       PORT: 3007
       # SQS via Localstack (queue subscribed to SNS topic)
@@ -470,6 +485,7 @@ services:
     profiles:
       - forms-identity-api
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: production
@@ -521,6 +537,7 @@ services:
     profiles:
       - forms-identity-ui
     environment:
+      NODE_OPTIONS: *node-options
       HOST: 0.0.0.0
       ENVIRONMENT: local
       NODE_ENV: development

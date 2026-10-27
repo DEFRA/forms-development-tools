@@ -156,10 +156,17 @@ Check out the `forms-identity-ui` repo locally and execute:
 #### Main signing keys
 
 ```sh
-node scripts/generate-jwks.mjs            # OIDC_JWKS
+node scripts/generate-jwks.mjs            # OIDC_JWKS_KEY_20261027
 ```
 
-This script outptus the full key pair, which can be copied into `OIDC_JWKS`.
+This script outputs one private signing key, which can be copied into `OIDC_JWKS_KEY_20261027`.
+
+The signing keys and the cookie keys are named with the date they were added,
+as `YYYYMMDD` (`OIDC_JWKS_KEY_<YYYYMMDD>` and `OIDC_COOKIE_KEY_<YYYYMMDD>`).
+`OIDC_JWKS_SIGNING_KEY` and `OIDC_COOKIE_SIGNING_KEY` hold the date of the key
+that signs. The harness has one key of each, so both are set to `20261027`.
+The procedure to add or change a key is in `docs/key-rotation.md` in
+`forms-identity-ui`.
 
 #### forms-runner's client key pair
 

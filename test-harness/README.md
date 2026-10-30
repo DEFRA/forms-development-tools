@@ -217,6 +217,14 @@ Examples:
   ./run-harness.sh exclude=forms-designer auth=mock
   ```
 
+  The services call each other by container name on the harness Docker network (for example `http://forms-manager:3001`). If you exclude a service and run it on your machine instead, point the other services at it in `.env`:
+
+  ```
+  HARNESS_MANAGER_URL=http://host.docker.internal:3001
+  ```
+
+  The settings are `HARNESS_DESIGNER_URL`, `HARNESS_MANAGER_URL`, `HARNESS_SUBMISSION_URL`, `HARNESS_AUDIT_URL`, `HARNESS_ENTITLEMENT_URL`, `HARNESS_NOTIFY_URL`, `HARNESS_SHAREPOINT_URL` and `HARNESS_IDENTITY_UI_URL`.
+
 This will spin up all the necessary containers for local development of the Defra Forms.
 
 ## Issues

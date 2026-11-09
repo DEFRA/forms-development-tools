@@ -507,6 +507,8 @@ services:
       SERVICE_AUTH_ALLOWED_SUBJECT: arn:aws:iam::000000000000:role/forms-identity-ui
       # SNS topic used for publishing events
       AWS_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_identity_events
       SNS_ENDPOINT: http://${LOCALSTACK_HOST:-host.docker.internal}:4566
     networks:

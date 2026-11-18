@@ -547,7 +547,9 @@ services:
       OIDC_RUNNER_INITIATE_LOGIN_URI: http://localhost:3009/auth/initiate
       OIDC_RUNNER_BACKCHANNEL_LOGOUT_URI: http://localhost:3009/auth/backchannel-logout
       # APIs that can get an access token. Each name becomes the token audience.
-      OIDC_RESOURCE_SERVERS: urn:defra:forms:forms-submission-api
+      OIDC_RESOURCE_SERVERS: ${OIDC_RESOURCE_SERVERS:-urn:defra:forms:forms-submission-api}
+      # APIs whose access tokens carry the email claim. Each must be in OIDC_RESOURCE_SERVERS.
+      OIDC_EMAIL_CLAIM_RESOURCE_SERVERS: ${OIDC_EMAIL_CLAIM_RESOURCE_SERVERS:-urn:defra:forms:forms-submission-api}
       OIDC_TTL_AUTHORIZATION_CODE: 60
       OIDC_TTL_ID_TOKEN: 300
       OIDC_TTL_ACCESS_TOKEN: 300

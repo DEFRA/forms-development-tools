@@ -39,6 +39,7 @@ services:
       FEATURE_FLAG_ALLOW_PAYMENTS: ${FEATURE_FLAG_ALLOW_PAYMENTS:-true}
       FEATURE_FLAG_ALLOW_GEOSPATIAL: ${FEATURE_FLAG_ALLOW_GEOSPATIAL:-true}
       FEATURE_FLAG_ALLOW_CONDITIONAL_EMAILS: ${FEATURE_FLAG_ALLOW_CONDITIONAL_EMAILS:-true}
+      FEATURE_FLAG_ALLOW_COPY_ANSWERS: true
       # SNS
       SNS_ENDPOINT: http://host.docker.internal:4566
       SNS_TOPIC_ARN: arn:aws:sns:eu-west-2:000000000000:forms_designer_events
@@ -396,6 +397,7 @@ services:
       DESIGNER_URL: http://localhost:3000
       MANAGER_URL: http://host.docker.internal:3001
       ENTITLEMENT_URL: http://host.docker.internal:3004
+      RUNNER_URL: http://localhost:3009
       RECEIVE_MESSAGE_TIMEOUT_MS: 5000
       SQS_MAX_NUMBER_OF_MESSAGES: 10
       SQS_VISIBILITY_TIMEOUT: 1
